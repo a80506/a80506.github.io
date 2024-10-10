@@ -543,7 +543,7 @@
                 emoji = weather_emoji;
                 if (cwb_t != "" && cwb_h != "" && parseFloat(cwb_t) > -10 && parseFloat(cwb_h) > 0) {
                     if (station == "新莊" )
-                        station += "：";
+                        station = weather_emoji;
                     else
                         station += "：";
 
@@ -599,7 +599,12 @@
           // 定義函數來根據天氣條件顯示對應的 Emoji
           function getWeatherEmoji(weather) {
             if (weather.includes('晴')) {
-              weather_emoji = '☀️'; // 晴天
+              const now = new Date();  // 取得目前時間
+              const hours = now.getHours();  // 取得小時數字
+              if (hours > 5 && hours < 18)
+                  weather_emoji = '☀️';
+              else
+                  weather_emoji = '🌙';
             } else if (weather.includes('雨')) {
               weather_emoji = '🌧️'; // 雨天
             } else if (weather.includes('陰')) {
