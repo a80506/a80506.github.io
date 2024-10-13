@@ -554,7 +554,7 @@
                     if (parseInt(cwb_t) >= 32 || parseInt(cwb_t) < 15) {
                         $("div.weather").css("color", "red");
                         $("div.weather").css("font-weight", "bold");
-                    } else if (parseInt(cwb_t) < 20) {
+                    } else if (parseInt(cwb_t) > 28 || parseInt(cwb_t) < 20) {
                         $("div.weather").css("color", "orange");
                         $("div.weather").css("font-weight", "bold");
                     }
