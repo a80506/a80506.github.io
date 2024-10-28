@@ -67,8 +67,8 @@
                 { div: "", title: "國際重要指數", url: "https://www.wantgoo.com/global" },
                 { div: "", title: "Yahoo 大盤線圖", url: "https://tw.stock.yahoo.com/t/idx.php" },
                 { div: "", title: "HiStock 大盤指標", url: "https://histock.tw/stock/tchart.aspx?no=0000&m=b" },
+                { div: "IPO", title: "HiStock 股票申購", url: "https://histock.tw/stock/public.aspx" },
                 { div: "", title: "HiStock 大盤籌碼", url: "https://histock.tw/stock/three.aspx" },
-                { div: "", title: "HiStock 股票申購", url: "https://histock.tw/stock/public.aspx" },
                 { div: "", title: "Investing 期貨", url: "https://www.investing.com/indices/indices-futures" },
                 { div: "", title: "HiStock-大盤", url: "https://histock.tw/stock/three.aspx" }
             ]
@@ -565,6 +565,7 @@
                     $("div.STOCK_1").html("<a href='https://tw.stock.yahoo.com/t/00675L.php' "+ color2 + " >" + f3.toFixed(2).toString() + ", " + sign2 + f4.toFixed(2).toString() + ", " + sign2 + (f4 / (f3-f4) * 100).toFixed(2).toString() + "%</a>");
                     $("div.STOCK_2").html("<a href='https://tw.stock.yahoo.com/t/3047.php' "+ color3 + " >" + f5.toFixed(2).toString() + ", " + sign3 + f6.toFixed(2).toString() + ", " + sign3 + (f6 / (f5-f6) * 100).toFixed(2).toString() + "%</a>");
                     $("div.STOCK_3").html("<a href='https://tw.stock.yahoo.com/t/8089.php' "+ color4 + " >" + f7.toFixed(2).toString() + ", " + sign4 + f8.toFixed(2).toString() + ", " + sign4 + (f8 / (f7-f8) * 100).toFixed(2).toString() + "%</a>");
+                    $("div.IPO").html("<a href='https://histock.tw/stock/public.aspx' style='color: #80FF00';>HiStock 股票申購</a>");
                 }
             });
         });
