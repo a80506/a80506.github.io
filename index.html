@@ -143,7 +143,8 @@
                 { div: "", title: "全部圖表", url: "sensor2.html" },
                 { div: "living_room", title: "客廳：00°C, 00%", url: "" },
                 { div: "room3", title: "書房：00°C, 00%", url: "" },
-                { div: "", title: "BTC Dominance", url: "https://tw.tradingview.com/chart/?symbol=CRYPTOCAP%3ABTC.D" },
+//                { div: "", title: "BTC Dominance", url: "https://tw.tradingview.com/chart/?symbol=CRYPTOCAP%3ABTC.D" },
+                { div: "btc_etf_flow", title: "BTC ETF Flow", url: "https://farside.co.uk/btc/" },
                 { div: "", title: "BTC 1Y HODL Wave", url: "https://www.lookintobitcoin.com/charts/1-year-hodl-wave/" },
                 { div: "home_traffic", title: "Home Traffic", url: "https://thingspeak.com/channels/1729950" },
                 { div: "XXX", title: "Coinblock", url: "https://a80506.github.io/coinblock-w.html"},
@@ -566,6 +567,7 @@
                     $("div.STOCK_2").html("<a href='https://tw.stock.yahoo.com/t/3047.php' "+ color3 + " >" + f5.toFixed(2).toString() + ", " + sign3 + f6.toFixed(2).toString() + ", " + sign3 + (f6 / (f5-f6) * 100).toFixed(2).toString() + "%</a>");
                     $("div.STOCK_3").html("<a href='https://tw.stock.yahoo.com/t/8089.php' "+ color4 + " >" + f7.toFixed(2).toString() + ", " + sign4 + f8.toFixed(2).toString() + ", " + sign4 + (f8 / (f7-f8) * 100).toFixed(2).toString() + "%</a>");
                     $("div.IPO").html("<a href='https://histock.tw/stock/public.aspx' style='color: #80FF00';>HiStock 股票申購</a>");
+                    $("div.btc_etf_flow").html("<a href='https://farside.co.uk/btc/' style='color: #80FF00';>BTC ETF Flow</a>");
                 }
             });
         });
