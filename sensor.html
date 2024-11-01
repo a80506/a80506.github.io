@@ -73,7 +73,7 @@
         var green = "#80FF00";
         var gray = "#444444";
         var fil_reward = 0, fil_storage = 0;
-        var blur = 0;
+        var grass = 0;
         var mcc = 0;
         var wcc = 0;
 
@@ -374,8 +374,8 @@
 
                             name = val[i].slug
 
-                            if (item == "BLUR")
-                                blur = price;
+                            if (item == "GRASS")
+                                grass = price;
                         }
                     });
                 }
@@ -447,7 +447,7 @@
                         $("div.coin").html(btc + " / " + eth + "<br />" + wcc + " / " + mcc + " / " + fil);
                         //$("div.coin").html(btc + " / " + eth + "<br />" + parseFloat(wcc).toFixed(4) + " / " + parseFloat(mcc).toFixed(4));
                     } else {
-                        $("div.coin").html(btc + " / " + eth + "<br />" + fil + " / " + arb + " / " + op);
+                        $("div.coin").html(btc + " / " + eth + "<br />" + grass + " / " + arb + " / " + op);
                     }
                 });
             })
@@ -641,7 +641,7 @@
         }
 
         function get_all() {
-            //get_binance_cmc("BLUR", "blur-token");
+            get_binance_cmc("GRASS", "grass");
             setTimeout(function () { window.location = window.location; }, 300000);
             getWeatherTaipei();
             get_coin();
