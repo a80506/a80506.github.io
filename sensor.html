@@ -339,47 +339,69 @@
             }
         }
 
-        function get_binance_cmc(item, slug) {
-
+        function get_binance_cmc(item, slug, retry = 1) {
             var percent = 0;
             var percent_html = "";
+            var maxRetries = 3; // 設定最大重試次數
 
             $.getJSON("https://www.binance.com/bapi/composite/v1/public/promo/cmc/cryptocurrency/quotes/latest?symbol=" + item,
-
                 function (data) {
                     var color = "#80FF00";
-                    var percent = 0;
                     var price = 0;
                     var name = "";
                     var i = 0;
 
                     $.each(data.data.body.data, function (key, val) {
-                        if (key == item) {
+                        if (key === item) {
                             i = 0;
-                            while(val[i].slug.length > 0) {
-                                if (slug == val[i].slug)
+                            while (val[i] && val[i].slug.length > 0) {
+                                if (slug === val[i].slug) {
                                     break;
-                                i = i + 1;
+                                }
+                                i++;
                             }
 
-                            price = parseFloat(val[i].quote.USD.price);
-                            if (price >= 100)
-                                price = parseInt(price);
-                            else if (price >= 1)
-                                price = parseFloat(price).toFixed(2);
-                            else if (price >= 0.01)
-                                price = parseFloat(price).toFixed(3);
-                            else
-                                price = parseFloat(price).toFixed(4);
+                            if (val[i] && val[i].quote && val[i].quote.USD) {
+                                price = parseFloat(val[i].quote.USD.price);
 
-                            name = val[i].slug
+                                if (price >= 100) {
+                                    price = parseInt(price);
+                                } else if (price >= 1) {
+                                    price = price.toFixed(2);
+                                } else if (price >= 0.01) {
+                                    price = price.toFixed(3);
+                                } else {
+                                    price = price.toFixed(4);
+                                }
 
-                            if (item == "GRASS")
-                                grass = price;
+                                name = val[i].slug;
+
+                                if (item === "GRASS") {
+                                    grass = price;
+                                }
+                            }
                         }
                     });
+
+                    // 若 price 為 0 且重試次數未超過最大重試次數，則重新嘗試
+                    if (price === 0 && retry < maxRetries) {
+                        console.log("Price is 0, retrying fetch... Attempt:", retry + 1);
+                        get_binance_cmc(item, slug, retry + 1);
+                    } else if (price === 0) {
+                        console.warn("Unable to fetch a valid price after", maxRetries, "attempts.");
+                    } else {
+                        console.log("Price fetched successfully:", price);
+                    }
                 }
-            );
+            ).fail(function() {
+                // 若請求失敗且尚未達到最大重試次數，則重試
+                if (retry < maxRetries) {
+                    console.log("Request failed, retrying... Attempt:", retry + 1);
+                    get_binance_cmc(item, slug, retry + 1);
+                } else {
+                    console.warn("Failed to fetch data after", maxRetries, "attempts.");
+                }
+            });
         }
 
         function get_coin_binance() {
