@@ -470,7 +470,7 @@
                             doge = price;
                     }
 
-                    $("div.coin").html(btc + " / " + eth + "<br />" + grass + " / " + sol + " / " + doge);
+                    $("div.coin").html(btc + " / " + eth + "<br />" + parseFloat(grass). toFixed(1) + " / " + sol + " / " + doge);
                 });
             })
             .fail(function(){
