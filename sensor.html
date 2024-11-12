@@ -416,7 +416,7 @@
                 var flow = 0;
                 var usdt = 0;
                 var ava = 0;
-                var arb = 0;
+                var bnb = 0;
                 var sol = 0;
                 var op = 0;
                 var doge = 0;
@@ -445,7 +445,7 @@
                         $("div.ethbtc").html(ethbtc);
                     } else {
                         price = parseFloat(data[key].lastPrice);
-                        if (data[key].symbol == "ARBUSDT")
+                        if (data[key].symbol == "BNBUSDT")
                             price = parseFloat(price).toFixed(1);
                         else if (price >= 100)
                             price = parseInt(price);
@@ -460,8 +460,8 @@
                             fil = price;
                         else if (data[key].symbol == "AVAUSDT")
                             ava = price;
-                        else if (data[key].symbol == "ARBUSDT")
-                            arb = price;
+                        else if (data[key].symbol == "BNBUSDT")
+                           bnb = price;
                         else if (data[key].symbol == "OPUSDT")
                             op = price;
                         else if (data[key].symbol == "SOLUSDT")
@@ -470,7 +470,7 @@
                             doge = price;
                     }
 
-                    $("div.coin").html(btc + " / " + eth + "<br />" + parseFloat(grass). toFixed(1) + " / " + sol + " / " + doge);
+                    $("div.coin").html(btc + " / " + eth + "<br />" + bnb + " / " + sol + " / " + doge);
                 });
             })
             .fail(function(){
