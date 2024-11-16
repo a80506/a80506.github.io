@@ -38,7 +38,7 @@
             background-color: black;
             color: #808080;
             font-weight: bold;
-            font-size: 25px;
+            font-size: 23px;
             display: flex;
             flex-direction: column;
             justify-content: flex-start;
@@ -292,14 +292,22 @@
                         price = parseInt(price);
                     else if (price >= 1)
                         price = price.toFixed(2);
+                    else if (price >= 0.1)
+                        price = price.toFixed(3);
                     else if (price >= 0.01)
+                        price = price.toFixed(4);
+/*
                         price = price.toFixed(4);
                     else
                         price = price.toFixed(6);
+*/
                     data.coin = data.coin.replace("1000", "");
 
                     // 更新區塊內容
-                    block.innerHTML = `<center><div>${data.coin}<br /> ${percent_str} </div></center>`;
+                    if (price >= 0.01)
+                        block.innerHTML = `<center><div>${data.coin}: ${price}<br /> ${percent_str} </div></center>`;
+                    else
+                        block.innerHTML = `<center><div>${data.coin}<br /> ${percent_str} </div></center>`;
                     container.appendChild(block);
                 });
             });
