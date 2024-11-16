@@ -38,7 +38,7 @@
             background-color: black;
             color: #808080;
             font-weight: bold;
-            font-size: 23px;
+            font-size: 25px;
             display: flex;
             flex-direction: column;
             justify-content: flex-start;
@@ -303,11 +303,7 @@
 */
                     data.coin = data.coin.replace("1000", "");
 
-                    // 更新區塊內容
-                    if (price >= 0.01)
-                        block.innerHTML = `<center><div>${data.coin}: ${price}<br /> ${percent_str} </div></center>`;
-                    else
-                        block.innerHTML = `<center><div>${data.coin}<br /> ${percent_str} </div></center>`;
+                    block.innerHTML = `<center><div>${data.coin}<br /> ${percent_str} </div></center>`;
                     container.appendChild(block);
                 });
             });
