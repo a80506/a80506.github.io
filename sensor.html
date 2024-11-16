@@ -90,8 +90,55 @@
         $("div.miner1").css("color", gray);
         //$("div.pm10").css("color", gray);
 
-        function get_binance(item) {
+        function btcDominance() {
+            // Initialize XMLHttpRequest
+            const xhr = new XMLHttpRequest();
+            
+            // Make synchronous request
+            xhr.open('GET', 'https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&order=market_cap_desc&per_page=250&page=1&sparkline=false', false);
+            
+            try {
+                // Send request
+                xhr.send();
+                
+                if (xhr.status !== 200) {
+                    throw new Error(`HTTP error! status: ${xhr.status}`);
+                }
+                
+                // Parse response
+                const response = JSON.parse(xhr.responseText);
+                
+                // Initialize variables
+                let BTCCap = 0;
+                let altCap = 0;
+                
+                // Get current date
+                const current_time = new Date().toLocaleDateString('en-GB', {
+                    day: '2-digit',
+                    month: '2-digit',
+                    year: 'numeric'
+                }).split('/').join('-');
+                
+                // Calculate market caps
+                for (const x of response) {
+                    if (x.id === "bitcoin") {
+                        BTCCap = x.market_cap;
+                        altCap += x.market_cap;
+                    } else {
+                        altCap += x.market_cap;
+                    }
+                }
+                
+                // Return formatted percentage
+                return `${(BTCCap/altCap * 100).toFixed(0 )}%`;
+                
+            } catch (error) {
+                console.error('Error:', error);
+                throw error;
+            }
+        }
 
+        function get_binance(item) {
             var percent = 0;
             var percent_html = "";
 
@@ -421,6 +468,8 @@
                 var op = 0;
                 var doge = 0;
                 var price = 0;
+                var btcd = btcDominance();
+
                 $.each( data, function( key, val ) {
                     if (data[key].symbol == "BTCUSDT") {
                         btc_percent = parseFloat(data[key].priceChangePercent).toFixed(1);
@@ -442,7 +491,7 @@
 
                     } else if (data[key].symbol == "ETHBTC") {
                         ethbtc = parseFloat(data[key].lastPrice);
-                        $("div.ethbtc").html(ethbtc);
+                        $("div.ethbtc").html(ethbtc + " / " + btcd);
                     } else {
                         price = parseFloat(data[key].lastPrice);
                         if (data[key].symbol == "BNBUSDT")
