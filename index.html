@@ -791,7 +791,8 @@
                 if (item == "BLUR")
                     $("div.MCC").html("<a style=\"color:" + color + ";\" href=\"https://www.binance.com/zh-TW/trade/" + item + "_USDT\">" + item.toUpperCase()+ ": " + String(price) + percent_html + "</a>");
                 else
-                    $("div." + item.toUpperCase()).html("<a style=\"color:" + color + ";\" href=\"https://www.binance.com/zh-TW/trade/" + item + "_USDT\">" + item.toUpperCase()+ ": " + String(price) + percent_html + "</a>");
+                    $("div." + item.toUpperCase()).html("<a style=\"color:" + color + ";\" href=\"https://www.binance.com/zh-TW/trade/" + item + "_BTC\">" + item.toUpperCase() + "</a>" + "<a style=\"color:" + color + ";\" href=\"https://www.binance.com/zh-TW/trade/" + item + "_USDT\">"  + ": " + String(price) + percent_html + "</a>");
+					//$("div." + item.toUpperCase()).html("<a style=\"color:" + color + ";\" href=\"https://www.binance.com/zh-TW/trade/" + item + "_USDT\">" + item.toUpperCase()+ ": " + String(price) + percent_html + "</a>");
             }
         );
     }
