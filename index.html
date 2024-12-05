@@ -298,7 +298,17 @@
     var room3_t = 0, room3_h = 0;
     var timestamp = 0;
     var fil_reward = 0, fil_storage = 0;
+	var bfx_btc = 0;
 
+    function get_bfx_btc() {
+        $.getJSON("https://api-pub.bitfinex.com/v2/ticker/tBTCUST",
+        function (data) {
+            bfx_btc = data[6];
+alert(bfx_btc);
+        });
+    }
+
+get_bfx_btc();
     function get_pm25() {
         $.getJSON("https://data.moenv.gov.tw/api/v2/aqx_p_432?api_key=e8dd42e6-9b8b-43f8-991e-b3dee723a52d&format=JSON",
         function (data) {
