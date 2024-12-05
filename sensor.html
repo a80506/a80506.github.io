@@ -485,6 +485,8 @@
                             $("div.coin").css("color", green);
 
                         btc = parseInt(data[key].lastPrice);
+                        if (btc >= 100000)
+                            btc = parseFloat(btc/1000).toFixed(1).toString() + "K";
 
                     } else if (data[key].symbol == "ETHUSDT") {
                         eth = parseInt(data[key].lastPrice);
