@@ -38,27 +38,28 @@
             ]
         },
         { // [3]
-            title: "新聞資訊",
+            title: "總經/Crypto",
             items: [
-                { div: "", title: "FLOW twitter", url: "https://twitter.com/flow_blockchain" },
-                { div: "", title: "寶二爺", url: "https://www.youtube.com/@ChandlerGuoChannel/videos" },
-                { div: "", title: "寶二爺-2", url: "https://www.youtube.com/playlist?list=PLYvhyeS4ghwEGIzq89U3CjgkSaSKgi47p" },
                 { div: "", title: "Woody twitter", url: "https://twitter.com/woody82343978" },
                 { div: "", title: "Gareth Soloway", url: "https://twitter.com/garethsoloway" },
                 { div: "", title: "Messari research", url: "https://messari.io/research" },
-                { div: "", title: "Youtube", url: "https://www.youtube.com" },
+                { div: "", title: "BTC vs 金銅比", url: "https://www.macromicro.me/charts/54926/bi-te-bi-jin-tong-bi?share=0517317a270c7772d87a819ffae053c6aa956bebca8dcb5d86c346be0b68a5db" },
+                { div: "", title: "逃頂指數", url: "https://www.coinglass.com/zh-TW/pro/i/MA" },
+                { div: "", title: "ahr999指標", url: "https://www.coinglass.com/zh-TW/pro/i/ahr999" },
+                { div: "", title: "貪婪&恐慌指數", url: "https://alternative.me/crypto/fear-and-greed-index/" },
             ]
         },
         { // [4] 第二列開始
-            title: "其他資訊",
+            title: "加密貨幣",
             items: [
-                { div: "", title: "台鐵訂票系統", url: "https://tip.railway.gov.tw/" },
-                { div: "", title: "高鐵訂票系統", url: "https://irs.thsrc.com.tw/IMINT/?locale=tw" },
-                { div: "", title: "Google Map", url: "https://www.google.com.tw/maps" },
-                { div: "", title: "Draw.io", url: "https://www.draw.io" },
-                { div: "", title: "安納金-演繹", url: "https://hackmd.io/f-wr0D2WR0y-eWgoqo9tGg" },
-                { div: "", title: "安納金-Total", url: "https://hackmd.io/yefD2UDFRqCi13fU3ZFD4A" },
-                { div: "", title: "大大讀書", url: "https://www.dada-master.com/book" }
+                { div: "ENA", title: "", url: "" },
+                { div: "ORDI", title: "", url: "" },
+                { div: "1000SATS", title: "", url: "" },
+                { div: "AVA", title: "", url: "" },
+                { div: "ZK", title: "", url: "" },
+                { div: "ALT", title: "", url: "" },
+                { div: "ADA", title: "", url: "" },
+                { div: "DOT", title: "", url: "" }
             ]
         },
         { // [5]
@@ -70,7 +71,7 @@
                 { div: "IPO", title: "HiStock 股票申購", url: "https://histock.tw/stock/public.aspx" },
                 { div: "", title: "HiStock 大盤籌碼", url: "https://histock.tw/stock/three.aspx" },
                 { div: "", title: "Investing 期貨", url: "https://www.investing.com/indices/indices-futures" },
-                { div: "", title: "HiStock-大盤", url: "https://histock.tw/stock/three.aspx" }
+                { div: "", title: "ETF淨值", url: "https://mis.twse.com.tw/stock/etf_nav.jsp?ex=tse" }
             ]
         },
         { // [6]
@@ -87,15 +88,17 @@
             ]
         },
         { // [7]
-            title: "總經/ETF/Crypto",
+            title: "加密貨幣",
             items: [
-                { div: "", title: "美元指數", url: "https://www.investing.com/currencies/us-dollar-index" },
-                { div: "", title: "BTC vs 金銅比", url: "https://www.macromicro.me/charts/54926/bi-te-bi-jin-tong-bi?share=0517317a270c7772d87a819ffae053c6aa956bebca8dcb5d86c346be0b68a5db" },
-                { div: "", title: "逃頂指數", url: "https://www.coinglass.com/zh-TW/pro/i/MA" },
-                { div: "", title: "ahr999指標", url: "https://www.coinglass.com/zh-TW/pro/i/ahr999" },
-                { div: "", title: "貪婪&恐慌指數", url: "https://alternative.me/crypto/fear-and-greed-index/" },
-                { div: "", title: "TLT", url: "https://www.investing.com/etfs/ishares-lehman-20-year-treas" },
-                { div: "", title: "ETF淨值", url: "https://mis.twse.com.tw/stock/etf_nav.jsp?ex=tse" }
+                { div: "DOGE", title: "", url: "" },
+                { div: "SHIB", title: "", url: "" },
+                { div: "PEPE", title: "", url: "" },
+                { div: "BONK", title: "", url: "" },
+                { div: "FLOKI", title: "", url: "" },
+                { div: "WIF", title: "", url: "" },
+                { div: "BONK", title: "", url: "" },
+                { div: "NOT", title: "", url: "" },
+                { div: "PNUT", title: "", url: "" }
             ]
         },
         { // [8] 第三列開始
@@ -262,7 +265,7 @@
             document.write("<tr><td class=\"title\">" + list_table[i].title + "</td></tr>");
 
             for (j = 0; j < 8; j++) {
-                if (j == 7 && i != 8 & i !== 9)
+                if (j == 7 && i != 4 && i != 7 && i != 8 && i != 9)
                     continue;
                 item_title = list_table[i].items[j].title;
                 item_url = list_table[i].items[j].url;
@@ -792,7 +795,7 @@
                     $("div.MCC").html("<a style=\"color:" + color + ";\" href=\"https://www.binance.com/zh-TW/trade/" + item + "_USDT\">" + item.toUpperCase()+ ": " + String(price) + percent_html + "</a>");
                 else
                     $("div." + item.toUpperCase()).html("<a style=\"color:" + color + ";\" href=\"https://www.binance.com/zh-TW/trade/" + item + "_BTC\">" + item.toUpperCase() + "</a>" + "<a style=\"color:" + color + ";\" href=\"https://www.binance.com/zh-TW/trade/" + item + "_USDT\">"  + ": " + String(price) + percent_html + "</a>");
-					//$("div." + item.toUpperCase()).html("<a style=\"color:" + color + ";\" href=\"https://www.binance.com/zh-TW/trade/" + item + "_USDT\">" + item.toUpperCase()+ ": " + String(price) + percent_html + "</a>");
+                    //$("div." + item.toUpperCase()).html("<a style=\"color:" + color + ";\" href=\"https://www.binance.com/zh-TW/trade/" + item + "_USDT\">" + item.toUpperCase()+ ": " + String(price) + percent_html + "</a>");
             }
         );
     }
@@ -1006,6 +1009,21 @@
 
 
     set_time();
+    get_binance("PNUT");
+    get_binance("ADA");
+    get_binance("DOT");
+    get_binance("SHIB");
+    get_binance("PEPE");
+    get_binance("BONK");
+    get_binance("FLOKI");
+    get_binance("WIF");
+    get_binance("NOT");
+    get_binance("ENA");
+    get_binance("ORDI");
+    get_binance("1000SATS");
+    get_binance("AVA");
+    get_binance("ZK");
+    get_binance("ALT");
     get_binance("FIL");
     get_binance("BTC");
     get_binance("ETH");
@@ -1018,6 +1036,7 @@
     get_binance("ETHBTC");
     get_binance("FILBTC");
     get_binance("NEXO");
+    get_binance("SHIB");
     
     get_binance("PYTH");
     get_binance("STX");
