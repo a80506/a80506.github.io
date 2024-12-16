@@ -41,6 +41,7 @@
         .red-bg2 { background-color: #e38f53; color: #000; }
         .black-bg { background-color: black; }
         .green-text { color: #80FF00; }
+        .green-text-2 { color: #6B9442; }
         .red-text { color: red; }
 
         .kline-chart-container {
@@ -200,6 +201,7 @@
                 else if (data.priceChangePercent > 20) block.classList.add('green-bg');
                 else if (data.priceChangePercent > 10) block.classList.add('green-bg2');
                 else if (data.priceChangePercent > 1) block.classList.add('black-bg', 'green-text');
+                else if (data.priceChangePercent > 0) block.classList.add('black-bg', 'green-text-2');
                 else if (data.priceChangePercent < 0) block.classList.add('black-bg', 'red-text');
 
                 const percentStr = (data.priceChangePercent > 0 ? '+' : '') + data.priceChangePercent.toFixed(1) + '%';
