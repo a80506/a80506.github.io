@@ -94,32 +94,32 @@
         function btcDominance() {
             // Initialize XMLHttpRequest
             const xhr = new XMLHttpRequest();
-           
+
             // Make synchronous request
             xhr.open('GET', 'https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&order=market_cap_desc&per_page=250&page=1&sparkline=false', false);
-           
+
             try {
                 // Send request
                 xhr.send();
-               
+
                 if (xhr.status !== 200) {
                     throw new Error(`HTTP error! status: ${xhr.status}`);
                 }
-               
+
                 // Parse response
                 const response = JSON.parse(xhr.responseText);
-               
+
                 // Initialize variables
                 let BTCCap = 0;
                 let altCap = 0;
-               
+
                 // Get current date
                 const current_time = new Date().toLocaleDateString('en-GB', {
                     day: '2-digit',
                     month: '2-digit',
                     year: 'numeric'
                 }).split('/').join('-');
-               
+
                 // Calculate market caps
                 for (const x of response) {
                     if (x.id === "bitcoin") {
@@ -129,10 +129,10 @@
                         altCap += x.market_cap;
                     }
                 }
-               
+
                 // Return formatted percentage
                 return `${(BTCCap/altCap * 100).toFixed(2)}%`;
-               
+
             } catch (error) {
                 console.error('Error:', error);
                 throw error;
@@ -164,7 +164,7 @@
             );
             return;
         }
-  
+
         function get_sensor() {
             $.getJSON("https://api.thingspeak.com/channels/72313/feeds.json?results=" + String(max),
                 function (data) {
@@ -181,11 +181,8 @@
                                     room1_t = parseInt(val[i].field7);
                                     room1_h = parseInt(val[i].field8);
                                 } else if (val[i].field5 && val[i].field6) {
-                                    var diffmin = parseInt(((Date.now() - Date.parse(val[i].created_at))/600000));
-                                    if (diffmin < 10) {
                                         room2_t = parseFloat(val[i].field5);
                                         room2_h = parseInt(val[i].field6);
-                                    }
                                 }
                             }
 
@@ -212,14 +209,12 @@
                             }
 
                             if (room2_t == 0) {
-                                $("div.room2").css("color", gray);
+                                $("div.balcony").css("color", gray);
                             } else if (room2_t >= 28 || room2_t < 25) {
-                                $("div.room2").css("color", "red");
-                                $("div.room2").css("font-weight", "bold");
-                            //} else if (room2_t < 23) {
-                                //$("div.room2").css("color", "orange");
+                                $("div.balcony").css("color", "red");
+                                $("div.balcony").css("font-weight", "bold");
                             } else {
-                                $("div.room2").css("color", green);
+                                $("div.balcony").css("color", green);
                             }
 
                             if (room3_h >= 80) {
@@ -228,48 +223,15 @@
                             } else if (room3_h >= 70) {
                                 $("div.living_room_h").css("color", "orange");
                             }
-                     
-                            //if (now_hour >= 21 || now_hour < 7) {
-                            //    document.querySelector('.room2').style.display = 'block';
-                            //    document.querySelector('.living_room').style.display = 'none';
-                            //}
 
                             $("div.living_room").html("客廳：" + living_room_t + "°C, " + living_room_h + "%");
                             $("div.room1").html("書房：" + room1_t + "°C, " + room1_h + "%");
-                            $("div.room2").html("臥室：" + room2_t + "°C");
+                            $("div.balcony").html("陽台：" + room2_t + "°C, " + room2_h + "%");
                             //$("div.living_room_h").html("客廳 " + living_room_h + "% / 書房 " + room3_h + "%");
                         }
                     });
                 });
 
-            $.getJSON("https://api.thingspeak.com/channels/72313/feeds.json?results=" + String(max),
-            function (data) {
-                var timestamp = 0;
-                $.each(data, function (key, val) {
-                    if (key == "feeds") {
-                        for (var i = 0; i < max; i++) {
-                            if (val[i].field5 && val[i].field6) {
-                                balcony_t = parseInt(val[i].field5);
-                                balcony_h = parseInt(val[i].field6);
-                                timestamp = Date.parse(val[i].created_at);
-                            }
-                        }
-
-                        if (balcony_h == 0 || Date.now() - timestamp > 1800000) { // 1800000 = 0.5 hour
-                            return;
-                        } else if (balcony_h >= 80) {
-                            $("div.balcony").css("color", "red");
-                            $("div.balcony").css("font-weight", "bold");
-                        } else if (balcony_h >= 70) {
-                            $("div.balcony").css("color", "orange");
-                        } else {
-                            $("div.balcony").css("color", green);
-                        }
-
-                        $("div.balcony").html("陽台：" + balcony_t + "°C, " + balcony_h + "%");
-                    }
-                });
-            });
         }
 
         // FIL reward + ETHBTC --------------------------------------------------------
@@ -317,7 +279,7 @@
         }
 
         // ------------------------------------------------------------------------------
-     
+
         function get_sea() {
             $.getJSON("https://starsharks.com/go/api/market/exchange-rate",
             function (data) {
@@ -455,7 +417,7 @@
         function get_coin_binance() {
             $.getJSON("https://api.binance.com/api/v3/ticker/24hr",
             function (data) {
-       
+
                 var ethbtc = 0;
                 var btc = 0;
                 var btc_percent;
@@ -696,7 +658,7 @@
             .then(data => {
               // 找到中正區的天氣資訊
               const station = data.records.Station[0];
-             
+
               if (station) {
                 const weatherCondition = station.WeatherElement.Weather;
                 const emoji = getWeatherEmoji(weatherCondition);
@@ -744,7 +706,7 @@
                 livingroomDiv.style.display = "block";
             }
         }
-       
+
         hide_item();
 
         set_time();
