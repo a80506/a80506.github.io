@@ -145,9 +145,11 @@
                 { div: "", title: "全部圖表", url: "sensor2.html" },
                 { div: "living_room", title: "客廳：00°C, 00%", url: "" },
                 { div: "room3", title: "書房：00°C, 00%", url: "" },
+                { div: "room2", title: "陽台：00°C, 00%", url: "" },
+                { div: "", title: "Crypto2025", url: "https://tinyurl.com/alexcrypto2025" },
 //                { div: "", title: "BTC Dominance", url: "https://tw.tradingview.com/chart/?symbol=CRYPTOCAP%3ABTC.D" },
-                { div: "btc_etf_flow", title: "BTC ETF Flow", url: "https://farside.co.uk/btc/" },
-                { div: "", title: "BTC 1Y HODL Wave", url: "https://www.lookintobitcoin.com/charts/1-year-hodl-wave/" },
+//                { div: "btc_etf_flow", title: "BTC ETF Flow", url: "https://farside.co.uk/btc/" },
+//                { div: "", title: "BTC 1Y HODL Wave", url: "https://www.lookintobitcoin.com/charts/1-year-hodl-wave/" },
                 { div: "home_traffic", title: "Home Traffic", url: "https://thingspeak.com/channels/1729950" },
                 { div: "XXX", title: "Coinblock", url: "https://a80506.github.io/coinblock-w.html"},
             ]
@@ -447,7 +449,7 @@
 
                     $("div.living_room").html("客廳：" + living_room_t + "°C, " + living_room_h + "%");
                     $("div.room1").html("主臥：" + room1_t + "°C, " + room1_h + "%");
-                    $("div.room2").html("礦機：" + room2_t + "°C");
+                    $("div.room2").html("陽台：" + room2_t + "°C, " + room2_h + "%");
                     $("div.room3").html("書房：" + room3_t + "°C, " + room3_h + "%");
                 }
             });
@@ -501,7 +503,7 @@
                     if (!get_miner2)
                         status += ", <font color=\"red\">miner2</font>"
                     $("div.home_traffic").html("<a href='https://thingspeak.com/channels/1729950'>Home Traffic" + status + "</a>");
-                    
+                   
                 }
             });
         });
