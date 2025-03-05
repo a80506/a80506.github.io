@@ -1,3 +1,4 @@
+
 <script>
     var rows = 4;
     var list_table = [
@@ -82,7 +83,7 @@
                 { div: "", title: "三大法人-期貨", url: "http://www.taifex.com.tw/cht/3/futContractsDateExcel" },
                 //{ div: "", title: "三大法人-選擇權", url: "http://www.taifex.com.tw/cht/3/optContractsDateExcel" },
                 { div: "", title: "三大法人-現貨", url: "http://www.twse.com.tw/zh/page/trading/fund/BFI82U.html" },
-                { div: "", title: "外資買賣超", url: "https://fubon-ebrokerdj.fbs.com.tw/Z/ZG/ZGK_D.djhtm" },
+                { div: "nasdaq", title: "外資買賣超", url: "https://fubon-ebrokerdj.fbs.com.tw/Z/ZG/ZGK_D.djhtm" },
                 { div: "TSE", title: "", url: "" },
                 { div: "STOCK_1", title: "", url: "" },
                 { div: "STOCK_2", title: "", url: "" },
@@ -568,7 +569,7 @@
                         color4 = 'style="color: #80FF00;"';
                     }
 
-                    $("div.TSE").html("<a href='https://tw.stock.yahoo.com/t/idx.php' "+ color1 + " >" + f1.toFixed(2).toString() + ", " + sign1 + f2.toFixed(0).toString() + ", " + sign1 + (f2 / (f1-f2) * 100).toFixed(2).toString() + "%</a>");
+                    $("div.TSE").html("<a href='https://tw.stock.yahoo.com/t/idx.php' "+ color1 + " >" + f1.toString() + ", " + sign1 + f2.toString() + ", " + sign1 + (f2 / (f1-f2) * 100).toFixed(2).toString() + "%</a>");
                     $("div.STOCK_1").html("<a href='https://tw.stock.yahoo.com/quote/00637L/technical-analysis' "+ color2 + " >" + f3.toFixed(2).toString() + ", " + sign2 + f4.toFixed(2).toString() + ", " + sign2 + (f4 / (f3-f4) * 100).toFixed(2).toString() + "%</a>");
                     $("div.STOCK_2").html("<a href='https://tw.stock.yahoo.com/quote/6994/technical-analysis' "+ color3 + " >" + f5.toFixed(2).toString() + ", " + sign3 + f6.toFixed(2).toString() + ", " + sign3 + (f6 / (f5-f6) * 100).toFixed(2).toString() + "%</a>");
                     $("div.STOCK_3").html("<a href='https://tw.stock.yahoo.com/quote/2408/technical-analysis' "+ color4 + " >" + f7.toFixed(2).toString() + ", " + sign4 + f8.toFixed(2).toString() + ", " + sign4 + (f8 / (f7-f8) * 100).toFixed(2).toString() + "%</a>");
@@ -1008,10 +1009,53 @@
                 });
         }
 
+        // Nasdaq Futures
+        async function fetchNasdaqData(url, targetDivId) {
+            const nasdaqDataElement = document.getElementById(targetDivId);
+            
+            try {
+                // Fetch the JSON data
+                const response = await fetch(url);
+                
+                // Check if the response is OK
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                
+                // Parse the JSON
+                const data = await response.json();
+                
+                // Calculate time difference
+                const dataTime = new Date(data.time);
+                const currentTime = new Date();
+                const timeDiffSeconds = Math.round((currentTime - dataTime) / 1000);
+                
+                // Show alert with time difference
+                //alert(`數據時間距離現在約 ${timeDiffSeconds} 秒`);
+                var status = '';
+                if (timeDiffSeconds > 1800)
+                    status = '*';
+                if (data.price_change > 0) {
+                    $("div.nasdaq").css("color", "#80FF00");
+                    $("div.nasdaq").html(data.latest_price.toString() + ", +" + data.price_change.toString() + ", +" + data.price_change_percent.toString() + "% "+ status);
+                } else {
+                    $("div.nasdaq").css("color", "red");
+                    $("div.nasdaq").html(data.latest_price.toString() + ", " + data.price_change.toString() + ", " + data.price_change_percent.toString() + "% "+ status);
+                }
+                //<div class="nasdaq" id="nasdaqDataContainer" align="center"></div>
+                //$("div.nasdaqDataContainer").html(data.latest_price.toString() + " / " );
+            } catch (error) {
+                // Handle any errors
+                $("div.nasdaq").html("No data");
+                console.error('Fetch error:', error);
+            }
+        }
+
     $("div.IPO").html("<a href='https://histock.tw/stock/public.aspx' style='color: #80FF00';>HiStock 股票申購</a>");
     $("div.btc_etf_flow").html("<a href='https://farside.co.uk/btc/' style='color: #80FF00';>BTC ETF Flow</a>");
 
     set_time();
+    fetchNasdaqData('https://za12.no-ip.info/nasdaq.json', 'nasdaq');
     get_binance("PENGU");
     get_binance("ADA");
     get_binance("DOT");
