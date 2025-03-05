@@ -42,6 +42,12 @@
             font-weight: bold;
             color: #FFFFFF;
         }
+
+        div.nasdaq {
+            font-size: 90pt;
+            font-weight: bold;
+            color: #80FF00;
+        }
     </style>
     <style type="text/css"></style>
     <script src="https://code.jquery.com/jquery-1.12.4.min.js" integrity="sha256-ZosEbRLbNQzLpnKIkEdrPv7lOy9C27hHQ+Xp8a4MxAQ="
@@ -59,6 +65,7 @@
     <div class="time" align="center">00:00:00</div>
     <div id="ethbtc" class="ethbtc" align="center">　</div>
     <div id="coin" class="coin" align="center">　</div>
+    <div class="nasdaq" id="nasdaqDataContainer" align="center"></div>
     <div align="center">　</div>
 
     <script>
@@ -89,7 +96,7 @@
         $("div.pm25").css("color", gray);
         $("div.miner0").css("color", gray);
         $("div.miner1").css("color", gray);
-        //$("div.pm10").css("color", gray);
+        $("div.nasdaq").css("color", gray);
 
         function btcDominance() {
             // Initialize XMLHttpRequest
@@ -484,7 +491,7 @@
                             doge = price;
                     }
 
-                    $("div.coin").html(btc + " / " + eth + "<br />" + bnb + " / " + sol + " / " + doge);
+                    $("div.coin").html(btc + " / " + eth);// + "<br />" + bnb + " / " + sol + " / " + doge);
                 });
             })
             .fail(function(){
@@ -676,7 +683,59 @@
             });
         }
 
+        // Nasdaq Futures
+		async function fetchNasdaqData(url, targetDivId) {
+			const nasdaqDataElement = document.getElementById(targetDivId);
+			
+			try {
+				// Fetch the JSON data
+				const response = await fetch(url);
+				
+				// Check if the response is OK
+				if (!response.ok) {
+					throw new Error(`HTTP error! status: ${response.status}`);
+				}
+				
+				// Parse the JSON
+				const data = await response.json();
+				
+				// Calculate time difference
+				const dataTime = new Date(data.time);
+				const currentTime = new Date();
+				const timeDiffSeconds = Math.round((currentTime - dataTime) / 1000);
+				
+				// Show alert with time difference
+				//alert(`數據時間距離現在約 ${timeDiffSeconds} 秒`);
+				var status = '';
+				if (timeDiffSeconds > 1800)
+                    status = '*';
+                if (data.price_change > 0)
+                    nasdaqDataElement.innerHTML = `
+                        <div class="nasdaq">
+                            ${data.latest_price.toString()} / +${data.price_change} ${status}
+                        </div>
+                    `;
+                else
+                    nasdaqDataElement.innerHTML = `
+                        <div class="nasdaq" style="color:red;">
+                            ${data.latest_price.toString()} / ${data.price_change} ${status}
+                        </div>
+                    `;
+                //<div class="nasdaq" id="nasdaqDataContainer" align="center"></div>
+                //$("div.nasdaqDataContainer").html(data.latest_price.toString() + " / " );
+            } catch (error) {
+                // Handle any errors
+                nasdaqDataElement.innerHTML = `
+                    <div class="nasdaq">
+                        No data
+                    </div>
+                `;
+                console.error('Fetch error:', error);
+            }
+        }
+
         function get_all() {
+            fetchNasdaqData('http://za12.no-ip.info/nasdaq.json', 'nasdaqDataContainer');
             get_binance_cmc("GRASS", "grass");
             setTimeout(function () { window.location = window.location; }, 300000);
             getWeatherTaipei();
