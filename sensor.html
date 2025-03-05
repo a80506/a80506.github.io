@@ -735,7 +735,7 @@
         }
 
         function get_all() {
-            fetchNasdaqData('http://za12.no-ip.info/nasdaq.json', 'nasdaqDataContainer');
+            fetchNasdaqData('https://za12.no-ip.info/nasdaq.json', 'nasdaqDataContainer');
             get_binance_cmc("GRASS", "grass");
             setTimeout(function () { window.location = window.location; }, 300000);
             getWeatherTaipei();
