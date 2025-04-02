@@ -66,11 +66,6 @@
     <!-- 表格顯示加密貨幣資訊 -->
     <div class="container"></div>
 
-    <!-- BTC 的 K 線圖容器 -->
-    <div class="kline-chart-container">
-        <canvas id="klineChartBTC"></canvas>
-    </div>
-
     <!-- ETH 的 K 線圖容器 -->
     <div class="kline-chart-container">
         <canvas id="klineChartETH"></canvas>
@@ -78,19 +73,19 @@
 
     <script>
     // Binance API 端點
-    const API_URL_KLINE_BTC = 'https://api.binance.com/api/v3/klines?symbol=BTCUSDT&interval=1d&limit=48';
-    const API_URL_KLINE_ETH = 'https://api.binance.com/api/v3/klines?symbol=ETHBTC&interval=1d&limit=48';
+    const API_URL_KLINE_ETH = 'https://api.binance.com/api/v3/klines?symbol=ETHUSDT&interval=1h&limit=48';
     const API_URL_TICKER = 'https://api.binance.com/api/v3/ticker/24hr';
 
-    // 定義幣種的顯示順序（移除 BTC 和 ETH）
+    // 定義幣種的顯示順序
     const COIN_ORDER = [
-        'SOL', 'BNB', 'FIL', 'PENDLE',
-        'PYTH', 'ZK', 'ZRO', 'SUI',
-        'DOGS', 'DOGE', 'ARB', 'OP',
-        'ETHFI', 'RENDER', 'STX', 'ORDI',
-        '1000SATS', 'STRK', 'LINK', 'ENA',
-        'FLOW', 'AR', 'UNI', 'ALT',
-        'SSV', 'BOME', 'AVA'
+        'BTC', 'ETH', 'SOL', 'BNB',
+        'FIL', 'PENDLE', 'PYTH', 'ZK',
+        'ZRO', 'SUI', 'DOGS', 'DOGE',
+        'ARB', 'OP', 'ETHFI', 'RENDER',
+        'STX', 'ORDI', '1000SATS', 'STRK',
+        'LINK', 'ENA', 'FLOW', 'AR',
+        'UNI', 'ALT', 'SSV', 
+        'BOME', 'AVA'
     ];
 
     // 獲取 K 線數據的函數
@@ -167,9 +162,7 @@
 
     // 更新 K 線圖
     async function updateKlineCharts() {
-        const btcData = await fetchKlineData(API_URL_KLINE_BTC);
         const ethData = await fetchKlineData(API_URL_KLINE_ETH);
-        drawKlineChart(btcData, 'klineChartBTC');
         drawKlineChart(ethData, 'klineChartETH');
     }
 
@@ -190,12 +183,17 @@
         );
 
         Promise.all(promises).then(results => {
-            const sortedCoins = results
-                .filter(data => data) // 過濾掉可能的 undefined
-                .sort((a, b) => b.priceChangePercent - a.priceChangePercent)
-                .slice(0, 8); // 只取前8個
+            const top12Coins = results.slice(0, 12);
+            const displayedCoins = new Set(top12Coins.map(data => data.coin));
 
-            sortedCoins.forEach(data => {
+            const additionalCoins = results
+                .filter(data => !displayedCoins.has(data.coin))
+                .sort((a, b) => b.priceChangePercent - a.priceChangePercent)
+                .slice(0, 8);
+
+            const finalCoins = [...top12Coins, ...additionalCoins];
+
+            finalCoins.forEach(data => {
                 const block = document.createElement('div');
                 block.className = 'block';
 
