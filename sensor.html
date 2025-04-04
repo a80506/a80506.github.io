@@ -231,8 +231,11 @@
                                 $("div.living_room_h").css("color", "orange");
                             }
 
+                            if (room1_t > 50 || room1_t < 0)
+                                $("div.room1").html("書房：error");
+                            else
+                                $("div.room1").html("書房：" + room1_t + "°C, " + room1_h + "%");
                             $("div.living_room").html("客廳：" + living_room_t + "°C, " + living_room_h + "%");
-                            $("div.room1").html("書房：" + room1_t + "°C, " + room1_h + "%");
                             $("div.balcony").html("陽台：" + room2_t + "°C, " + room2_h + "%");
                             //$("div.living_room_h").html("客廳 " + living_room_h + "% / 書房 " + room3_h + "%");
                         }
@@ -758,7 +761,8 @@
             let timeDiv = document.querySelector(".time");
             let livingroomDiv = document.querySelector(".living_room");
 
-            if (hours >= 6 && hours < 9) {
+            //if (hours >= 6 && hours < 9) {
+            if (living_room_h < 80) {
                 timeDiv.style.display = "block";
                 livingroomDiv.style.display = "none";
             } else {
