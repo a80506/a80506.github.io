@@ -707,9 +707,41 @@
             });
         }
 
+		function fetchEthereumTVL() {
+			try {
+				var url = "https://api.llama.fi/v2/chains";
+				var xhr = new XMLHttpRequest();
+				xhr.open("GET", url, false); // false 表示同步請求
+				xhr.send();
+
+				if (xhr.status !== 200) {
+					console.log("Error: 無法取得資料，狀態碼 " + xhr.status);
+					return null;
+				}
+
+				var chainsData = JSON.parse(xhr.responseText);
+				for (var i = 0; i < chainsData.length; i++) {
+					if (chainsData[i].name.toLowerCase() === "ethereum") {
+						var tvl = chainsData[i].tvl / 1e9; // 轉成十億美元
+						console.log("TVL: " + tvl.toFixed(2));
+						return tvl.toFixed(2);
+					}
+				}
+
+				console.log("Error: 在資料中找不到 Ethereum");
+				return null;
+
+			} catch (e) {
+				console.log("發生錯誤：" + e.toString());
+				return null;
+			}
+		}
+
         // Nasdaq Futures
         async function fetchNasdaqData(url, targetDivId) {
             const nasdaqDataElement = document.getElementById(targetDivId);
+            var ethtvl = fetchEthereumTVL();
+            var first_data = 0;
             
             try {
                 // Fetch the JSON data
@@ -733,16 +765,19 @@
                 var status = '';
                 if (timeDiffSeconds > 1800)
                     status = '*';
+                first_data = data.latest_price;
+                if (ethtvl > 0)
+                    first_data = ethtvl;
                 if (data.price_change > 0)
                     nasdaqDataElement.innerHTML = `
                         <div class="nasdaq">
-                            ${data.latest_price.toString()} / +${data.price_change} ${status}
+                            ${first_data.toString()} / +${data.price_change} ${status}
                         </div>
                     `;
                 else
                     nasdaqDataElement.innerHTML = `
                         <div class="nasdaq" style="color:red;">
-                            ${data.latest_price.toString()} / ${data.price_change} ${status}
+                            ${first_data.toString()} / ${data.price_change} ${status}
                         </div>
                     `;
                 //<div class="nasdaq" id="nasdaqDataContainer" align="center"></div>
@@ -793,7 +828,6 @@
         }
 
         hide_item();
-
         set_time();
         get_all();
         //setTimeout(function () { miner_balance(); }, 150000);
