@@ -1,4 +1,3 @@
-
 <script>
     var rows = 4;
     var list_table = [
@@ -34,7 +33,7 @@
                 { div: "", title: "帳戶清單", url: "https://docs.google.com/document/d/1HelciAITnbP-pqn82F1nzGnVughprQKhoJe74DDLLt4" },
                 { div: "", title: "一週氣象", url: "https://www.cwa.gov.tw/V8/C/W/County/County.html?C=63" },
                 { div: "", title: "即時天氣", url: "https://www.cwa.gov.tw/V8/C/W/OBS_Station.html?ID=C0ACA" },
-                { div: "weather", title: "新莊：00.0°C, 00%", url: ""},
+                { div: "weather", title: "新莊：00.0°C, 00%", url: "" },
                 { div: "pm25", title: "PM 2.5：0 ug/m3", url: "" },
                 { div: "", title: "", url: "" },
             ]
@@ -138,7 +137,7 @@
                 { div: "STX", title: "", url: "" },
                 { div: "ZRO", title: "", url: "" },
                 { div: "", title: "Alt-Coins", url: "coin.html" },
-                { div: "XXXBTC", title: "Coinblock", url: "https://a80506.github.io/coinblock-w.html"},
+                { div: "XXXBTC", title: "Coinblock", url: "https://a80506.github.io/coinblock-w.html" },
             ]
         },
         { // [11]
@@ -149,11 +148,11 @@
                 { div: "room3", title: "書房：00°C, 00%", url: "" },
                 { div: "room2", title: "陽台：00°C, 00%", url: "" },
                 { div: "", title: "Crypto2025", url: "https://tinyurl.com/alexcrypto2025" },
-//                { div: "", title: "BTC Dominance", url: "https://tw.tradingview.com/chart/?symbol=CRYPTOCAP%3ABTC.D" },
-//                { div: "btc_etf_flow", title: "BTC ETF Flow", url: "https://farside.co.uk/btc/" },
-//                { div: "", title: "BTC 1Y HODL Wave", url: "https://www.lookintobitcoin.com/charts/1-year-hodl-wave/" },
+                //                { div: "", title: "BTC Dominance", url: "https://tw.tradingview.com/chart/?symbol=CRYPTOCAP%3ABTC.D" },
+                //                { div: "btc_etf_flow", title: "BTC ETF Flow", url: "https://farside.co.uk/btc/" },
+                //                { div: "", title: "BTC 1Y HODL Wave", url: "https://www.lookintobitcoin.com/charts/1-year-hodl-wave/" },
                 { div: "home_traffic", title: "Home Traffic", url: "https://thingspeak.com/channels/1729950" },
-                { div: "XXX", title: "Coinblock", url: "https://a80506.github.io/coinblock-w.html"},
+                { div: "XXX", title: "Coinblock", url: "https://a80506.github.io/coinblock-w.html" },
             ]
         }
     ];
@@ -202,12 +201,16 @@
         }
 
         .XXX,
-        .XXXBTC{
+        .XXXBTC {
             display: grid;
-            grid-template-columns: repeat(8, 1fr); /* 將畫面分成4列 */
-            height: 100%; /* 使用全部可視區域高度 */
-            color: #808080; /* 設定文字顏色為白色 */
-            grid-gap: 0; /* 取消格線 */
+            grid-template-columns: repeat(8, 1fr);
+            /* 將畫面分成4列 */
+            height: 100%;
+            /* 使用全部可視區域高度 */
+            color: #808080;
+            /* 設定文字顏色為白色 */
+            grid-gap: 0;
+            /* 取消格線 */
             font-size: 5pt;
         }
 
@@ -219,43 +222,213 @@
         }
 
         .green-bg {
-            background-color: green; /* 設定背景色為綠色 */
+            background-color: green;
+            /* 設定背景色為綠色 */
             color: #fff;
         }
 
         .red-bg {
-            background-color: red; /* 設定背景色為紅色 */
+            background-color: red;
+            /* 設定背景色為紅色 */
             color: #000;
         }
 
         .green-bg2 {
-            background-color: #669933; /* 設定背景色為綠色 */
+            background-color: #669933;
+            /* 設定背景色為綠色 */
             color: #fff;
         }
 
         .red-bg2 {
-            background-color: #FF9797; /* 設定背景色為紅色 */
+            background-color: #FF9797;
+            /* 設定背景色為紅色 */
             color: #000;
         }
 
         .black-bg {
-            background-color: black; /* 設定背景色為黑色 */
+            background-color: black;
+            /* 設定背景色為黑色 */
         }
 
         .green-text {
-            color: #80FF00; /* 設定文字顏色為綠色 */
+            color: #80FF00;
+            /* 設定文字顏色為綠色 */
         }
 
         .red-text {
-            color: red; /* 設定文字顏色為紅色 */
+            color: red;
+            /* 設定文字顏色為紅色 */
+        }
+
+        /* Todoist 漂浮視窗樣式 */
+        .todoist-float-icon {
+            position: fixed;
+            top: 40px;
+            right: 150px;
+            width: 50px;
+            height: 50px;
+            background-color: #e44332;
+            border-radius: 50%;
+            cursor: pointer;
+            z-index: 1000;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+            transition: all 0.3s ease;
+        }
+
+        .todoist-float-icon:hover {
+            transform: scale(1.1);
+            box-shadow: 0 6px 16px rgba(0, 0, 0, 0.4);
+        }
+
+        .todoist-float-icon::before {
+            content: "✓";
+            color: white;
+            font-size: 24px;
+            font-weight: bold;
+        }
+
+        .todoist-panel {
+            position: fixed;
+            top: 80px;
+            right: 20px;
+            width: 220px;
+            max-height: 500px;
+            background-color: #2c2c2c;
+            border: 1px solid #444;
+            border-radius: 8px;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
+            z-index: 999;
+            display: none;
+            overflow: hidden;
+        }
+
+        .todoist-header {
+            background-color: #e44332;
+            color: white;
+            padding: 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .todoist-close {
+            cursor: pointer;
+            font-size: 18px;
+            color: white;
+        }
+
+        .todoist-content {
+            max-height: 400px;
+            overflow-y: auto;
+            padding: 10px;
+        }
+
+        .todoist-loading {
+            text-align: center;
+            padding: 20px;
+            color: #ccc;
+        }
+
+        .todoist-error {
+            text-align: center;
+            padding: 20px;
+            color: #ff6b6b;
+        }
+
+        .task-item {
+            background-color: #3c3c3c;
+            margin-bottom: 8px;
+            padding: 12px;
+            border-radius: 6px;
+            border-left: 3px solid #e44332;
+            transition: background-color 0.2s ease;
+        }
+
+        .task-item:hover {
+            background-color: #4c4c4c;
+        }
+
+        .task-title {
+            color: #fff;
+            font-size: 14px;
+            margin-bottom: 5px;
+            line-height: 1.4;
+        }
+
+        .task-meta {
+            font-size: 11px;
+            color: #999;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .task-project {
+            color: #e44332;
+        }
+
+        .task-priority {
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-size: 10px;
+        }
+
+        .priority-1 {
+            background-color: #ff4757;
+            color: white;
+        }
+
+        .priority-2 {
+            background-color: #ffa502;
+            color: white;
+        }
+
+        .priority-3 {
+            background-color: #3742fa;
+            color: white;
+        }
+
+        .priority-4 {
+            background-color: #747d8c;
+            color: white;
+        }
+
+        .task-due {
+            color: #ffa502;
+        }
+
+        .task-due.overdue {
+            color: #ff4757;
+            font-weight: bold;
+        }
+
+        .no-tasks {
+            text-align: center;
+            padding: 30px;
+            color: #999;
         }
     </style>
     <style type="text/css"></style>
 </head>
-<script src="https://code.jquery.com/jquery-1.12.4.min.js" integrity="sha256-ZosEbRLbNQzLpnKIkEdrPv7lOy9C27hHQ+Xp8a4MxAQ="
-    crossorigin="anonymous"></script>
+<script src="https://code.jquery.com/jquery-1.12.4.min.js"
+    integrity="sha256-ZosEbRLbNQzLpnKIkEdrPv7lOy9C27hHQ+Xp8a4MxAQ=" crossorigin="anonymous"></script>
 
 <body>
+    <!-- Todoist 漂浮視窗 -->
+    <div class="todoist-float-icon" id="todoistIcon"></div>
+    <div class="todoist-panel" id="todoistPanel">
+        <div class="todoist-header">
+            <span>我的任務</span>
+            <span class="todoist-close" id="todoistClose">×</span>
+        </div>
+        <div class="todoist-content" id="todoistContent">
+            <div class="todoist-loading">載入中...</div>
+        </div>
+    </div>
+
     <script>
         var item_title = "";
         var item_url = "";
@@ -285,7 +458,7 @@
             document.write("</tbody></table>");
             document.write("</td>");
 
-            if (i % rows == rows-1) {
+            if (i % rows == rows - 1) {
                 document.write("</tr>");
                 document.write("<tr valign=\"top\">");
             }
@@ -295,6 +468,7 @@
         document.write("</td></tr></tbody></table>");
     </script>
 </body>
+
 </html>
 
 <script>
@@ -308,40 +482,40 @@
 
     function get_pm25() {
         $.getJSON("https://data.moenv.gov.tw/api/v2/aqx_p_432?api_key=e8dd42e6-9b8b-43f8-991e-b3dee723a52d&format=JSON",
-        function (data) {
-            const citiesToCheck = ["新莊", "林口", "菜寮", "五股", "蘆洲", "板橋"];
-            let found = 0;
-            let site = "";
-            let pm25_str = "";
+            function (data) {
+                const citiesToCheck = ["新莊", "林口", "菜寮", "五股", "蘆洲", "板橋"];
+                let found = 0;
+                let site = "";
+                let pm25_str = "";
 
-            for (const city of citiesToCheck) {
-                for (const record of data.records) {
-                    if (record.sitename === city && parseInt(record["pm2.5"]) > 0) {
-                        found = 1;
-                        site = record.sitename;
-                        pm25_str = record["pm2.5"];
-                        break;
+                for (const city of citiesToCheck) {
+                    for (const record of data.records) {
+                        if (record.sitename === city && parseInt(record["pm2.5"]) > 0) {
+                            found = 1;
+                            site = record.sitename;
+                            pm25_str = record["pm2.5"];
+                            break;
+                        }
                     }
-                }
-                if (found)
-                    break;
-            }
-
-            if (found) {
-                const pm25Value = parseInt(pm25_str);
-                const pm25Div = $("div.pm25");
-
-                if (pm25Value > 40) {
-                    pm25Div.css("color", "red");
-                    pm25Div.css("font-weight", "bold");
-                } else if (pm25Value > 20) {
-                    pm25Div.css("color", "orange");
-                    pm25Div.css("font-weight", "bold");
+                    if (found)
+                        break;
                 }
 
-                pm25Div.html(`${site} PM2.5：${pm25_str}`);
-            }
-        });
+                if (found) {
+                    const pm25Value = parseInt(pm25_str);
+                    const pm25Div = $("div.pm25");
+
+                    if (pm25Value > 40) {
+                        pm25Div.css("color", "red");
+                        pm25Div.css("font-weight", "bold");
+                    } else if (pm25Value > 20) {
+                        pm25Div.css("color", "orange");
+                        pm25Div.css("font-weight", "bold");
+                    }
+
+                    pm25Div.html(`${site} PM2.5：${pm25_str}`);
+                }
+            });
     }
 
     function change_weather_div(data, station) {
@@ -384,19 +558,19 @@
 
     function get_weather() {
         $.getJSON("https://opendata.cwa.gov.tw/fileapi/v1/opendataapi/O-A0001-001?Authorization=CWB-843040FB-C733-4DFA-8263-47121194BF96&downloadType=WEB&format=JSON",
-        function (data) {
-            var found = 0;
+            function (data) {
+                var found = 0;
 
-            const cities = ["新莊", "三重", "五股", "蘆洲", "板橋"];
+                const cities = ["新莊", "三重", "五股", "蘆洲", "板橋"];
 
-            for (const city of cities) {
-                if (get_weather_place(data, city)) {
-                    return;
+                for (const city of cities) {
+                    if (get_weather_place(data, city)) {
+                        return;
+                    }
                 }
-            }
 
 
-        });
+            });
     }
 
     /* DHT22 Sensor */
@@ -480,38 +654,6 @@
             });
         });
 
-    // Home traffic
-    /*
-    $.getJSON("https://api.thingspeak.com/channels/1729950/feeds.json?results=" + String(max),
-        function (data) {
-            $.each(data, function (key, val) {
-                if (key == "feeds") {
-                    var status = "";
-                    var get_miner = 0;
-                    var get_miner2 = 0;
-                    for (var i = 0; i < max; i++) {
-                        if (Date.now() - Date.parse(val[i].created_at) > 300000)
-                            continue;
-                        if (parseFloat(val[i].field1) > 0) {
-                            if (parseFloat(val[i].field3) == 0)
-                                status = ": <font color=\"red\">none</font>"
-                        }
-                        if (!get_miner && parseFloat(val[i].field5) == 1)
-                            get_miner = 1;
-                        if (!get_miner2 && parseFloat(val[i].field5) == 2)
-                            get_miner2 = 1;
-                    }
-                    if (!get_miner)
-                        status += ", <font color=\"red\">miner</font>"
-                    if (!get_miner2)
-                        status += ", <font color=\"red\">miner2</font>"
-                    $("div.home_traffic").html("<a href='https://thingspeak.com/channels/1729950'>Home Traffic" + status + "</a>");
-                  
-                }
-            });
-        });
-    */
-                 
     // Stock
     $.getJSON("https://api.thingspeak.com/channels/72839/feeds.json?results=" + String(max),
         function (data) {
@@ -541,8 +683,8 @@
                     }
                     var sign1 = '', sign2 = '', sign3 = '', sign4 = '';
                     var color1 = '', color2 = '', color3 = '', color4 = '';
-                  
-                   
+
+
                     if (f2 < 0) {
                         color1 = 'style="color: red;"';
                     } else {
@@ -561,7 +703,7 @@
                         sign3 = '+';
                         color3 = 'style="color: #80FF00;"';
                     }
-                    
+
                     if (f8 < 0) {
                         color4 = 'style="color: red;"';
                     } else {
@@ -569,10 +711,10 @@
                         color4 = 'style="color: #80FF00;"';
                     }
 
-                    $("div.TSE").html("<a href='https://tw.stock.yahoo.com/t/idx.php' "+ color1 + " >" + f1.toString() + ", " + sign1 + f2.toString() + ", " + sign1 + (f2 / (f1-f2) * 100).toFixed(2).toString() + "%</a>");
-                    $("div.STOCK_1").html("<a href='https://tw.stock.yahoo.com/quote/00637L/technical-analysis' "+ color2 + " >" + f3.toFixed(2).toString() + ", " + sign2 + f4.toFixed(2).toString() + ", " + sign2 + (f4 / (f3-f4) * 100).toFixed(2).toString() + "%</a>");
-                    $("div.STOCK_2").html("<a href='https://tw.stock.yahoo.com/quote/00642U/technical-analysis' "+ color3 + " >" + f5.toFixed(2).toString() + ", " + sign3 + f6.toFixed(2).toString() + ", " + sign3 + (f6 / (f5-f6) * 100).toFixed(2).toString() + "%</a>");
-                    $("div.STOCK_3").html("<a href='https://tw.stock.yahoo.com/quote/2408/technical-analysis' "+ color4 + " >" + f7.toFixed(2).toString() + ", " + sign4 + f8.toFixed(2).toString() + ", " + sign4 + (f8 / (f7-f8) * 100).toFixed(2).toString() + "%</a>");
+                    $("div.TSE").html("<a href='https://tw.stock.yahoo.com/t/idx.php' " + color1 + " >" + f1.toString() + ", " + sign1 + f2.toString() + ", " + sign1 + (f2 / (f1 - f2) * 100).toFixed(2).toString() + "%</a>");
+                    $("div.STOCK_1").html("<a href='https://tw.stock.yahoo.com/quote/00637L/technical-analysis' " + color2 + " >" + f3.toFixed(2).toString() + ", " + sign2 + f4.toFixed(2).toString() + ", " + sign2 + (f4 / (f3 - f4) * 100).toFixed(2).toString() + "%</a>");
+                    $("div.STOCK_2").html("<a href='https://tw.stock.yahoo.com/quote/00642U/technical-analysis' " + color3 + " >" + f5.toFixed(2).toString() + ", " + sign3 + f6.toFixed(2).toString() + ", " + sign3 + (f6 / (f5 - f6) * 100).toFixed(2).toString() + "%</a>");
+                    $("div.STOCK_3").html("<a href='https://tw.stock.yahoo.com/quote/2408/technical-analysis' " + color4 + " >" + f7.toFixed(2).toString() + ", " + sign4 + f8.toFixed(2).toString() + ", " + sign4 + (f8 / (f7 - f8) * 100).toFixed(2).toString() + "%</a>");
                 }
             });
         });
@@ -701,12 +843,12 @@
         var color = "#80FF00";
         $.getJSON("https://api.gasprice.io/v1/estimates",
             function (data) {
-                    gas = parseFloat(data.result.baseFee);
-                    if (gas > 60)
-                        color = "red";
-                    else if (gas > 40)
-                        color = "orange";
-                    $("div.GAS").html("<a style=\"color:" + color + ";\" href=\"https://www.gasprice.io/\">" + "ETH Gas: " + parseInt(gas).toString() + "</a>");
+                gas = parseFloat(data.result.baseFee);
+                if (gas > 60)
+                    color = "red";
+                else if (gas > 40)
+                    color = "orange";
+                $("div.GAS").html("<a style=\"color:" + color + ";\" href=\"https://www.gasprice.io/\">" + "ETH Gas: " + parseInt(gas).toString() + "</a>");
             }
         );
     }
@@ -718,9 +860,9 @@
             item = "MCC";
             $.getJSON("https://api.geckoterminal.com/api/v2/networks/bsc/pools/" + pool,
                 function (data) {
-                        price = parseFloat(data.data.attributes.base_token_price_usd);
-                        if (price > 0.08)
-                            $("div."+item).html("<a href='https://www.geckoterminal.com/bsc/pools/" + pool + "'>" + item + ": " + price.toFixed(4).toString() + "</a>");
+                    price = parseFloat(data.data.attributes.base_token_price_usd);
+                    if (price > 0.08)
+                        $("div." + item).html("<a href='https://www.geckoterminal.com/bsc/pools/" + pool + "'>" + item + ": " + price.toFixed(4).toString() + "</a>");
                 }
             );
         }
@@ -728,9 +870,9 @@
             item = "WCC";
             $.getJSON("https://api.geckoterminal.com/api/v2/networks/bsc/pools/" + pool,
                 function (data) {
-                        price = parseFloat(data.data.attributes.base_token_price_usd);
-                        if (price > 0.015)
-                            $("div."+item).html("<a href='https://www.geckoterminal.com/bsc/pools/" + pool + "'>" + item + ": " + price.toFixed(4).toString() + "</a>");
+                    price = parseFloat(data.data.attributes.base_token_price_usd);
+                    if (price > 0.015)
+                        $("div." + item).html("<a href='https://www.geckoterminal.com/bsc/pools/" + pool + "'>" + item + ": " + price.toFixed(4).toString() + "</a>");
                 }
             );
         }
@@ -755,13 +897,13 @@
                         color = "yellow";
                     }
 
-//                    if (item == "ETHBTC") {
-//                        price = parseFloat(data.lastPrice).toFixed(3);
-//                        $("div." + item.toUpperCase()).html("<a style=\"color:" + color + ";\" href=\"https://www.binance.com/zh-TW/trade/" + item + "_USDT\">" + item.toUpperCase()+ ": " + String(price) + percent_html + "</a>");
-//                    } else {
-                        price = parseFloat(data.lastPrice).toFixed(5);
-                        $("div." + item.toUpperCase()).html("<a style=\"color:" + color + ";\" href=\"https://www.binance.com/zh-TW/trade/" + item + "\">" + item.toUpperCase()+ ": " + String(price) + "</a>");
-//                    }
+                    //                    if (item == "ETHBTC") {
+                    //                        price = parseFloat(data.lastPrice).toFixed(3);
+                    //                        $("div." + item.toUpperCase()).html("<a style=\"color:" + color + ";\" href=\"https://www.binance.com/zh-TW/trade/" + item + "_USDT\">" + item.toUpperCase()+ ": " + String(price) + percent_html + "</a>");
+                    //                    } else {
+                    price = parseFloat(data.lastPrice).toFixed(5);
+                    $("div." + item.toUpperCase()).html("<a style=\"color:" + color + ";\" href=\"https://www.binance.com/zh-TW/trade/" + item + "\">" + item.toUpperCase() + ": " + String(price) + "</a>");
+                    //                    }
                 }
             );
             return;
@@ -794,10 +936,10 @@
 
 
                 if (item == "BLUR")
-                    $("div.MCC").html("<a style=\"color:" + color + ";\" href=\"https://www.binance.com/zh-TW/trade/" + item + "_USDT\">" + item.toUpperCase()+ ": " + String(price) + percent_html + "</a>");
+                    $("div.MCC").html("<a style=\"color:" + color + ";\" href=\"https://www.binance.com/zh-TW/trade/" + item + "_USDT\">" + item.toUpperCase() + ": " + String(price) + percent_html + "</a>");
                 else
-                    $("div." + item.toUpperCase()).html("<a style=\"color:" + color + ";\" href=\"https://www.binance.com/zh-TW/trade/" + item + "_BTC\">" + item.toUpperCase() + "</a>" + "<a style=\"color:" + color + ";\" href=\"https://www.binance.com/zh-TW/trade/" + item + "_USDT\">"  + ": " + String(price) + percent_html + "</a>");
-                    //$("div." + item.toUpperCase()).html("<a style=\"color:" + color + ";\" href=\"https://www.binance.com/zh-TW/trade/" + item + "_USDT\">" + item.toUpperCase()+ ": " + String(price) + percent_html + "</a>");
+                    $("div." + item.toUpperCase()).html("<a style=\"color:" + color + ";\" href=\"https://www.binance.com/zh-TW/trade/" + item + "_BTC\">" + item.toUpperCase() + "</a>" + "<a style=\"color:" + color + ";\" href=\"https://www.binance.com/zh-TW/trade/" + item + "_USDT\">" + ": " + String(price) + percent_html + "</a>");
+                //$("div." + item.toUpperCase()).html("<a style=\"color:" + color + ";\" href=\"https://www.binance.com/zh-TW/trade/" + item + "_USDT\">" + item.toUpperCase()+ ": " + String(price) + percent_html + "</a>");
             }
         );
     }
@@ -820,7 +962,7 @@
                     if (key == item) {
 
                         i = 0;
-                        while(val[i].slug.length > 0) {
+                        while (val[i].slug.length > 0) {
                             if (slug == val[i].slug)
                                 break;
                             i = i + 1;
@@ -851,7 +993,7 @@
                             price = parseFloat(price).toFixed(6);
 
                         name = val[i].slug
-                        $("div." + item.toUpperCase()).html("<a style=\"color:" + color + ";\" href=\"https://www.binance.com/en/price/" + name + "\">" + item.toUpperCase()+ ": " + String(price) + percent_html + "</a>");
+                        $("div." + item.toUpperCase()).html("<a style=\"color:" + color + ";\" href=\"https://www.binance.com/en/price/" + name + "\">" + item.toUpperCase() + ": " + String(price) + percent_html + "</a>");
                     }
                 });
             }
@@ -861,231 +1003,231 @@
     function set_time() {
         var d = new Date();
         $("div.time").css("color", "orange");
-        $("div.time").html((d.getMonth()+1) + "/" + d.getDate() + " "+ d.toLocaleTimeString("en-US", { hour12: false , hour: "2-digit", minute: "2-digit"}));
+        $("div.time").html((d.getMonth() + 1) + "/" + d.getDate() + " " + d.toLocaleTimeString("en-US", { hour12: false, hour: "2-digit", minute: "2-digit" }));
         setTimeout(function () { set_time(); }, 1000);
     }
 
     $("div.mining").html("<font color=\"#80FF00\">Mining: <a href='https://explorer.neurai.org/address/NWZ2EWG4EuKycxGdsQU32yZ1BxSESo4eNG'>XNA</a> / <a href='https://explorer.neoxa.net/address/GTY1YPNYGXX1WxqGQFgCK1znqUmcu7wtZA'>NEOX</a></font>");
-        var coinOrder = [
-            'BTC', 'ETH', 'SOL', 'BNB',
-            'STX', 'ORDI', '1000SATS', 'RIF',
-            'ARB', 'OP', 'STRK', 'XAI',
-            'LINK', 'PYTH', 'TIA', 'BAND',
-            'DOT', 'ATOM', 'FIL', 'AR', 
-            'BLUR', 'UNI', 'DYDX', 'JUP',
-            'STG', 'ALT', 'MANTA', 'MATIC',
-            'SSV', 'PENDLE', 'MAGIC', 'WLD',
-            'FLOW', 'NEXO', 'APE', 'MEME',
-            'PEPE', 'DOGE', 'SHIB', 'BONK'
-            ];
+    var coinOrder = [
+        'BTC', 'ETH', 'SOL', 'BNB',
+        'STX', 'ORDI', '1000SATS', 'RIF',
+        'ARB', 'OP', 'STRK', 'XAI',
+        'LINK', 'PYTH', 'TIA', 'BAND',
+        'DOT', 'ATOM', 'FIL', 'AR',
+        'BLUR', 'UNI', 'DYDX', 'JUP',
+        'STG', 'ALT', 'MANTA', 'MATIC',
+        'SSV', 'PENDLE', 'MAGIC', 'WLD',
+        'FLOW', 'NEXO', 'APE', 'MEME',
+        'PEPE', 'DOGE', 'SHIB', 'BONK'
+    ];
 
 
-        function fetchAndUpdate() {
-            var container = document.querySelector('.XXX');
-            container.innerHTML = ''; // 清空容器內的內容
+    function fetchAndUpdate() {
+        var container = document.querySelector('.XXX');
+        container.innerHTML = ''; // 清空容器內的內容
 
-            var promises = coinOrder.map(function(coin) {
-                return fetch('https://api.binance.com/api/v3/ticker/24hr?symbol=' + coin + 'USDT')
-                    .then(response => response.json())
-                    .then(data => {
-                        // 創建區塊
-                        var block = document.createElement('div');
-                        block.className = 'block';
-                        var priceChangePercent = parseFloat(data.priceChangePercent);
-                        if (priceChangePercent < -10) {
-                            block.classList.add('red-bg', 'black-text');
-                        } else if (priceChangePercent < -5) {
-                            block.classList.add('red-bg2', 'black-text');
-                        } else if (priceChangePercent > 10) {
-                            block.classList.add('green-bg', 'black-text');
-                        } else if (priceChangePercent > 5) {
-                            block.classList.add('green-bg2', 'black-text');
-                        } else if (priceChangePercent > 1) {
-                            block.classList.add('black-bg', 'green-text');
-                        } else if (priceChangePercent < -1) {
-                            block.classList.add('black-bg', 'red-text');
-                        }
-
-                        var percent_str = priceChangePercent.toFixed(1).toString() + "%";
-                        if (priceChangePercent > 0)
-                            percent_str = "+" + percent_str;
-                        // 移除價格末尾多餘的零，並移除百分比
-                        var price = parseFloat(data.lastPrice);
-                        if (price >= 100)
-                            price = parseInt(price);
-                        else if (price >= 1)
-                            price = price.toFixed(2);
-                        else if (price >= 0.01)
-                            price = price.toFixed(4);
-                        else
-                            price = price.toFixed(6);
-                        coin = coin.replace("1000", "");
-                        // 更新區塊內容
-                        if (priceChangePercent < 1 && priceChangePercent > -1)
-                             block.innerHTML = `<center><div><a href="sensor3.html">${coin}</a></div></center>`;
-                      else
-                          block.innerHTML = `<center><div>${coin}</div></center>`;
-                      return block;
-                    })
-                    .catch(error => {
-                        console.error('Error fetching ' + coin + ' price:', error);
-                        return null;
-                    });
-            });
-
-            Promise.all(promises)
-                .then(blocks => {
-                    blocks.forEach(block => {
-                        if (block) {
-                            container.appendChild(block);
-                        }
-                    });
-                });
-        }
-
-        function fetchAndUpdateBTC() {
-            var container = document.querySelector('.XXXBTC');
-            container.innerHTML = ''; // 清空容器內的內容
-
-            var promises = coinOrder.map(function(coin) {
-                return fetch('https://api.binance.com/api/v3/ticker/24hr?symbol=' + coin + 'BTC')
-                    .then(response => response.json())
-                    .then(data => {
-                        // 創建區塊
-                        var block = document.createElement('div');
-                        block.className = 'block';
-                        var priceChangePercent = parseFloat(data.priceChangePercent);
-                        if (priceChangePercent < -10) {
-                            block.classList.add('red-bg', 'black-text');
-                        } else if (priceChangePercent < -5) {
-                            block.classList.add('red-bg2', 'black-text');
-                        } else if (priceChangePercent > 10) {
-                            block.classList.add('green-bg', 'black-text');
-                        } else if (priceChangePercent > 5) {
-                            block.classList.add('green-bg2', 'black-text');
-                        } else if (priceChangePercent > 1) {
-                            block.classList.add('black-bg', 'green-text');
-                        } else if (priceChangePercent < -1) {
-                            block.classList.add('black-bg', 'red-text');
-                        }
-
-                        var percent_str = priceChangePercent.toFixed(1).toString() + "%";
-                        if (priceChangePercent > 0)
-                            percent_str = "+" + percent_str;
-                        // 移除價格末尾多餘的零，並移除百分比
-                        var price = parseFloat(data.lastPrice);
-                        if (price >= 100)
-                            price = parseInt(price);
-                        else if (price >= 1)
-                            price = price.toFixed(2);
-                        else if (price >= 0.01)
-                            price = price.toFixed(4);
-                        else
-                            price = price.toFixed(6);
-                        coin = coin.replace("1000", "");
-                        // 更新區塊內容
-                        if (priceChangePercent < 1 && priceChangePercent > -1)
-                             block.innerHTML = `<center><div><a href="sensor3.html">${coin}</a></div></center>`;
-                      else
-                          block.innerHTML = `<center><div>${coin}</div></center>`;
-                      return block;
-                    })
-                    .catch(error => {
-                        console.error('Error fetching ' + coin + ' price:', error);
-                        var block = document.createElement('div');
-                        block.className = 'block';
-                        block.innerHTML = ``;
-                        return block
-                    });
-            });
-
-            Promise.all(promises)
-                .then(blocks => {
-                    blocks.forEach(block => {
-                        if (block) {
-                            container.appendChild(block);
-                        }
-                    });
-                });
-        }
-
-        // Nasdaq Futures
-        async function fetchNasdaqData(url, targetDivId) {
-            const nasdaqDataElement = document.getElementById(targetDivId);
-            
-            try {
-                // Fetch the JSON data
-                const response = await fetch(url);
-                
-                // Check if the response is OK
-                if (!response.ok) {
-                    throw new Error(`HTTP error! status: ${response.status}`);
-                }
-                
-                // Parse the JSON
-                const data = await response.json();
-                
-                // Calculate time difference
-                const dataTime = new Date(data.time);
-                const currentTime = new Date();
-                const timeDiffSeconds = Math.round((currentTime - dataTime) / 1000);
-                
-                // Show alert with time difference
-                //alert(`數據時間距離現在約 ${timeDiffSeconds} 秒`);
-                var status = '';
-                if (timeDiffSeconds > 1800)
-                    status = '*';
-                if (data.price_change > 0) {
-                    $("div.nasdaq").css("color", "#80FF00");
-                    $("div.nasdaq").html(data.latest_price.toString() + ", +" + data.price_change.toString() + ", +" + data.price_change_percent.toString() + "% "+ status);
-                } else {
-                    $("div.nasdaq").css("color", "red");
-                    $("div.nasdaq").html(data.latest_price.toString() + ", " + data.price_change.toString() + ", " + data.price_change_percent.toString() + "% "+ status);
-                }
-                //<div class="nasdaq" id="nasdaqDataContainer" align="center"></div>
-                //$("div.nasdaqDataContainer").html(data.latest_price.toString() + " / " );
-            } catch (error) {
-                // Handle any errors
-                $("div.nasdaq").html("No data");
-                console.error('Fetch error:', error);
-            }
-        }
-
-        function fetchEthereumTVL() {
-            try {
-                var url = "https://api.llama.fi/v2/chains";
-                var xhr = new XMLHttpRequest();
-                xhr.open("GET", url, false); // false 表示同步請求
-                xhr.send();
-
-                if (xhr.status !== 200) {
-                    console.log("Error: 無法取得資料，狀態碼 " + xhr.status);
-                    return null;
-                }
-
-                var chainsData = JSON.parse(xhr.responseText);
-                for (var i = 0; i < chainsData.length; i++) {
-                    if (chainsData[i].name.toLowerCase() === "ethereum") {
-                        var tvl = chainsData[i].tvl / 1e9; // 轉成十億美元
-                        if (tvl < 80)
-                            $("div.ETHTVL").css("color", "orange");
-                        else if (tvl < 75)
-                            $("div.ETHTVL").css("color", "red");
-
-                        $("div.ETHTVL").html("ETH TVL: " + tvl.toFixed(2).toString());
-                        console.log("TVL: " + tvl.toFixed(2));
-                        //return tvl.toFixed(2);
+        var promises = coinOrder.map(function (coin) {
+            return fetch('https://api.binance.com/api/v3/ticker/24hr?symbol=' + coin + 'USDT')
+                .then(response => response.json())
+                .then(data => {
+                    // 創建區塊
+                    var block = document.createElement('div');
+                    block.className = 'block';
+                    var priceChangePercent = parseFloat(data.priceChangePercent);
+                    if (priceChangePercent < -10) {
+                        block.classList.add('red-bg', 'black-text');
+                    } else if (priceChangePercent < -5) {
+                        block.classList.add('red-bg2', 'black-text');
+                    } else if (priceChangePercent > 10) {
+                        block.classList.add('green-bg', 'black-text');
+                    } else if (priceChangePercent > 5) {
+                        block.classList.add('green-bg2', 'black-text');
+                    } else if (priceChangePercent > 1) {
+                        block.classList.add('black-bg', 'green-text');
+                    } else if (priceChangePercent < -1) {
+                        block.classList.add('black-bg', 'red-text');
                     }
-                }
 
-                console.log("Error: 在資料中找不到 Ethereum");
-                //return null;
+                    var percent_str = priceChangePercent.toFixed(1).toString() + "%";
+                    if (priceChangePercent > 0)
+                        percent_str = "+" + percent_str;
+                    // 移除價格末尾多餘的零，並移除百分比
+                    var price = parseFloat(data.lastPrice);
+                    if (price >= 100)
+                        price = parseInt(price);
+                    else if (price >= 1)
+                        price = price.toFixed(2);
+                    else if (price >= 0.01)
+                        price = price.toFixed(4);
+                    else
+                        price = price.toFixed(6);
+                    coin = coin.replace("1000", "");
+                    // 更新區塊內容
+                    if (priceChangePercent < 1 && priceChangePercent > -1)
+                        block.innerHTML = `<center><div><a href="sensor3.html">${coin}</a></div></center>`;
+                    else
+                        block.innerHTML = `<center><div>${coin}</div></center>`;
+                    return block;
+                })
+                .catch(error => {
+                    console.error('Error fetching ' + coin + ' price:', error);
+                    return null;
+                });
+        });
 
-            } catch (e) {
-                console.log("發生錯誤：" + e.toString());
-                //return null;
+        Promise.all(promises)
+            .then(blocks => {
+                blocks.forEach(block => {
+                    if (block) {
+                        container.appendChild(block);
+                    }
+                });
+            });
+    }
+
+    function fetchAndUpdateBTC() {
+        var container = document.querySelector('.XXXBTC');
+        container.innerHTML = ''; // 清空容器內的內容
+
+        var promises = coinOrder.map(function (coin) {
+            return fetch('https://api.binance.com/api/v3/ticker/24hr?symbol=' + coin + 'BTC')
+                .then(response => response.json())
+                .then(data => {
+                    // 創建區塊
+                    var block = document.createElement('div');
+                    block.className = 'block';
+                    var priceChangePercent = parseFloat(data.priceChangePercent);
+                    if (priceChangePercent < -10) {
+                        block.classList.add('red-bg', 'black-text');
+                    } else if (priceChangePercent < -5) {
+                        block.classList.add('red-bg2', 'black-text');
+                    } else if (priceChangePercent > 10) {
+                        block.classList.add('green-bg', 'black-text');
+                    } else if (priceChangePercent > 5) {
+                        block.classList.add('green-bg2', 'black-text');
+                    } else if (priceChangePercent > 1) {
+                        block.classList.add('black-bg', 'green-text');
+                    } else if (priceChangePercent < -1) {
+                        block.classList.add('black-bg', 'red-text');
+                    }
+
+                    var percent_str = priceChangePercent.toFixed(1).toString() + "%";
+                    if (priceChangePercent > 0)
+                        percent_str = "+" + percent_str;
+                    // 移除價格末尾多餘的零，並移除百分比
+                    var price = parseFloat(data.lastPrice);
+                    if (price >= 100)
+                        price = parseInt(price);
+                    else if (price >= 1)
+                        price = price.toFixed(2);
+                    else if (price >= 0.01)
+                        price = price.toFixed(4);
+                    else
+                        price = price.toFixed(6);
+                    coin = coin.replace("1000", "");
+                    // 更新區塊內容
+                    if (priceChangePercent < 1 && priceChangePercent > -1)
+                        block.innerHTML = `<center><div><a href="sensor3.html">${coin}</a></div></center>`;
+                    else
+                        block.innerHTML = `<center><div>${coin}</div></center>`;
+                    return block;
+                })
+                .catch(error => {
+                    console.error('Error fetching ' + coin + ' price:', error);
+                    var block = document.createElement('div');
+                    block.className = 'block';
+                    block.innerHTML = ``;
+                    return block
+                });
+        });
+
+        Promise.all(promises)
+            .then(blocks => {
+                blocks.forEach(block => {
+                    if (block) {
+                        container.appendChild(block);
+                    }
+                });
+            });
+    }
+
+    // Nasdaq Futures
+    async function fetchNasdaqData(url, targetDivId) {
+        const nasdaqDataElement = document.getElementById(targetDivId);
+
+        try {
+            // Fetch the JSON data
+            const response = await fetch(url);
+
+            // Check if the response is OK
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
             }
+
+            // Parse the JSON
+            const data = await response.json();
+
+            // Calculate time difference
+            const dataTime = new Date(data.time);
+            const currentTime = new Date();
+            const timeDiffSeconds = Math.round((currentTime - dataTime) / 1000);
+
+            // Show alert with time difference
+            //alert(`數據時間距離現在約 ${timeDiffSeconds} 秒`);
+            var status = '';
+            if (timeDiffSeconds > 1800)
+                status = '*';
+            if (data.price_change > 0) {
+                $("div.nasdaq").css("color", "#80FF00");
+                $("div.nasdaq").html(data.latest_price.toString() + ", +" + data.price_change.toString() + ", +" + data.price_change_percent.toString() + "% " + status);
+            } else {
+                $("div.nasdaq").css("color", "red");
+                $("div.nasdaq").html(data.latest_price.toString() + ", " + data.price_change.toString() + ", " + data.price_change_percent.toString() + "% " + status);
+            }
+            //<div class="nasdaq" id="nasdaqDataContainer" align="center"></div>
+            //$("div.nasdaqDataContainer").html(data.latest_price.toString() + " / " );
+        } catch (error) {
+            // Handle any errors
+            $("div.nasdaq").html("No data");
+            console.error('Fetch error:', error);
         }
+    }
+
+    function fetchEthereumTVL() {
+        try {
+            var url = "https://api.llama.fi/v2/chains";
+            var xhr = new XMLHttpRequest();
+            xhr.open("GET", url, false); // false 表示同步請求
+            xhr.send();
+
+            if (xhr.status !== 200) {
+                console.log("Error: 無法取得資料，狀態碼 " + xhr.status);
+                return null;
+            }
+
+            var chainsData = JSON.parse(xhr.responseText);
+            for (var i = 0; i < chainsData.length; i++) {
+                if (chainsData[i].name.toLowerCase() === "ethereum") {
+                    var tvl = chainsData[i].tvl / 1e9; // 轉成十億美元
+                    if (tvl < 80)
+                        $("div.ETHTVL").css("color", "orange");
+                    else if (tvl < 75)
+                        $("div.ETHTVL").css("color", "red");
+
+                    $("div.ETHTVL").html("ETH TVL: " + tvl.toFixed(2).toString());
+                    console.log("TVL: " + tvl.toFixed(2));
+                    //return tvl.toFixed(2);
+                }
+            }
+
+            console.log("Error: 在資料中找不到 Ethereum");
+            //return null;
+
+        } catch (e) {
+            console.log("發生錯誤：" + e.toString());
+            //return null;
+        }
+    }
 
     $("div.IPO").html("<a href='https://histock.tw/stock/public.aspx' style='color: #80FF00';>HiStock 股票申購</a>");
     $("div.btc_etf_flow").html("<a href='https://farside.co.uk/btc/' style='color: #80FF00';>BTC ETF Flow</a>");
@@ -1121,7 +1263,7 @@
     get_binance("FILBTC");
     get_binance("NEXO");
     get_binance("SHIB");
-    
+
     get_binance("PYTH");
     get_binance("STX");
     get_binance("SSV");
@@ -1134,13 +1276,280 @@
     get_binance_cmc("COOKIE", "cookie");
     //get_geckoterminal("0xfb79d843d8d7e38bd5a7f115fa889b043db6fe76"); //MCC
     //get_geckoterminal("0x09ead9122ba8ac230746eb9730d1c099d9a6181d"); //WCC
-              
+
     //get_binance_cmc("GRASS", "grass");
     //get_sea();
     //get_shark();
 
     get_pm25();
     get_weather();
+
+    // Todoist 漂浮視窗功能
+    const TODOIST_API_TOKEN = 'dc38f34f10b1ee5fdbba8f63bc465d23bc810f34'; // 請替換為你的 Todoist API Token
+    let todoistTasks = [];
+
+    // 要顯示的任務關鍵字
+    const TASK_KEYWORDS = ['Fix VPN', 'ToDo', '黑種草', '新表格'];
+
+    // 初始載入 Todoist 任務並顯示圖示
+    initTodoistTasks();
+
+    // 初始化 Todoist 任務
+    function initTodoistTasks() {
+        // 如果沒有設定 API Token，顯示示範資料
+        if (TODOIST_API_TOKEN === 'YOUR_TODOIST_API_TOKEN') {
+            showDemoTasks();
+            return;
+        }
+
+        $.ajax({
+            url: 'https://api.todoist.com/rest/v2/tasks',
+            method: 'GET',
+            headers: {
+                'Authorization': 'Bearer ' + TODOIST_API_TOKEN
+            },
+            success: function (tasks) {
+                todoistTasks = tasks;
+                // 任務載入完成後顯示圖示
+                $('#todoistIcon').css('display', 'flex');
+            },
+            error: function (xhr, status, error) {
+                console.error('Todoist API 載入失敗:', error);
+                // 即使失敗也顯示圖示，讓用戶可以看到錯誤訊息
+                $('#todoistIcon').css('display', 'flex');
+            }
+        });
+    }
+
+    // 漂浮視窗控制
+    $('#todoistIcon').click(function () {
+        const panel = $('#todoistPanel');
+        if (panel.is(':visible')) {
+            panel.hide();
+        } else {
+            panel.show();
+            loadTodoistTasks();
+        }
+    });
+
+    $('#todoistClose').click(function () {
+        $('#todoistPanel').hide();
+    });
+
+    // 點擊視窗外部關閉
+    $(document).click(function (event) {
+        if (!$(event.target).closest('.todoist-panel, .todoist-float-icon').length) {
+            $('#todoistPanel').hide();
+        }
+    });
+
+    // 載入 Todoist 任務
+    function loadTodoistTasks() {
+        const content = $('#todoistContent');
+        content.html('<div class="todoist-loading">載入中...</div>');
+
+        // 如果沒有設定 API Token，顯示示範資料
+        if (TODOIST_API_TOKEN === 'YOUR_TODOIST_API_TOKEN') {
+            showDemoTasks();
+            return;
+        }
+
+        $.ajax({
+            url: 'https://api.todoist.com/rest/v2/tasks',
+            method: 'GET',
+            headers: {
+                'Authorization': 'Bearer ' + TODOIST_API_TOKEN
+            },
+            success: function (tasks) {
+                todoistTasks = tasks;
+                displayTasks(tasks);
+            },
+            error: function (xhr, status, error) {
+                content.html('<div class="todoist-error">載入失敗：' + error + '<br><small>請檢查 API Token 是否正確</small></div>');
+            }
+        });
+    }
+
+    // 顯示示範任務（當沒有設定 API Token 時）
+    function showDemoTasks() {
+        const demoTasks = [
+            {
+                id: '1',
+                content: 'Fix VPN 連線問題',
+                project_id: 'work',
+                priority: 3,
+                due: { date: '2025-07-30' },
+                labels: ['技術']
+            },
+            {
+                id: '2',
+                content: 'ToDo 清單整理',
+                project_id: 'personal',
+                priority: 2,
+                due: null,
+                labels: ['整理']
+            },
+            {
+                id: '3',
+                content: '黑種草油補充',
+                project_id: 'health',
+                priority: 1,
+                due: { date: '2025-07-29' },
+                labels: ['健康']
+            },
+            {
+                id: '4',
+                content: '新表格設計完成',
+                project_id: 'work',
+                priority: 2,
+                due: null,
+                labels: ['設計']
+            }
+        ];
+
+        todoistTasks = demoTasks;
+        displayTasks(demoTasks);
+        // 示範任務載入完成後顯示圖示
+        $('#todoistIcon').css('display', 'flex');
+    }
+
+    // 顯示任務列表
+    function displayTasks(tasks) {
+        const content = $('#todoistContent');
+
+        // 過濾只顯示包含特定關鍵字的任務
+        const filteredTasks = tasks.filter(task => {
+            return TASK_KEYWORDS.some(keyword =>
+                task.content.includes(keyword)
+            );
+        });
+
+        if (filteredTasks.length === 0) {
+            content.html('<div class="no-tasks">🎉 沒有相關任務！</div>');
+            return;
+        }
+
+        // 按優先級和到期日排序
+        filteredTasks.sort((a, b) => {
+            // 先按優先級排序（數字越大優先級越高）
+            if (a.priority !== b.priority) {
+                return b.priority - a.priority;
+            }
+
+            // 再按到期日排序
+            if (a.due && b.due) {
+                return new Date(a.due.date) - new Date(b.due.date);
+            } else if (a.due) {
+                return -1;
+            } else if (b.due) {
+                return 1;
+            }
+
+            return 0;
+        });
+
+        let html = '';
+        filteredTasks.forEach(task => {
+            html += createTaskHTML(task);
+        });
+
+        content.html(html);
+    }
+
+    // 創建單個任務的 HTML
+    function createTaskHTML(task) {
+        const priorityClass = `priority-${task.priority}`;
+        const priorityText = getPriorityText(task.priority);
+        const dueInfo = getDueInfo(task.due);
+        const projectName = getProjectName(task.project_id);
+
+        return `
+            <div class="task-item" data-task-id="${task.id}">
+                <div class="task-title">
+                    <a href="https://app.todoist.com/" target="_blank" style="color: inherit; text-decoration: none;">
+                        ${escapeHtml(task.content)}
+                    </a>
+                </div>
+                <div class="task-meta">
+                    <span class="task-project">${projectName}</span>
+                    <div>
+                        ${task.priority > 1 ? `<span class="task-priority ${priorityClass}">${priorityText}</span>` : ''}
+                        ${dueInfo ? `<span class="task-due ${dueInfo.class}">${dueInfo.text}</span>` : ''}
+                    </div>
+                </div>
+            </div>
+        `;
+    }
+
+    // 獲取優先級文字
+    function getPriorityText(priority) {
+        const priorities = {
+            4: 'P1',
+            3: 'P2',
+            2: 'P3',
+            1: 'P4'
+        };
+        return priorities[priority] || '';
+    }
+
+    // 獲取到期日資訊
+    function getDueInfo(due) {
+        if (!due || !due.date) return null;
+
+        const dueDate = new Date(due.date);
+        const today = new Date();
+        const tomorrow = new Date(today);
+        tomorrow.setDate(today.getDate() + 1);
+
+        // 重置時間部分以便比較日期
+        today.setHours(0, 0, 0, 0);
+        tomorrow.setHours(0, 0, 0, 0);
+        dueDate.setHours(0, 0, 0, 0);
+
+        let text = '';
+        let className = '';
+
+        if (dueDate < today) {
+            text = '已逾期';
+            className = 'overdue';
+        } else if (dueDate.getTime() === today.getTime()) {
+            text = '今天';
+            className = '';
+        } else if (dueDate.getTime() === tomorrow.getTime()) {
+            text = '明天';
+            className = '';
+        } else {
+            text = formatDate(dueDate);
+            className = '';
+        }
+
+        return { text, class: className };
+    }
+
+    // 格式化日期
+    function formatDate(date) {
+        const month = date.getMonth() + 1;
+        const day = date.getDate();
+        return `${month}/${day}`;
+    }
+
+    // 獲取專案名稱（簡化版本）
+    function getProjectName(projectId) {
+        const projectNames = {
+            'work': '工作',
+            'personal': '個人',
+            'health': '健康',
+            'learning': '學習'
+        };
+        return projectNames[projectId] || '收件匣';
+    }
+
+    // HTML 轉義
+    function escapeHtml(text) {
+        const div = document.createElement('div');
+        div.textContent = text;
+        return div.innerHTML;
+    }
     fetchAndUpdate();
     fetchAndUpdateBTC();
     /* Auto Reload */
