@@ -1289,7 +1289,7 @@
     let todoistTasks = [];
 
     // 要顯示的任務關鍵字
-    const TASK_KEYWORDS = ['Fix VPN', 'ToDo', '黑種草', '新表格'];
+    const TASK_KEYWORDS = ['Fix VPN', 'ToDo', '黑種草', '新表格', 'Check stock changes'];
 
     // 初始載入 Todoist 任務並顯示圖示
     initTodoistTasks();
@@ -1310,13 +1310,11 @@
             },
             success: function (tasks) {
                 todoistTasks = tasks;
-                // 任務載入完成後顯示圖示
-                $('#todoistIcon').css('display', 'flex');
+                displayTasks(tasks);
             },
             error: function (xhr, status, error) {
                 console.error('Todoist API 載入失敗:', error);
-                // 即使失敗也顯示圖示，讓用戶可以看到錯誤訊息
-                $('#todoistIcon').css('display', 'flex');
+                // API 載入失敗時不顯示圖示
             }
         });
     }
@@ -1409,8 +1407,6 @@
 
         todoistTasks = demoTasks;
         displayTasks(demoTasks);
-        // 示範任務載入完成後顯示圖示
-        $('#todoistIcon').css('display', 'flex');
     }
 
     // 顯示任務列表
@@ -1426,8 +1422,13 @@
 
         if (filteredTasks.length === 0) {
             content.html('<div class="no-tasks">🎉 沒有相關任務！</div>');
+            // 沒有任務時隱藏圖示
+            $('#todoistIcon').css('display', 'none');
             return;
         }
+
+        // 有任務時顯示圖示
+        $('#todoistIcon').css('display', 'flex');
 
         // 按優先級和到期日排序
         filteredTasks.sort((a, b) => {
