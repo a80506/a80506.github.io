@@ -472,10 +472,6 @@
                             btc_percent = "";
                         else
                             btc_percent = "(" + btc_percent.toString() + "%)";
-                        if (parseFloat(data[key].priceChange) < 0)
-                            $("div.coin").css("color", "red");
-                        else
-                            $("div.coin").css("color", green);
 
                         btc = parseInt(data[key].lastPrice);
                         if (btc >= 100000)
@@ -483,6 +479,10 @@
 
                     } else if (data[key].symbol == "ETHUSDT") {
                         eth = parseInt(data[key].lastPrice);
+                        if (parseFloat(data[key].priceChange) < 0)
+                            $("div.coin").css("color", "red");
+                        else
+                            $("div.coin").css("color", green);
 /*
                     } else if (data[key].symbol == "ETHBTC") {
                         ethbtc = parseFloat(data[key].lastPrice);
