@@ -52,6 +52,7 @@
     <style type="text/css"></style>
     <script src="https://code.jquery.com/jquery-1.12.4.min.js" integrity="sha256-ZosEbRLbNQzLpnKIkEdrPv7lOy9C27hHQ+Xp8a4MxAQ="
         crossorigin="anonymous"></script>
+    <script src="config.js"></script>
 </head>
 
 <body>
@@ -545,7 +546,7 @@
         }
 
         function get_pm25() {
-            $.getJSON("https://data.moenv.gov.tw/api/v2/aqx_p_432?api_key=8694e71c-49d7-4b28-b7ef-2e2fbb695c8f&format=JSON",
+            $.getJSON("https://data.moenv.gov.tw/api/v2/aqx_p_432?api_key=" + CONFIG.MOENV_KEY + "&format=JSON",
             function (data) {
                 const citiesToCheck = ["新莊", "林口", "菜寮", "五股", "蘆洲", "板橋"];
                 let found = 0;
@@ -644,7 +645,7 @@
         }
 
         function get_weather(emoji) {
-            $.getJSON("https://opendata.cwa.gov.tw/fileapi/v1/opendataapi/O-A0001-001?Authorization=CWB-843040FB-C733-4DFA-8263-47121194BF96&downloadType=WEB&format=JSON",
+            $.getJSON("https://opendata.cwa.gov.tw/fileapi/v1/opendataapi/O-A0001-001?Authorization=" + CONFIG.CWB_APIKEY + "&downloadType=WEB&format=JSON",
             function (data) {
                 var found = 0;
 
@@ -661,7 +662,7 @@
 
         function getWeatherTaipei() {
           // API URL with Authorization and StationId for 中正區
-          const apiUrl = 'https://opendata.cwa.gov.tw/api/v1/rest/datastore/O-A0003-001?Authorization=CWB-843040FB-C733-4DFA-8263-47121194BF96&StationId=466920';
+          const apiUrl = 'https://opendata.cwa.gov.tw/api/v1/rest/datastore/O-A0003-001?Authorization=' + CONFIG.CWB_APIKEY + '&StationId=466920';
 
           // 定義函數來根據天氣條件顯示對應的 Emoji
           function getWeatherEmoji(weather) {
@@ -802,7 +803,7 @@
         }
 
         function get_all() {
-            fetchNasdaqData('https://za12.no-ip.info/linepic/nasdaq.json', 'nasdaqDataContainer');
+            fetchNasdaqData('https://' + CONFIG.MYSITE + '/linepic/nasdaq.json', 'nasdaqDataContainer');
             //fetchNasdaqData('http://192.168.55.147/linepic/nasdaq.json', 'nasdaqDataContainer');
             get_binance_cmc("GRASS", "grass");
             setTimeout(function () { window.location = window.location; }, 300000);
