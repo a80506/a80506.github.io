@@ -6,30 +6,167 @@
     <style type="text/css">
         body {
             background-color: #000000;
+            margin: 0;
+            padding: 0;
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .chart-container {
+            display: grid;
+            gap: 10px;
+            /* 預設：2x4 布局 */
+            grid-template-columns: repeat(2, 450px);
+            grid-template-rows: repeat(4, 260px);
+        }
+        
+        .chart-container iframe {
+            border: 1px solid #cccccc;
+            width: 450px;
+            height: 260px;
+        }
+        
+        /* 寬螢幕：4x2 布局 */
+        @media screen and (min-width: 1700px) {
+            .chart-container {
+                grid-template-columns: repeat(4, 450px);
+                grid-template-rows: repeat(2, 260px);
+                max-width: 1880px;
+                margin: 0 auto;
+            }
         }
     </style>
     <style type="text/css"></style>
     <script src="https://code.jquery.com/jquery-1.12.4.min.js" integrity="sha256-ZosEbRLbNQzLpnKIkEdrPv7lOy9C27hHQ+Xp8a4MxAQ="
         crossorigin="anonymous"></script>
+    <script src="config.js"></script>
 </head>
 
 <body>
-    <div align="center">
-        <iframe width="450" height="260" style="border: 1px solid #cccccc;" src="https://thingspeak.com/channels/72313/charts/1?dynamic=true&max=50&min=0&results=400&title=客廳-溫度&type=spline&yaxismax=40&yaxismin=5"></iframe>
-        <iframe width="450" height="260" style="border: 1px solid #cccccc;" src="https://thingspeak.com/channels/72313/charts/2?dynamic=true&max=100&min=0&results=400&title=客廳-濕度&type=spline&yaxismax=100&yaxismin=30"></iframe>
-    </div>
-    <div align="center">
-        <iframe width="450" height="260" style="border: 1px solid #cccccc;" src="https://thingspeak.com/channels/72313/charts/3?bgcolor=%23ffffff&color=%23d62020&dynamic=true&max=100&min=1&results=400&title=房間-溫度&type=spline&yaxismax=40&yaxismin=5"></iframe>
-        <iframe width="450" height="260" style="border: 1px solid #cccccc;" src="https://thingspeak.com/channels/72313/charts/4?dynamic=true&max=100&min=1&results=400&title=房間-濕度&type=spline&yaxismax=100&yaxismin=40"></iframe>
-    </div>
-    <div align="center">
-        <iframe width="450" height="260" style="border: 1px solid #cccccc;" src="https://thingspeak.com/channels/72313/charts/5?bgcolor=%23ffffff&color=%23d62020&dynamic=true&max=50&min=0&results=400&title=陽台-溫度&type=spline&yaxismax=60&yaxismin=5"></iframe>
-        <iframe width="450" height="260" style="border: 1px solid #cccccc;" src="https://thingspeak.com/channels/72313/charts/6?bgcolor=%23ffffff&color=%23d62020&dynamic=true&max=100&min=0&results=400&title=陽台-濕度&type=spline&yaxismax=100&yaxismin=30"></iframe>
-    </div>
-    <div align="center">
-        <iframe width="450" height="260" style="border: 1px solid #cccccc;" src="https://thingspeak.com/channels/72313/charts/7?bgcolor=%23ffffff&color=%23d62020&dynamic=true&max=50&min=0&results=400&title=書房-溫度&type=spline&yaxismax=40&yaxismin=5"></iframe>
-        <iframe width="450" height="260" style="border: 1px solid #cccccc;" src="https://thingspeak.com/channels/72313/charts/8?bgcolor=%23ffffff&color=%23d62020&dynamic=true&max=100&min=0&results=400&title=書房-濕度&type=spline&yaxismax=100&yaxismin=30"></iframe>
+    <div class="chart-container" id="chart-container">
+        <!-- iframes 會直接加入這裡 -->
     </div>
 </body>
+
+<script>
+    // Y軸範圍變數
+    var tempMax = 40;
+    var tempMin = 15;
+    var humidityMax = 100;
+    var humidityMin = 30;
+    var roomHumidityMin = 40;
+
+    // 簡化的圖表創建函數
+    function createCharts() {
+        var container = document.getElementById('chart-container');
+        
+        // 如果已有圖表，不重新創建
+        if (container.children.length > 0) {
+            return;
+        }
+        // 直接按順序創建所有 8 個圖表
+        var chartConfigs = [
+            { chart: 1, title: '客廳-溫度', yaxismax: tempMax, yaxismin: tempMin, bgcolor: '', color: '' },
+            { chart: 2, title: '客廳-濕度', yaxismax: humidityMax, yaxismin: humidityMin, bgcolor: '', color: '' },
+            { chart: 3, title: '房間-溫度', yaxismax: tempMax, yaxismin: tempMin, bgcolor: '%23ffffff', color: '%23d62020' },
+            { chart: 4, title: '房間-濕度', yaxismax: humidityMax, yaxismin: roomHumidityMin, bgcolor: '', color: '' },
+            { chart: 5, title: '陽台-溫度', yaxismax: tempMax, yaxismin: tempMin, bgcolor: '%23ffffff', color: '%23d62020' },
+            { chart: 6, title: '陽台-濕度', yaxismax: humidityMax, yaxismin: humidityMin, bgcolor: '%23ffffff', color: '%23d62020' },
+            { chart: 7, title: '書房-溫度', yaxismax: tempMax, yaxismin: tempMin, bgcolor: '%23ffffff', color: '%23d62020' },
+            { chart: 8, title: '書房-濕度', yaxismax: humidityMax, yaxismin: humidityMin, bgcolor: '%23ffffff', color: '%23d62020' }
+        ];
+        
+        chartConfigs.forEach(function(chartConfig) {
+            var iframe = document.createElement('iframe');
+            iframe.width = '450';
+            iframe.height = '260';
+            
+            var src = 'https://thingspeak.com/channels/72313/charts/' + chartConfig.chart + 
+                     '?dynamic=true&max=' + (chartConfig.chart % 2 === 1 ? '50' : '100') + 
+                     '&min=' + (chartConfig.chart % 2 === 1 ? '0' : chartConfig.chart === 4 ? '1' : '0') + 
+                     '&results=400&title=' + encodeURIComponent(chartConfig.title) + 
+                     '&type=spline&yaxismax=' + chartConfig.yaxismax + 
+                     '&yaxismin=' + chartConfig.yaxismin;
+            
+            if (chartConfig.bgcolor) {
+                src += '&bgcolor=' + chartConfig.bgcolor;
+            }
+            if (chartConfig.color) {
+                src += '&color=' + chartConfig.color;
+            }
+            
+            iframe.src = src;
+            container.appendChild(iframe);
+        });
+    }
+
+    function check_outdoor_temperature(data, station) {
+        if (data.ObsTime.DateTime != "") {
+            timestamp = Date.parse(data.ObsTime.DateTime);
+            if (Date.now() - timestamp > 5400000)
+                return null;
+        }
+        if (data.WeatherElement) {
+            var cwb_t = data.WeatherElement.AirTemperature;
+            if (cwb_t != "" && parseFloat(cwb_t) > -10) {
+                var temperature = parseFloat(cwb_t);
+                return {
+                    temperature: temperature,
+                    station: station,
+                    isLowTemp: temperature < 5
+                };
+            }
+        }
+        return null;
+    }
+
+    function get_weather_temperature_check(data, station) {
+        for (var x in data.cwaopendata.dataset.Station) {
+            if (data.cwaopendata.dataset.Station[x].StationName == station) {
+                var result = check_outdoor_temperature(data.cwaopendata.dataset.Station[x], station);
+                if (result)
+                    return result;
+            }
+        }
+        return null;
+    }
+
+    function monitor_outdoor_temperature() {
+        $.getJSON("https://opendata.cwa.gov.tw/fileapi/v1/opendataapi/O-A0001-001?Authorization=" + CONFIG.CWB_APIKEY + "&downloadType=WEB&format=JSON",
+            function (data) {
+                const cities = ["新莊", "三重", "五股", "蘆洲", "板橋"];
+                var tempResult = null;
+                
+                for (const city of cities) {
+                    tempResult = get_weather_temperature_check(data, city);
+                    if (tempResult) {
+                        break;
+                    }
+                }
+                
+                // 如果檢測到低溫，調整溫度範圍變數
+                if (tempResult && tempResult.isLowTemp) {
+                    tempMax = tempMax - 10;
+                    tempMin = tempMin - 10;
+                    //alert("戶外溫度警告：" + tempResult.station + " 目前溫度 " + tempResult.temperature + "°C，低於 15°C！\n圖表溫度範圍已調整為 " + tempMin + "°C ~ " + tempMax + "°C");
+                }
+                
+                // 創建圖表（使用調整後的變數）
+                createCharts();
+            }
+        ).fail(function() {
+            // 如果API調用失敗，使用預設值創建圖表
+            console.log('Failed to fetch weather data, using default temperature ranges');
+            createCharts();
+        });
+    }
+
+    // 移除 resize 監聽器，現在完全依靠 CSS 處理響應式布局
+
+    // 頁面載入時先檢查溫度再創建圖表
+    monitor_outdoor_temperature();
+</script>
 
 </html>
