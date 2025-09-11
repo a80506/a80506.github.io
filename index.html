@@ -415,6 +415,7 @@
 </head>
 <script src="https://code.jquery.com/jquery-1.12.4.min.js"
     integrity="sha256-ZosEbRLbNQzLpnKIkEdrPv7lOy9C27hHQ+Xp8a4MxAQ=" crossorigin="anonymous"></script>
+<script src="config.js"></script>
 
 <body>
     <!-- Todoist 漂浮視窗 -->
@@ -481,7 +482,7 @@
     var fil_reward = 0, fil_storage = 0;
 
     function get_pm25() {
-        $.getJSON("https://data.moenv.gov.tw/api/v2/aqx_p_432?api_key=8694e71c-49d7-4b28-b7ef-2e2fbb695c8f&format=JSON",
+        $.getJSON("https://data.moenv.gov.tw/api/v2/aqx_p_432?api_key=" + CONFIG.MOENV_KEY + "&format=JSON",
             function (data) {
                 const citiesToCheck = ["新莊", "林口", "菜寮", "五股", "蘆洲", "板橋"];
                 let found = 0;
@@ -557,7 +558,7 @@
     }
 
     function get_weather() {
-        $.getJSON("https://opendata.cwa.gov.tw/fileapi/v1/opendataapi/O-A0001-001?Authorization=CWB-843040FB-C733-4DFA-8263-47121194BF96&downloadType=WEB&format=JSON",
+        $.getJSON("https://opendata.cwa.gov.tw/fileapi/v1/opendataapi/O-A0001-001?Authorization=" + CONFIG.CWB_APIKEY + "&downloadType=WEB&format=JSON",
             function (data) {
                 var found = 0;
 
@@ -1234,7 +1235,7 @@
 
     fetchEthereumTVL();
     set_time();
-    fetchNasdaqData('https://za12.no-ip.info/linepic/nasdaq.json', 'nasdaq');
+    fetchNasdaqData('https://' + CONFIG.MYSITE + '/linepic/nasdaq.json', 'nasdaq');
     get_binance("PENGU");
     get_binance("ADA");
     get_binance("DOT");
@@ -1285,7 +1286,7 @@
     get_weather();
 
     // Todoist 漂浮視窗功能
-    const TODOIST_API_TOKEN = 'dc38f34f10b1ee5fdbba8f63bc465d23bc810f34'; // 請替換為你的 Todoist API Token
+    const TODOIST_API_TOKEN = CONFIG.TODOIST_TOKEN; // 從 config.js 載入 Todoist API Token
     let todoistTasks = [];
 
     // 要顯示的任務關鍵字
