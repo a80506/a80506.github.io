@@ -48,6 +48,12 @@
             font-weight: bold;
             color: #80FF00;
         }
+
+        div.rain {
+            font-size: 60pt;
+            font-weight: bold;
+            color: red;
+        }
     </style>
     <style type="text/css"></style>
     <script src="https://code.jquery.com/jquery-1.12.4.min.js" integrity="sha256-ZosEbRLbNQzLpnKIkEdrPv7lOy9C27hHQ+Xp8a4MxAQ="
@@ -63,6 +69,7 @@
     <div class="balcony" align="center">陽台：00°C, 00%</div>
     <div class="kids" align="center">房間：00°C, 00%</div>
     <div class="pm25" align="center">PM2.5：0 ug/m3</div>
+    <div class="rain" align="center" style="display: none;"></div>
     <div class="weather" align="center">戶外：00°C, 0%</div>
     <div class="time" align="center">00:00:00</div>
     <!--<div id="ethbtc" class="ethbtc" align="center">　</div> -->
@@ -802,6 +809,34 @@
             }
         }
 
+        function get_rain() {
+            $.getJSON('https://' + CONFIG.MYSITE + '/linepic/rain.json')
+                .done(function(data) {
+                    var hasRain = false;
+                    if (data.rain_periods && data.rain_periods.length > 0) {
+                        for (var i = 0; i < data.rain_periods.length; i++) {
+                            var period = data.rain_periods[i];
+                            if (period.weather_description && period.weather_description.includes('雨')) {
+                                hasRain = true;
+                                $('div.rain').html(period.time + ' ' + period.weather_description + ' ' + period.probability + '%');
+                                $('div.rain').show();
+                                $('div.kids').hide();
+                                break;
+                            }
+                        }
+                    }
+                    if (!hasRain) {
+                        $('div.rain').hide();
+                        $('div.kids').show();
+                    }
+                })
+                .fail(function() {
+                    console.log('Failed to fetch rain data');
+                    $('div.rain').hide();
+                    $('div.kids').show();
+                });
+        }
+
         function get_all() {
             fetchNasdaqData('https://' + CONFIG.MYSITE + '/linepic/nasdaq.json', 'nasdaqDataContainer');
             //fetchNasdaqData('http://192.168.55.147/linepic/nasdaq.json', 'nasdaqDataContainer');
@@ -812,6 +847,7 @@
             get_pm25();
             get_weather();
             get_sensor();
+            get_rain();
             //get_filecoin();
   //          get_binance("ETHBTC");
             //miner_data(0);
