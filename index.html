@@ -35,7 +35,7 @@
                 { div: "", title: "即時天氣", url: "https://www.cwa.gov.tw/V8/C/W/OBS_Station.html?ID=C0ACA" },
                 { div: "weather", title: "新莊：00.0°C, 00%", url: "" },
                 { div: "pm25", title: "PM 2.5：0 ug/m3", url: "" },
-                { div: "", title: "", url: "" },
+                { div: "rain", title: "", url: "" },
             ]
         },
         { // [3]
@@ -1282,8 +1282,34 @@
     //get_sea();
     //get_shark();
 
+    function get_rain() {
+        $.getJSON('https://' + CONFIG.MYSITE + '/linepic/rain.json')
+            .done(function(data) {
+                var hasRain = false;
+                if (data.rain_periods && data.rain_periods.length > 0) {
+                    for (var i = 0; i < data.rain_periods.length; i++) {
+                        var period = data.rain_periods[i];
+                        if (period.weather_description && period.weather_description.includes('雨')) {
+                            hasRain = true;
+                            $('div.rain').css("color", "red");
+                            $('div.rain').html(period.time + ' ' + period.weather_description + ' ' + period.probability + '%');
+                            break;
+                        }
+                    }
+                }
+                if (!hasRain) {
+                    $('div.rain').html('');
+                }
+            })
+            .fail(function() {
+                console.log('Failed to fetch rain data');
+                $('div.rain').html('');
+            });
+    }
+
     get_pm25();
     get_weather();
+    get_rain();
 
     // Todoist 漂浮視窗功能
     const TODOIST_API_TOKEN = CONFIG.TODOIST_TOKEN; // 從 config.js 載入 Todoist API Token
