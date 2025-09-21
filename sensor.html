@@ -774,6 +774,7 @@
                 if (timeDiffSeconds > 1800)
                     status = '*';
                 first_data = data.latest_price;
+                vix_percent = data.price_change_percent_vix;
                 if (first_data == 111) {
                     nasdaqDataElement.innerHTML = `
                         <div class="nasdaq" style="color:red;">
@@ -782,17 +783,17 @@
                     `;
                 } else {
                     if (ethtvl > 0)
-                        first_data = ethtvl;
+                        first_data = parseInt(ethtvl);
                     if (data.price_change > 0)
                         nasdaqDataElement.innerHTML = `
                             <div class="nasdaq">
-                                ${first_data.toString()} / +${data.price_change} ${status}
+                                ${first_data.toString()} / +${data.price_change} ${status} / ${vix_percent}
                             </div>
                         `;
                     else
                         nasdaqDataElement.innerHTML = `
                             <div class="nasdaq" style="color:red;">
-                                ${first_data.toString()} / ${data.price_change} ${status}
+                                ${first_data.toString()} / ${data.price_change} ${status} / ${vix_percent}
                             </div>
                         `;
                 }
