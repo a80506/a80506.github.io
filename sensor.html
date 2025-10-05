@@ -767,6 +767,7 @@
                 const dataTime = new Date(data.time);
                 const currentTime = new Date();
                 const timeDiffSeconds = Math.round((currentTime - dataTime) / 1000);
+                var todolist_status = "";
                 
                 // Show alert with time difference
                 //alert(`數據時間距離現在約 ${timeDiffSeconds} 秒`);
@@ -775,28 +776,25 @@
                     status = '*';
                 first_data = data.latest_price;
                 vix_percent = data.price_change_percent_vix;
-                if (first_data == 111) {
+
+                if (ethtvl > 0)
+                    first_data = parseInt(ethtvl);
+
+                if (first_data == 111)
+                    todolist_status = "**";
+
+                if (data.price_change > 0)
                     nasdaqDataElement.innerHTML = `
-                        <div class="nasdaq" style="color:red;">
-                            ToDoList !!!
+                        <div class="nasdaq">
+                            ${first_data.toString()} / +${data.price_change} ${status} / ${vix_percent} / $(todolist_status)
                         </div>
                     `;
-                } else {
-                    if (ethtvl > 0)
-                        first_data = parseInt(ethtvl);
-                    if (data.price_change > 0)
-                        nasdaqDataElement.innerHTML = `
-                            <div class="nasdaq">
-                                ${first_data.toString()} / +${data.price_change} ${status} / ${vix_percent}
-                            </div>
-                        `;
-                    else
-                        nasdaqDataElement.innerHTML = `
-                            <div class="nasdaq" style="color:red;">
-                                ${first_data.toString()} / ${data.price_change} ${status} / ${vix_percent}
-                            </div>
-                        `;
-                }
+                else
+                    nasdaqDataElement.innerHTML = `
+                        <div class="nasdaq" style="color:red;">
+                            ${first_data.toString()} / ${data.price_change} ${status} / ${vix_percent} / $(todolist_status)
+                        </div>
+                    `;
                 //<div class="nasdaq" id="nasdaqDataContainer" align="center"></div>
                 //$("div.nasdaqDataContainer").html(data.latest_price.toString() + " / " );
             } catch (error) {
