@@ -780,19 +780,21 @@
                 if (ethtvl > 0)
                     first_data = parseInt(ethtvl);
 
-                if (first_data == 111)
+                if (first_data == 111) {
                     todolist_status = "**";
+                    vix_percent = "";
+                }
 
                 if (data.price_change > 0)
                     nasdaqDataElement.innerHTML = `
                         <div class="nasdaq">
-                            ${first_data.toString()} / +${data.price_change} ${status} / ${vix_percent} / ${todolist_status}
+                            ${first_data.toString()} / +${data.price_change} ${status} / ${vix_percent}${todolist_status}
                         </div>
                     `;
                 else
                     nasdaqDataElement.innerHTML = `
                         <div class="nasdaq" style="color:red;">
-                            ${first_data.toString()} / ${data.price_change} ${status} / ${vix_percent} / ${todolist_status}
+                            ${first_data.toString()} / ${data.price_change} ${status} / ${vix_percent}${todolist_status}
                         </div>
                     `;
                 //<div class="nasdaq" id="nasdaqDataContainer" align="center"></div>
