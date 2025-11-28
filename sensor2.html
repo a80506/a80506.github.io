@@ -215,10 +215,18 @@
         .room-mini-chart {
             margin-top: clamp(10px, 1.5vh, 15px);
             display: none;
+            overflow: hidden;
+            max-height: 0;
+            opacity: 0;
+            transition: max-height 0.3s ease, opacity 0.3s ease, margin 0.3s ease;
         }
 
         @media (min-height: 700px) {
             .room-mini-chart { display: block; }
+            .room-mini-chart.loaded {
+                max-height: clamp(60px, 10vh, 100px);
+                opacity: 1;
+            }
         }
 
         .room-mini-chart canvas {
@@ -844,6 +852,8 @@ function renderMiniCharts() {
         const ctx = document.getElementById(`miniChart${idx}`)?.getContext('2d');
         if (!ctx) return;
         
+        const chartContainer = document.getElementById(`miniChart${idx}`)?.parentElement;
+        
         miniCharts[idx] = new Chart(ctx, {
             type: 'line',
             data: {
@@ -892,6 +902,11 @@ function renderMiniCharts() {
                 }
             }
         });
+        
+        // 圖表載入完成後顯示
+        if (chartContainer) {
+            setTimeout(() => chartContainer.classList.add('loaded'), 50);
+        }
     });
 }
 
