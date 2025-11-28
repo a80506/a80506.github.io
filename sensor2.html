@@ -1,172 +1,909 @@
-<html>
-
+<!DOCTYPE html>
+<html lang="zh-TW">
 <head>
-    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-    <title>DHT sendors</title>
-    <style type="text/css">
-        body {
-            background-color: #000000;
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>溫濕度監控系統</title>
+    <style>
+        * {
             margin: 0;
             padding: 0;
-            height: 100vh;
+            box-sizing: border-box;
+        }
+
+        html, body {
+            height: 100%;
+        }
+
+        /* 暗色主題 (預設) */
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            min-height: 100vh;
+            padding: 2vh 2vw;
+            display: flex;
+            flex-direction: column;
+            transition: all 0.3s ease;
+            
+            /* 暗色主題變數 */
+            --bg: linear-gradient(135deg, #0a0a0f 0%, #1a1a2e 50%, #0f0f1a 100%);
+            --text-color: #e0e0e0;
+            --header-bg: rgba(20, 20, 40, 0.6);
+            --header-border: rgba(0, 255, 255, 0.1);
+            --header-shadow: rgba(0, 255, 255, 0.1);
+            --title-gradient: linear-gradient(90deg, #00ffff, #00ff88, #00ffff);
+            --update-time-color: #888;
+            --card-bg: linear-gradient(145deg, rgba(25, 25, 50, 0.9), rgba(15, 15, 30, 0.9));
+            --card-border: rgba(0, 255, 255, 0.2);
+            --card-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+            --card-hover-shadow: 0 20px 50px rgba(0, 255, 255, 0.2);
+            --card-top-bar: linear-gradient(90deg, #00ffff, #00ff88);
+            --room-name-color: #00ffff;
+            --online-dot: #00ff88;
+            --offline-dot: #555;
+            --metric-bg: rgba(0, 0, 0, 0.3);
+            --metric-border: rgba(255, 255, 255, 0.05);
+            --metric-label-color: #888;
+            --temp-color: #ff6b6b;
+            --humid-color: #4ecdc4;
+            --modal-overlay: rgba(0, 0, 0, 0.8);
+            --modal-bg: linear-gradient(145deg, rgba(25, 25, 50, 0.98), rgba(15, 15, 30, 0.98));
+            --modal-border: rgba(0, 255, 255, 0.3);
+            --chart-bg: rgba(0, 0, 0, 0.3);
+            --chart-grid: rgba(255, 255, 255, 0.05);
+            
+            background: var(--bg);
+            color: var(--text-color);
+        }
+
+        /* 亮色主題 */
+        body.light-theme {
+            --bg: #f5f7fa;
+            --text-color: #333;
+            --header-bg: #fff;
+            --header-border: #e0e0e0;
+            --header-shadow: rgba(0, 0, 0, 0.06);
+            --title-gradient: linear-gradient(90deg, #5c6bc0, #42a5f5, #5c6bc0);
+            --update-time-color: #888;
+            --card-bg: #fff;
+            --card-border: #e8e8e8;
+            --card-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+            --card-hover-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+            --card-top-bar: linear-gradient(90deg, #5c6bc0, #42a5f5);
+            --room-name-color: #5c6bc0;
+            --online-dot: #4caf50;
+            --offline-dot: #ccc;
+            --metric-bg: #f8f9fa;
+            --metric-border: #eee;
+            --metric-label-color: #888;
+            --temp-color: #e65100;
+            --humid-color: #0288d1;
+            --modal-overlay: rgba(0, 0, 0, 0.5);
+            --modal-bg: #fff;
+            --modal-border: #e0e0e0;
+            --chart-bg: #f8f9fa;
+            --chart-grid: rgba(0, 0, 0, 0.05);
+            
+            background: var(--bg);
+            color: var(--text-color);
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            width: 100%;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: clamp(15px, 3vh, 40px);
+            padding: clamp(12px, 1.5vh, 20px);
+            position: relative;
+        }
+
+        .theme-toggle {
+            background: var(--metric-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 50%;
+            width: clamp(32px, 5vh, 40px);
+            height: clamp(32px, 5vh, 40px);
+            font-size: clamp(1rem, 2vh, 1.2rem);
+            cursor: pointer;
+            transition: all 0.3s ease;
             display: flex;
             align-items: center;
             justify-content: center;
+            flex-shrink: 0;
         }
-        
-        .chart-container {
+
+        .theme-toggle:hover {
+            transform: scale(1.1);
+        }
+
+        h1 {
+            font-size: clamp(1.5rem, 4vh, 2.5rem);
+            background: var(--title-gradient);
+            background-size: 200% auto;
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            animation: gradient 3s ease infinite;
+            margin-bottom: 10px;
+        }
+
+        @keyframes gradient {
+            0%, 100% { background-position: 0% center; }
+            50% { background-position: 100% center; }
+        }
+
+        .update-time {
+            color: var(--update-time-color);
+            font-size: clamp(0.75rem, 1.5vh, 0.9rem);
+        }
+
+        .outdoor-info {
+            display: flex;
+            justify-content: center;
+            gap: clamp(20px, 4vw, 60px);
+            margin-bottom: clamp(15px, 2vh, 25px);
+            flex-wrap: wrap;
+        }
+
+        .outdoor-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: clamp(8px, 1.2vh, 12px) clamp(15px, 2vw, 25px);
+            background: var(--metric-bg);
+            border-radius: 30px;
+            border: 1px solid var(--card-border);
+        }
+
+        .outdoor-icon {
+            font-size: clamp(1rem, 2vh, 1.3rem);
+        }
+
+        .outdoor-label {
+            font-size: clamp(0.7rem, 1.2vh, 0.85rem);
+            color: var(--metric-label-color);
+        }
+
+        .outdoor-value {
+            font-size: clamp(0.85rem, 1.5vh, 1rem);
+            font-weight: 600;
+            color: var(--text-color);
+        }
+
+        .outdoor-value.hot {
+            color: #ff6b6b;
+        }
+
+        .outdoor-value.humid {
+            color: #46a3ff;
+        }
+
+        .outdoor-value.pm-high {
+            color: #ff9800;
+        }
+
+        .outdoor-value.pm-danger {
+            color: #f44336;
+        }
+
+        .rooms-grid {
             display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: clamp(10px, 2vh, 25px);
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        @media (max-width: 1000px) {
+            .rooms-grid { 
+                grid-template-columns: repeat(2, 1fr);
+                max-width: 700px;
+            }
+        }
+
+        @media (max-width: 500px) {
+            .rooms-grid { grid-template-columns: 1fr; }
+        }
+
+        .room-mini-chart {
+            margin-top: clamp(10px, 1.5vh, 15px);
+            display: none;
+        }
+
+        @media (min-height: 700px) {
+            .room-mini-chart { display: block; }
+        }
+
+        .room-mini-chart canvas {
+            max-height: clamp(50px, 8vh, 80px);
+        }
+
+        .room-card {
+            background: var(--card-bg);
+            border-radius: clamp(10px, 2vh, 20px);
+            padding: clamp(12px, 2vh, 25px);
+            border: 1px solid var(--card-border);
+            box-shadow: var(--card-shadow);
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+            cursor: pointer;
+        }
+
+        .room-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: var(--card-top-bar);
+        }
+
+        .room-card:hover {
+            transform: translateY(-5px);
+            box-shadow: var(--card-hover-shadow);
+        }
+
+        .room-name {
+            font-size: clamp(1rem, 2vh, 1.3rem);
+            color: var(--room-name-color);
+            margin-bottom: clamp(10px, 1.5vh, 20px);
+            display: flex;
+            align-items: center;
             gap: 10px;
-            /* 預設：2x4 布局 */
-            grid-template-columns: repeat(2, 450px);
-            grid-template-rows: repeat(4, 260px);
+            font-weight: 600;
         }
-        
-        .chart-container iframe {
-            border: 1px solid #cccccc;
-            width: 450px;
-            height: 260px;
+
+        .status-dot {
+            width: clamp(8px, 1.2vh, 10px);
+            height: clamp(8px, 1.2vh, 10px);
+            border-radius: 50%;
+            flex-shrink: 0;
         }
-        
-        /* 寬螢幕：4x2 布局 */
-        @media screen and (min-width: 1700px) {
-            .chart-container {
-                grid-template-columns: repeat(4, 450px);
-                grid-template-rows: repeat(2, 260px);
-                max-width: 1880px;
-                margin: 0 auto;
-            }
+
+        .status-dot.online {
+            background: var(--online-dot);
+            box-shadow: 0 0 10px var(--online-dot);
+            animation: pulse 2s infinite;
         }
-    </style>
-    <style type="text/css"></style>
-    <script src="https://code.jquery.com/jquery-1.12.4.min.js" integrity="sha256-ZosEbRLbNQzLpnKIkEdrPv7lOy9C27hHQ+Xp8a4MxAQ="
-        crossorigin="anonymous"></script>
-    <script src="config.js"></script>
+
+        .status-dot.offline {
+            background: var(--offline-dot);
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        .offline-badge {
+            font-size: clamp(0.6rem, 1vh, 0.7rem);
+            background: rgba(255, 100, 100, 0.2);
+            color: #ff6b6b;
+            padding: 3px 8px;
+            border-radius: 10px;
+            margin-left: auto;
+        }
+
+        .no-data-card { opacity: 0.5; }
+        .no-data-card:hover { transform: none; }
+        .no-data-card .room-name { color: #888; }
+
+        .room-update-time {
+            margin-top: clamp(8px, 1vh, 15px);
+            text-align: center;
+            font-size: clamp(0.6rem, 1vh, 0.75rem);
+            color: var(--update-time-color);
+        }
+
+        .metrics {
+            display: flex;
+            gap: clamp(6px, 1vh, 20px);
+        }
+
+        .metric {
+            flex: 1;
+            text-align: center;
+            padding: clamp(10px, 1.5vh, 20px) clamp(5px, 0.5vw, 15px);
+            background: var(--metric-bg);
+            border-radius: clamp(8px, 1.5vh, 15px);
+            border: 1px solid var(--metric-border);
+            overflow: hidden;
+            min-width: 0;
+        }
+
+        .metric-icon {
+            font-size: clamp(1.2rem, 3vh, 2rem);
+            margin-bottom: clamp(5px, 1vh, 10px);
+        }
+
+        .metric-value {
+            font-size: clamp(1.2rem, 3vh, 2rem);
+            font-weight: bold;
+            margin-bottom: 5px;
+            white-space: nowrap;
+        }
+
+        .metric-label {
+            font-size: clamp(0.65rem, 1.2vh, 0.85rem);
+            color: var(--metric-label-color);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .temp .metric-value { color: var(--temp-color); }
+        .humid .metric-value { color: var(--humid-color); }
+        .no-data { color: #666; font-size: 1.5rem; }
+
+        .loading {
+            text-align: center;
+            padding: 50px;
+            color: var(--room-name-color);
+            font-size: 1.2rem;
+        }
+
+        /* Modal 樣式 */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: var(--modal-overlay);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+            padding: 2vh 2vw;
+        }
+
+        .modal-overlay.active { display: flex; }
+
+        .modal {
+            background: var(--modal-bg);
+            border-radius: clamp(12px, 2vh, 20px);
+            padding: clamp(15px, 2.5vh, 30px);
+            border: 1px solid var(--modal-border);
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+            width: 100%;
+            max-width: min(900px, 95vw);
+            max-height: 90vh;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: clamp(15px, 2vh, 25px);
+            flex-shrink: 0;
+        }
+
+        .modal-title {
+            font-size: clamp(1.1rem, 2.5vh, 1.5rem);
+            color: var(--room-name-color);
+        }
+
+        .modal-close {
+            background: none;
+            border: none;
+            color: var(--metric-label-color);
+            font-size: clamp(1.5rem, 3vh, 2rem);
+            cursor: pointer;
+            transition: color 0.3s;
+            line-height: 1;
+        }
+
+        .modal-close:hover { color: #ff6b6b; }
+
+        .time-range-btns {
+            display: flex;
+            gap: 10px;
+            margin-bottom: clamp(12px, 2vh, 20px);
+            flex-shrink: 0;
+        }
+
+        .time-range-btn {
+            padding: clamp(6px, 1vh, 10px) clamp(12px, 2vw, 20px);
+            border: 1px solid var(--card-border);
+            background: var(--metric-bg);
+            color: var(--text-color);
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: clamp(0.75rem, 1.3vh, 0.9rem);
+            transition: all 0.2s ease;
+        }
+
+        .time-range-btn:hover {
+            border-color: var(--room-name-color);
+        }
+
+        .time-range-btn.active {
+            background: var(--room-name-color);
+            color: #fff;
+            border-color: var(--room-name-color);
+        }
+
+        body.light-theme .time-range-btn.active {
+            color: #fff;
+        }
+
+        .chart-container {
+            background: var(--chart-bg);
+            border-radius: clamp(8px, 1.5vh, 15px);
+            padding: clamp(12px, 2vh, 20px);
+            margin-bottom: clamp(10px, 1.5vh, 20px);
+            flex: 1;
+            min-height: 0;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .chart-container:last-child { margin-bottom: 0; }
+
+        .chart-title {
+            color: var(--metric-label-color);
+            font-size: clamp(0.7rem, 1.3vh, 0.9rem);
+            margin-bottom: clamp(8px, 1vh, 15px);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            flex-shrink: 0;
+        }
+
+        .chart-container canvas {
+            flex: 1;
+            min-height: 0;
+            max-height: clamp(120px, 25vh, 250px);
+        }
+</style>
 </head>
-
 <body>
-    <div class="chart-container" id="chart-container">
-        <!-- iframes 會直接加入這裡 -->
+    <div class="container">
+        <header>
+            <h1>🏠 智慧溫濕度監控系統</h1>
+            <p class="update-time">最後更新: <span id="lastUpdate">載入中...</span></p>
+        </header>
+        
+        <div class="outdoor-info">
+            <div class="outdoor-item weather">
+                <span class="outdoor-icon">🌤️</span>
+                <span class="outdoor-label">戶外</span>
+                <span class="outdoor-value" id="weatherValue">--</span>
+            </div>
+            <div class="outdoor-item pm25">
+                <span class="outdoor-icon">🌫️</span>
+                <span class="outdoor-label">PM2.5</span>
+                <span class="outdoor-value" id="pm25Value">--</span>
+            </div>
+            <button class="theme-toggle" id="themeToggle" title="切換主題">🌙</button>
+        </div>
+        
+        <div class="rooms-grid" id="roomsGrid"></div>
+        
+
     </div>
-</body>
 
-<script>
-    // Y軸範圍變數
-    var tempMax = 40;
-    var tempMin = 15;
-    var humidityMax = 100;
-    var humidityMin = 30;
-    var roomHumidityMin = 40;
+    <div class="modal-overlay" id="modalOverlay">
+        <div class="modal">
+            <div class="modal-header">
+                <h2 class="modal-title" id="modalTitle">房間詳情</h2>
+                <button class="modal-close" id="modalClose">&times;</button>
+            </div>
+            <div class="time-range-btns">
+                <button class="time-range-btn active" data-days="1">24 小時</button>
+                <button class="time-range-btn" data-days="3">3 天</button>
+                <button class="time-range-btn" data-days="7">7 天</button>
+                <button class="time-range-btn" data-days="14">14 天</button>
+            </div>
+            <div class="chart-container">
+                <div class="chart-title" id="tempChartTitle">🌡️ 溫度變化 (24小時)</div>
+                <canvas id="tempChart"></canvas>
+            </div>
+            <div class="chart-container">
+                <div class="chart-title" id="humidChartTitle">💧 濕度變化 (24小時)</div>
+                <canvas id="humidChart"></canvas>
+            </div>
+        </div>
+    </div>
 
-    // 簡化的圖表創建函數
-    function createCharts() {
-        var container = document.getElementById('chart-container');
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="config.js"></script>
+    <script>
+const API_URL = 'https://api.thingspeak.com/channels/72313/feeds.json?results=50';
+const API_URL_HISTORY = 'https://api.thingspeak.com/channels/72313/feeds.json';
+
+const rooms = [
+    { name: '客廳', tempField: 'field1', humidField: 'field2' },
+    { name: '房間', tempField: 'field3', humidField: 'field4' },
+    { name: '陽台', tempField: 'field5', humidField: 'field6' },
+    { name: '書房', tempField: 'field7', humidField: 'field8' }
+];
+
+let tempChart = null;
+let humidChart = null;
+let currentRoomIndex = null;
+let currentDays = 1;
+let cachedFeeds24h = null;
+let cachedFeedsFull = null;
+
+function formatValue(value, unit) {
+    if (value === null || value === undefined || value === '') {
+        return '<span class="no-data">--</span>';
+    }
+    return `${parseFloat(value).toFixed(1)}${unit}`;
+}
+
+function formatDateTime(dateStr) {
+    const date = new Date(dateStr);
+    return date.toLocaleString('zh-TW', {
+        year: 'numeric', month: '2-digit', day: '2-digit',
+        hour: '2-digit', minute: '2-digit', second: '2-digit'
+    });
+}
+
+function formatTime(dateStr) {
+    const date = new Date(dateStr);
+    const datePart = date.toLocaleString('en-US', { month: '2-digit', day: '2-digit' });
+    const timePart = date.toLocaleString('en-US', { hour: '2-digit', minute: '2-digit', hour12: false });
+    return [datePart, timePart];
+}
+
+function hasData(value) {
+    return value !== null && value !== undefined && value !== '';
+}
+
+function getLatestDataPerRoom(feeds) {
+    const latestData = {}, latestTime = {};
+    for (let i = feeds.length - 1; i >= 0; i--) {
+        const feed = feeds[i];
+        for (const room of rooms) {
+            if (hasData(feed[room.tempField]) && !hasData(latestData[room.tempField])) {
+                latestData[room.tempField] = feed[room.tempField];
+                latestData[room.humidField] = feed[room.humidField];
+                latestTime[room.name] = feed.created_at;
+            }
+        }
+    }
+    return { data: latestData, times: latestTime };
+}
+
+function createRoomCard(room, data, updateTime, index) {
+    const temp = data[room.tempField];
+    const humid = data[room.humidField];
+    const hasRoomData = hasData(temp) || hasData(humid);
+    const timeStr = updateTime ? formatDateTime(updateTime) : '';
+    return `
+        <div class="room-card ${hasRoomData ? '' : 'no-data-card'}" data-room-index="${index}">
+            <div class="room-name">
+                <span class="status-dot ${hasRoomData ? 'online' : 'offline'}"></span>
+                ${room.name}
+                ${hasRoomData ? '' : '<span class="offline-badge">離線</span>'}
+            </div>
+            <div class="metrics">
+                <div class="metric temp">
+                    <div class="metric-icon">🌡️</div>
+                    <div class="metric-value">${formatValue(temp, '°C')}</div>
+                    <div class="metric-label">溫度</div>
+                </div>
+                <div class="metric humid">
+                    <div class="metric-icon">💧</div>
+                    <div class="metric-value">${formatValue(humid, '%')}</div>
+                    <div class="metric-label">濕度</div>
+                </div>
+            </div>
+            <div class="room-mini-chart">
+                <canvas id="miniChart${index}"></canvas>
+            </div>
+            ${hasRoomData ? `<div class="room-update-time">更新: ${timeStr}</div>` : ''}
+        </div>
+    `;
+}
+
+function getRoomHistoryData(feeds, room, days) {
+    const now = new Date();
+    const startTime = new Date(now.getTime() - days * 24 * 60 * 60 * 1000);
+    const filteredFeeds = feeds.filter(feed => {
+        const feedTime = new Date(feed.created_at);
+        return feedTime >= startTime && hasData(feed[room.tempField]);
+    });
+    const sampleRate = days === 1 ? 1 : days === 3 ? 3 : days === 7 ? 6 : 12;
+    const labels = [], tempData = [], humidData = [];
+    for (let i = 0; i < filteredFeeds.length; i += sampleRate) {
+        const feed = filteredFeeds[i];
+        labels.push(formatTime(feed.created_at));
+        tempData.push(parseFloat(feed[room.tempField]));
+        humidData.push(parseFloat(feed[room.humidField]));
+    }
+    return { labels, tempData, humidData };
+}
+
+function createChart(ctx, labels, data, color) {
+    const isLight = document.body.classList.contains('light-theme');
+    const gridColor = isLight ? 'rgba(0,0,0,0.08)' : 'rgba(255,255,255,0.05)';
+    const textColor = isLight ? '#666' : '#888';
+    return new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: labels,
+            datasets: [{
+                data: data,
+                borderColor: color,
+                backgroundColor: color + '20',
+                fill: true,
+                tension: 0.5,
+                borderWidth: 2,
+                pointRadius: 1,
+                pointHoverRadius: 4
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: { legend: { display: false } },
+            scales: {
+                x: { ticks: { color: textColor, maxTicksLimit: 8 }, grid: { color: gridColor } },
+                y: { ticks: { color: textColor }, grid: { color: gridColor } }
+            }
+        }
+    });
+}
+
+function renderChart(roomIndex, days) {
+    const room = rooms[roomIndex];
+    if (tempChart) { tempChart.destroy(); tempChart = null; }
+    if (humidChart) { humidChart.destroy(); humidChart = null; }
+    const feeds = days === 1 ? (cachedFeeds24h || cachedFeedsFull) : cachedFeedsFull;
+    if (!feeds) return;
+    const { labels, tempData, humidData } = getRoomHistoryData(feeds, room, days);
+    const isLight = document.body.classList.contains('light-theme');
+    tempChart = createChart(document.getElementById('tempChart').getContext('2d'), labels, tempData, isLight ? '#e65100' : '#ff6b6b');
+    humidChart = createChart(document.getElementById('humidChart').getContext('2d'), labels, humidData, isLight ? '#0288d1' : '#4ecdc4');
+    const timeLabel = days === 1 ? '24小時' : `${days} 天`;
+    document.getElementById('tempChartTitle').textContent = `🌡️ 溫度變化 (${timeLabel})`;
+    document.getElementById('humidChartTitle').textContent = `💧 濕度變化 (${timeLabel})`;
+}
+
+async function prefetch24hData() {
+    try {
+        const res = await fetch(`${API_URL_HISTORY}?results=500`);
+        const json = await res.json();
+        if (json.feeds) cachedFeeds24h = json.feeds;
+    } catch (e) { console.error('Error prefetching 24h:', e); }
+}
+
+async function prefetchFullData() {
+    try {
+        const res = await fetch(`${API_URL_HISTORY}?results=6000`);
+        const json = await res.json();
+        if (json.feeds) cachedFeedsFull = json.feeds;
+    } catch (e) { console.error('Error prefetching full:', e); }
+}
+
+async function showRoomDetail(roomIndex) {
+    currentRoomIndex = roomIndex;
+    currentDays = 1;
+    document.getElementById('modalTitle').textContent = `${rooms[roomIndex].name} - 歷史數據`;
+    document.getElementById('modalOverlay').classList.add('active');
+    document.querySelectorAll('.time-range-btn').forEach(btn => btn.classList.toggle('active', btn.dataset.days === '1'));
+    if (cachedFeeds24h || cachedFeedsFull) {
+        renderChart(roomIndex, 1);
+    } else {
+        await prefetch24hData();
+        renderChart(roomIndex, 1);
+    }
+}
+
+function closeModal() {
+    document.getElementById('modalOverlay').classList.remove('active');
+}
+
+async function fetchData() {
+    const grid = document.getElementById('roomsGrid');
+    try {
+        const res = await fetch(API_URL);
+        const json = await res.json();
+        if (json.feeds && json.feeds.length > 0) {
+            const { data, times } = getLatestDataPerRoom(json.feeds);
+            grid.innerHTML = rooms.map((room, index) => createRoomCard(room, data, times[room.name], index)).join('');
+            document.querySelectorAll('.room-card').forEach(card => {
+                card.addEventListener('click', () => showRoomDetail(parseInt(card.dataset.roomIndex)));
+            });
+            document.getElementById('lastUpdate').textContent = formatDateTime(json.feeds[json.feeds.length - 1].created_at);
+            // 渲染迷你圖表
+            renderMiniCharts();
+        }
+    } catch (e) {
+        console.error('Error fetching data:', e);
+        grid.innerHTML = '<div class="loading">資料載入失敗，請稍後再試</div>';
+    }
+}
+
+function initTheme() {
+    const saved = localStorage.getItem('theme');
+    if (saved === 'light') {
+        document.body.classList.add('light-theme');
+        document.getElementById('themeToggle').textContent = '☀️';
+    }
+}
+
+function toggleTheme() {
+    document.body.classList.toggle('light-theme');
+    const isLight = document.body.classList.contains('light-theme');
+    document.getElementById('themeToggle').textContent = isLight ? '☀️' : '🌙';
+    localStorage.setItem('theme', isLight ? 'light' : 'dark');
+}
+
+// 事件綁定
+document.getElementById('modalClose').addEventListener('click', closeModal);
+document.getElementById('modalOverlay').addEventListener('click', (e) => { if (e.target.id === 'modalOverlay') closeModal(); });
+document.getElementById('themeToggle').addEventListener('click', toggleTheme);
+document.querySelectorAll('.time-range-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+        const days = parseInt(btn.dataset.days);
+        if (days === currentDays || currentRoomIndex === null) return;
+        currentDays = days;
+        document.querySelectorAll('.time-range-btn').forEach(b => b.classList.toggle('active', b.dataset.days === String(days)));
+        renderChart(currentRoomIndex, days);
+    });
+});
+
+// 戶外天氣
+async function fetchWeather() {
+    try {
+        const res = await fetch(`https://opendata.cwa.gov.tw/fileapi/v1/opendataapi/O-A0001-001?Authorization=${CONFIG.CWB_APIKEY}&downloadType=WEB&format=JSON`);
+        const data = await res.json();
+        const cities = ['新莊', '三重', '五股', '蘆洲', '板橋'];
+        const stations = data.cwaopendata?.dataset?.Station || [];
         
-        // 如果已有圖表，不重新創建
-        if (container.children.length > 0) {
-            return;
-        }
-        // 直接按順序創建所有 8 個圖表
-        var chartConfigs = [
-            { chart: 1, title: '客廳-溫度', yaxismax: tempMax, yaxismin: tempMin, bgcolor: '', color: '' },
-            { chart: 2, title: '客廳-濕度', yaxismax: humidityMax, yaxismin: humidityMin, bgcolor: '', color: '' },
-            { chart: 3, title: '房間-溫度', yaxismax: tempMax, yaxismin: tempMin, bgcolor: '%23ffffff', color: '%23d62020' },
-            { chart: 4, title: '房間-濕度', yaxismax: humidityMax, yaxismin: roomHumidityMin, bgcolor: '', color: '' },
-            { chart: 5, title: '陽台-溫度', yaxismax: tempMax, yaxismin: tempMin, bgcolor: '%23ffffff', color: '%23d62020' },
-            { chart: 6, title: '陽台-濕度', yaxismax: humidityMax, yaxismin: humidityMin, bgcolor: '%23ffffff', color: '%23d62020' },
-            { chart: 7, title: '書房-溫度', yaxismax: tempMax, yaxismin: tempMin, bgcolor: '%23ffffff', color: '%23d62020' },
-            { chart: 8, title: '書房-濕度', yaxismax: humidityMax, yaxismin: humidityMin, bgcolor: '%23ffffff', color: '%23d62020' }
-        ];
-        
-        chartConfigs.forEach(function(chartConfig) {
-            var iframe = document.createElement('iframe');
-            iframe.width = '450';
-            iframe.height = '260';
-            
-            var src = 'https://thingspeak.com/channels/72313/charts/' + chartConfig.chart + 
-                     '?dynamic=true&max=' + (chartConfig.chart % 2 === 1 ? '50' : '100') + 
-                     '&min=' + (chartConfig.chart % 2 === 1 ? '0' : chartConfig.chart === 4 ? '1' : '0') + 
-                     '&results=400&title=' + encodeURIComponent(chartConfig.title) + 
-                     '&type=spline&yaxismax=' + chartConfig.yaxismax + 
-                     '&yaxismin=' + chartConfig.yaxismin;
-            
-            if (chartConfig.bgcolor) {
-                src += '&bgcolor=' + chartConfig.bgcolor;
-            }
-            if (chartConfig.color) {
-                src += '&color=' + chartConfig.color;
-            }
-            
-            iframe.src = src;
-            container.appendChild(iframe);
-        });
-    }
-
-    function check_outdoor_temperature(data, station) {
-        if (data.ObsTime.DateTime != "") {
-            timestamp = Date.parse(data.ObsTime.DateTime);
-            if (Date.now() - timestamp > 5400000)
-                return null;
-        }
-        if (data.WeatherElement) {
-            var cwb_t = data.WeatherElement.AirTemperature;
-            if (cwb_t != "" && parseFloat(cwb_t) > -10) {
-                var temperature = parseFloat(cwb_t);
-                return {
-                    temperature: temperature,
-                    station: station,
-                    isLowTemp: temperature < 5
-                };
-            }
-        }
-        return null;
-    }
-
-    function get_weather_temperature_check(data, station) {
-        for (var x in data.cwaopendata.dataset.Station) {
-            if (data.cwaopendata.dataset.Station[x].StationName == station) {
-                var result = check_outdoor_temperature(data.cwaopendata.dataset.Station[x], station);
-                if (result)
-                    return result;
-            }
-        }
-        return null;
-    }
-
-    function monitor_outdoor_temperature() {
-        $.getJSON("https://opendata.cwa.gov.tw/fileapi/v1/opendataapi/O-A0001-001?Authorization=" + CONFIG.CWB_APIKEY + "&downloadType=WEB&format=JSON",
-            function (data) {
-                const cities = ["新莊", "三重", "五股", "蘆洲", "板橋"];
-                var tempResult = null;
+        for (const city of cities) {
+            const station = stations.find(s => s.StationName === city);
+            if (station?.WeatherElement) {
+                const temp = station.WeatherElement.AirTemperature;
+                const humid = station.WeatherElement.RelativeHumidity;
+                const obsTime = station.ObsTime?.DateTime;
                 
-                for (const city of cities) {
-                    tempResult = get_weather_temperature_check(data, city);
-                    if (tempResult) {
-                        break;
+                if (obsTime && Date.now() - Date.parse(obsTime) > 5400000) continue;
+                if (temp && humid && parseFloat(temp) > -10 && parseFloat(humid) > 0) {
+                    const el = document.getElementById('weatherValue');
+                    el.textContent = `${city} ${temp}°C ${parseInt(humid)}%`;
+                    el.classList.remove('hot', 'humid');
+                    if (parseInt(temp) >= 32) el.classList.add('hot');
+                    else if (parseInt(humid) >= 80) el.classList.add('humid');
+                    return;
+                }
+            }
+        }
+    } catch (e) { console.error('Error fetching weather:', e); }
+}
+
+// PM2.5
+async function fetchPM25() {
+    try {
+        const res = await fetch(`https://data.moenv.gov.tw/api/v2/aqx_p_432?api_key=${CONFIG.MOENV_KEY}&format=JSON`);
+        const data = await res.json();
+        const cities = ['新莊', '林口', '菜寮', '五股', '蘆洲', '板橋'];
+        
+        for (const city of cities) {
+            const record = data.records?.find(r => r.sitename === city && parseInt(r['pm2.5']) > 0);
+            if (record) {
+                const pm25 = parseInt(record['pm2.5']);
+                const el = document.getElementById('pm25Value');
+                el.textContent = `${city} ${pm25}`;
+                el.classList.remove('pm-high', 'pm-danger');
+                if (pm25 > 40) el.classList.add('pm-danger');
+                else if (pm25 > 20) el.classList.add('pm-high');
+                return;
+            }
+        }
+    } catch (e) { console.error('Error fetching PM2.5:', e); }
+}
+
+// 迷你圖表
+let miniCharts = [null, null, null, null];
+
+function renderMiniCharts() {
+    if (!cachedFeeds24h && !cachedFeedsFull) return;
+    const feeds = cachedFeeds24h || cachedFeedsFull;
+    
+    const isLight = document.body.classList.contains('light-theme');
+    const gridColor = isLight ? 'rgba(0,0,0,0.08)' : 'rgba(255,255,255,0.05)';
+    const tempColor = isLight ? '#e65100' : '#ff6b6b';
+    const humidColor = isLight ? '#0288d1' : '#4ecdc4';
+    
+    const now = new Date();
+    const startTime = new Date(now.getTime() - 24 * 60 * 60 * 1000);
+    
+    rooms.forEach((room, idx) => {
+        if (miniCharts[idx]) { miniCharts[idx].destroy(); miniCharts[idx] = null; }
+        
+        const roomFeeds = feeds.filter(f => {
+            const t = new Date(f.created_at);
+            return t >= startTime && hasData(f[room.tempField]);
+        });
+        
+        // 降採樣
+        const sampled = [];
+        for (let i = 0; i < roomFeeds.length; i += 4) {
+            sampled.push(roomFeeds[i]);
+        }
+        
+        const labels = sampled.map(f => formatTime(f.created_at));
+        const tempData = sampled.map(f => parseFloat(f[room.tempField]));
+        const humidData = sampled.map(f => parseFloat(f[room.humidField]));
+        
+        const ctx = document.getElementById(`miniChart${idx}`)?.getContext('2d');
+        if (!ctx) return;
+        
+        miniCharts[idx] = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels,
+                datasets: [
+                    {
+                        label: '溫度',
+                        data: tempData,
+                        borderColor: tempColor,
+                        backgroundColor: tempColor + '20',
+                        fill: false,
+                        tension: 0.5,
+                        borderWidth: 1.5,
+                        pointRadius: 0,
+                        yAxisID: 'y'
+                    },
+                    {
+                        label: '濕度',
+                        data: humidData,
+                        borderColor: humidColor,
+                        backgroundColor: humidColor + '20',
+                        fill: false,
+                        tension: 0.5,
+                        borderWidth: 1.5,
+                        pointRadius: 0,
+                        yAxisID: 'y1'
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: { legend: { display: false } },
+                scales: {
+                    x: { display: false },
+                    y: {
+                        position: 'left',
+                        ticks: { color: tempColor, font: { size: 9 }, maxTicksLimit: 3 },
+                        grid: { color: gridColor }
+                    },
+                    y1: {
+                        position: 'right',
+                        ticks: { color: humidColor, font: { size: 9 }, maxTicksLimit: 3 },
+                        grid: { display: false }
                     }
                 }
-                
-                // 如果檢測到低溫，調整溫度範圍變數
-                if (tempResult && tempResult.isLowTemp) {
-                    tempMax = tempMax - 10;
-                    tempMin = tempMin - 10;
-                    //alert("戶外溫度警告：" + tempResult.station + " 目前溫度 " + tempResult.temperature + "°C，低於 15°C！\n圖表溫度範圍已調整為 " + tempMin + "°C ~ " + tempMax + "°C");
-                }
-                
-                // 創建圖表（使用調整後的變數）
-                createCharts();
             }
-        ).fail(function() {
-            // 如果API調用失敗，使用預設值創建圖表
-            console.log('Failed to fetch weather data, using default temperature ranges');
-            createCharts();
         });
-    }
+    });
+}
 
-    // 移除 resize 監聽器，現在完全依靠 CSS 處理響應式布局
-
-    // 頁面載入時先檢查溫度再創建圖表
-    monitor_outdoor_temperature();
-</script>
-
+// 初始化
+initTheme();
+fetchData();
+fetchWeather();
+fetchPM25();
+prefetch24hData().then(() => { prefetchFullData(); });
+setInterval(fetchData, 30000);
+setInterval(() => { fetchWeather(); fetchPM25(); }, 10 * 60 * 1000);
+setInterval(() => { prefetch24hData().then(() => prefetchFullData()); }, 5 * 60 * 1000);
+    </script>
+</body>
 </html>
