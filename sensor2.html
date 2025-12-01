@@ -893,9 +893,9 @@ function updateExtraDisplay() {
     
     // 礦機資訊
     const minerTemp = latest.field4;
-    const minerHash = latest.field5;
+    const minerHash = (latest.field5/1000).toFixed(3);
     if (minerTemp && minerHash) {
-        document.getElementById('minerValue').textContent = `${minerTemp}°C / ${minerHash} GH`;
+        document.getElementById('minerValue').textContent = `${minerTemp}°C / ${minerHash} TH/s`;
     }
     
     // 耗電量
