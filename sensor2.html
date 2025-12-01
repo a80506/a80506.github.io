@@ -105,6 +105,10 @@
         }
 
         .theme-toggle {
+            position: absolute;
+            top: 50%;
+            right: clamp(10px, 2vw, 20px);
+            transform: translateY(-50%);
             background: var(--metric-bg);
             border: 1px solid var(--card-border);
             border-radius: 50%;
@@ -116,11 +120,10 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            flex-shrink: 0;
         }
 
         .theme-toggle:hover {
-            transform: scale(1.1);
+            transform: translateY(-50%) scale(1.1);
         }
 
         h1 {
@@ -147,8 +150,8 @@
         .outdoor-info {
             display: flex;
             justify-content: center;
-            gap: clamp(20px, 4vw, 60px);
-            margin-bottom: clamp(15px, 2vh, 25px);
+            gap: clamp(15px, 3vw, 40px);
+            margin-bottom: clamp(10px, 1.5vh, 20px);
             flex-wrap: wrap;
         }
 
@@ -158,6 +161,7 @@
             gap: 8px;
             padding: clamp(8px, 1.2vh, 12px) clamp(15px, 2vw, 25px);
             background: var(--metric-bg);
+            min-width: 140px;
             border-radius: 30px;
             border: 1px solid var(--card-border);
         }
@@ -193,6 +197,16 @@
             color: #f44336;
         }
 
+        .outdoor-item.clickable {
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .outdoor-item.clickable:hover {
+            transform: scale(1.05);
+            border-color: var(--room-name-color);
+        }
+
         .rooms-grid {
             display: grid;
             grid-template-columns: repeat(4, 1fr);
@@ -213,24 +227,17 @@
         }
 
         .room-mini-chart {
-            margin-top: clamp(10px, 1.5vh, 15px);
+            margin-top: 10px;
             display: none;
-            overflow: hidden;
-            max-height: 0;
-            opacity: 0;
-            transition: max-height 0.3s ease, opacity 0.3s ease, margin 0.3s ease;
         }
 
-        @media (min-height: 700px) {
+        @media (min-height: 600px) {
             .room-mini-chart { display: block; }
-            .room-mini-chart.loaded {
-                max-height: clamp(60px, 10vh, 100px);
-                opacity: 1;
-            }
         }
 
         .room-mini-chart canvas {
-            max-height: clamp(50px, 8vh, 80px);
+            width: 100% !important;
+            height: 80px !important;
         }
 
         .room-card {
@@ -399,6 +406,10 @@
 
         .modal-title {
             font-size: clamp(1.1rem, 2.5vh, 1.5rem);
+            color: #ffd700;
+        }
+
+        body.light-theme .modal-title {
             color: var(--room-name-color);
         }
 
@@ -433,17 +444,23 @@
         }
 
         .time-range-btn:hover {
-            border-color: var(--room-name-color);
+            border-color: #ffd700;
         }
 
         .time-range-btn.active {
-            background: var(--room-name-color);
-            color: #fff;
+            background: #ffd700;
+            color: #000;
+            border-color: #ffd700;
+        }
+
+        body.light-theme .time-range-btn:hover {
             border-color: var(--room-name-color);
         }
 
         body.light-theme .time-range-btn.active {
+            background: var(--room-name-color);
             color: #fff;
+            border-color: var(--room-name-color);
         }
 
         .chart-container {
@@ -480,20 +497,33 @@
         <header>
             <h1>🏠 智慧溫濕度監控系統</h1>
             <p class="update-time">最後更新: <span id="lastUpdate">載入中...</span></p>
+            <button class="theme-toggle" id="themeToggle" title="切換主題">🌙</button>
         </header>
         
         <div class="outdoor-info">
-            <div class="outdoor-item weather">
+            <div class="outdoor-item clickable" id="weatherItem">
                 <span class="outdoor-icon">🌤️</span>
                 <span class="outdoor-label">戶外</span>
                 <span class="outdoor-value" id="weatherValue">--</span>
             </div>
-            <div class="outdoor-item pm25">
+            <div class="outdoor-item clickable" id="pm25Item">
                 <span class="outdoor-icon">🌫️</span>
                 <span class="outdoor-label">PM2.5</span>
                 <span class="outdoor-value" id="pm25Value">--</span>
             </div>
-            <button class="theme-toggle" id="themeToggle" title="切換主題">🌙</button>
+        </div>
+        
+        <div class="outdoor-info">
+            <div class="outdoor-item clickable" id="minerItem">
+                <span class="outdoor-icon">⛏️</span>
+                <span class="outdoor-label">礦機</span>
+                <span class="outdoor-value" id="minerValue">--</span>
+            </div>
+            <div class="outdoor-item clickable" id="powerItem">
+                <span class="outdoor-icon">⚡</span>
+                <span class="outdoor-label">陽台耗電</span>
+                <span class="outdoor-value" id="powerValue">--</span>
+            </div>
         </div>
         
         <div class="rooms-grid" id="roomsGrid"></div>
@@ -529,6 +559,7 @@
     <script>
 const API_URL = 'https://api.thingspeak.com/channels/72313/feeds.json?results=50';
 const API_URL_HISTORY = 'https://api.thingspeak.com/channels/72313/feeds.json';
+const API_URL_EXTRA = 'https://api.thingspeak.com/channels/565880/feeds.json';
 
 const rooms = [
     { name: '客廳', tempField: 'field1', humidField: 'field2' },
@@ -542,6 +573,9 @@ let humidChart = null;
 let currentRoomIndex = null;
 let currentDays = 1;
 let cachedFeeds24h = null;
+let cachedExtra24h = null;
+let cachedExtraFull = null;
+let currentModalType = null; // 'room', 'weather', 'pm25', 'miner', 'power'
 let cachedFeedsFull = null;
 
 function formatValue(value, unit) {
@@ -699,7 +733,12 @@ async function prefetchFullData() {
 
 async function showRoomDetail(roomIndex) {
     currentRoomIndex = roomIndex;
+    currentModalType = 'room';
     currentDays = 1;
+    
+    // 確保濕度圖表顯示
+    document.getElementById('humidChart').parentElement.style.display = '';
+    
     document.getElementById('modalTitle').textContent = `${rooms[roomIndex].name} - 歷史數據`;
     document.getElementById('modalOverlay').classList.add('active');
     document.querySelectorAll('.time-range-btn').forEach(btn => btn.classList.toggle('active', btn.dataset.days === '1'));
@@ -758,12 +797,23 @@ document.getElementById('themeToggle').addEventListener('click', toggleTheme);
 document.querySelectorAll('.time-range-btn').forEach(btn => {
     btn.addEventListener('click', () => {
         const days = parseInt(btn.dataset.days);
-        if (days === currentDays || currentRoomIndex === null) return;
+        if (days === currentDays) return;
         currentDays = days;
         document.querySelectorAll('.time-range-btn').forEach(b => b.classList.toggle('active', b.dataset.days === String(days)));
-        renderChart(currentRoomIndex, days);
+        
+        if (currentModalType && currentModalType !== 'room') {
+            renderExtraChart(currentModalType, days);
+        } else if (currentRoomIndex !== null) {
+            renderChart(currentRoomIndex, days);
+        }
     });
 });
+
+// 額外資料點擊事件
+document.getElementById('weatherItem').addEventListener('click', () => showExtraDetail('weather'));
+document.getElementById('pm25Item').addEventListener('click', () => showExtraDetail('pm25'));
+document.getElementById('minerItem').addEventListener('click', () => showExtraDetail('miner'));
+document.getElementById('powerItem').addEventListener('click', () => showExtraDetail('power'));
 
 // 戶外天氣
 async function fetchWeather() {
@@ -814,6 +864,119 @@ async function fetchPM25() {
             }
         }
     } catch (e) { console.error('Error fetching PM2.5:', e); }
+}
+
+// 額外資料預載
+async function prefetchExtra24h() {
+    try {
+        const res = await fetch(`${API_URL_EXTRA}?results=96`);
+        const json = await res.json();
+        if (json.feeds) {
+            cachedExtra24h = json.feeds;
+            updateExtraDisplay();
+        }
+    } catch (e) { console.error('Error prefetching extra 24h:', e); }
+}
+
+async function prefetchExtraFull() {
+    try {
+        const res = await fetch(`${API_URL_EXTRA}?results=1344`);
+        const json = await res.json();
+        if (json.feeds) cachedExtraFull = json.feeds;
+    } catch (e) { console.error('Error prefetching extra full:', e); }
+}
+
+function updateExtraDisplay() {
+    const feeds = cachedExtra24h || cachedExtraFull;
+    if (!feeds || feeds.length === 0) return;
+    const latest = feeds[feeds.length - 1];
+    
+    // 礦機資訊
+    const minerTemp = latest.field4;
+    const minerHash = latest.field5;
+    if (minerTemp && minerHash) {
+        document.getElementById('minerValue').textContent = `${minerTemp}°C / ${minerHash} GH`;
+    }
+    
+    // 耗電量
+    const power = latest.field6;
+    if (power) {
+        document.getElementById('powerValue').textContent = `${power} W`;
+    }
+}
+
+// 顯示額外資料的 Modal
+function showExtraDetail(type) {
+    currentModalType = type;
+    currentDays = 1;
+    
+    const modal = document.getElementById('modalOverlay');
+    const title = document.getElementById('modalTitle');
+    const tempTitle = document.getElementById('tempChartTitle');
+    const humidTitle = document.getElementById('humidChartTitle');
+    const humidContainer = document.getElementById('humidChart').parentElement;
+    
+    const titles = {
+        weather: '戶外溫濕度 - 歷史數據',
+        pm25: 'PM2.5 - 歷史數據',
+        miner: '礦機資訊 - 歷史數據',
+        power: 'HS300 耗電量 - 歷史數據'
+    };
+    
+    title.textContent = titles[type];
+    modal.classList.add('active');
+    
+    document.querySelectorAll('.time-range-btn').forEach(btn => {
+        btn.classList.toggle('active', btn.dataset.days === '1');
+    });
+    
+    renderExtraChart(type, 1);
+}
+
+function renderExtraChart(type, days) {
+    if (tempChart) { tempChart.destroy(); tempChart = null; }
+    if (humidChart) { humidChart.destroy(); humidChart = null; }
+    
+    const feeds = days === 1 ? (cachedExtra24h || cachedExtraFull) : cachedExtraFull;
+    if (!feeds) return;
+    
+    const now = new Date();
+    const startTime = new Date(now.getTime() - days * 24 * 60 * 60 * 1000);
+    const filtered = feeds.filter(f => new Date(f.created_at) >= startTime);
+    
+    const labels = filtered.map(f => formatTime(f.created_at));
+    const isLight = document.body.classList.contains('light-theme');
+    const tempColor = isLight ? '#e65100' : '#ff6b6b';
+    const humidColor = isLight ? '#0288d1' : '#4ecdc4';
+    
+    const tempCtx = document.getElementById('tempChart').getContext('2d');
+    const humidCtx = document.getElementById('humidChart').getContext('2d');
+    const humidContainer = document.getElementById('humidChart').parentElement;
+    const tempTitle = document.getElementById('tempChartTitle');
+    const humidTitle = document.getElementById('humidChartTitle');
+    const timeLabel = days === 1 ? '24小時' : `${days} 天`;
+    
+    if (type === 'weather') {
+        humidContainer.style.display = '';
+        tempTitle.textContent = `🌡️ 戶外溫度 (${timeLabel})`;
+        humidTitle.textContent = `💧 戶外濕度 (${timeLabel})`;
+        tempChart = createChart(tempCtx, labels, filtered.map(f => parseFloat(f.field1)), tempColor);
+        humidChart = createChart(humidCtx, labels, filtered.map(f => parseFloat(f.field2)), humidColor);
+    } else if (type === 'pm25') {
+        humidContainer.style.display = 'none';
+        tempTitle.textContent = `🌫️ PM2.5 (${timeLabel})`;
+        tempChart = createChart(tempCtx, labels, filtered.map(f => parseFloat(f.field3)), '#ff9800');
+    } else if (type === 'miner') {
+        humidContainer.style.display = '';
+        tempTitle.textContent = `🌡️ 礦機溫度 (${timeLabel})`;
+        humidTitle.textContent = `⛏️ 礦機算力 (${timeLabel})`;
+        tempChart = createChart(tempCtx, labels, filtered.map(f => parseFloat(f.field4)), tempColor);
+        humidChart = createChart(humidCtx, labels, filtered.map(f => parseFloat(f.field5)), '#e6a800');
+    } else if (type === 'power') {
+        humidContainer.style.display = 'none';
+        tempTitle.textContent = `⚡ HS300 耗電量 (${timeLabel})`;
+        tempChart = createChart(tempCtx, labels, filtered.map(f => parseFloat(f.field6)), '#4ecdc4');
+    }
 }
 
 // 迷你圖表
@@ -916,9 +1079,11 @@ fetchData();
 fetchWeather();
 fetchPM25();
 prefetch24hData().then(() => { prefetchFullData(); });
+prefetchExtra24h().then(() => { prefetchExtraFull(); });
 setInterval(fetchData, 30000);
 setInterval(() => { fetchWeather(); fetchPM25(); }, 10 * 60 * 1000);
 setInterval(() => { prefetch24hData().then(() => prefetchFullData()); }, 5 * 60 * 1000);
+setInterval(() => { prefetchExtra24h().then(() => prefetchExtraFull()); }, 5 * 60 * 1000);
     </script>
 </body>
 </html>
