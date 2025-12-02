@@ -28,26 +28,26 @@
             --bg: linear-gradient(135deg, #0a0a0f 0%, #1a1a2e 50%, #0f0f1a 100%);
             --text-color: #e0e0e0;
             --header-bg: rgba(20, 20, 40, 0.6);
-            --header-border: rgba(0, 255, 255, 0.1);
-            --header-shadow: rgba(0, 255, 255, 0.1);
+            --header-border: rgba(255, 215, 0, 0.1);
+            --header-shadow: rgba(255, 215, 0, 0.1);
             --title-gradient: linear-gradient(90deg, #00ffff, #00ff88, #00ffff);
             --update-time-color: #888;
             --card-bg: linear-gradient(145deg, rgba(25, 25, 50, 0.9), rgba(15, 15, 30, 0.9));
-            --card-border: rgba(0, 255, 255, 0.2);
+            --card-border: rgba(255, 215, 0, 0.2);
             --card-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
-            --card-hover-shadow: 0 20px 50px rgba(0, 255, 255, 0.2);
-            --card-top-bar: linear-gradient(90deg, #00ffff, #00ff88);
-            --room-name-color: #00ffff;
-            --online-dot: #00ff88;
+            --card-hover-shadow: 0 20px 50px rgba(255, 215, 0, 0.2);
+            --card-top-bar: linear-gradient(90deg, #ffd700, #ffb700);
+            --room-name-color: #ffd700;
+            --online-dot: #7fff00;
             --offline-dot: #555;
             --metric-bg: rgba(0, 0, 0, 0.3);
             --metric-border: rgba(255, 255, 255, 0.05);
             --metric-label-color: #888;
             --temp-color: #ff6b6b;
-            --humid-color: #4ecdc4;
+            --humid-color: #ffd700;
             --modal-overlay: rgba(0, 0, 0, 0.8);
             --modal-bg: linear-gradient(145deg, rgba(25, 25, 50, 0.98), rgba(15, 15, 30, 0.98));
-            --modal-border: rgba(0, 255, 255, 0.3);
+            --modal-border: rgba(255, 215, 0, 0.3);
             --chart-bg: rgba(0, 0, 0, 0.3);
             --chart-grid: rgba(255, 255, 255, 0.05);
             
@@ -709,7 +709,7 @@ function renderChart(roomIndex, days) {
     const { labels, tempData, humidData } = getRoomHistoryData(feeds, room, days);
     const isLight = document.body.classList.contains('light-theme');
     tempChart = createChart(document.getElementById('tempChart').getContext('2d'), labels, tempData, isLight ? '#e65100' : '#ff6b6b');
-    humidChart = createChart(document.getElementById('humidChart').getContext('2d'), labels, humidData, isLight ? '#0288d1' : '#4ecdc4');
+    humidChart = createChart(document.getElementById('humidChart').getContext('2d'), labels, humidData, isLight ? '#0288d1' : '#ffd700');
     const timeLabel = days === 1 ? '24小時' : `${days} 天`;
     document.getElementById('tempChartTitle').textContent = `🌡️ 溫度變化 (${timeLabel})`;
     document.getElementById('humidChartTitle').textContent = `💧 濕度變化 (${timeLabel})`;
@@ -893,9 +893,9 @@ function updateExtraDisplay() {
     
     // 礦機資訊
     const minerTemp = latest.field4;
-    const minerHash = (latest.field5/1000).toFixed(3);
+    const minerHash = latest.field5;
     if (minerTemp && minerHash) {
-        document.getElementById('minerValue').textContent = `${minerTemp}°C / ${minerHash} TH/s`;
+        document.getElementById('minerValue').textContent = `${minerTemp}°C / ${minerHash} GH`;
     }
     
     // 耗電量
@@ -947,7 +947,7 @@ function renderExtraChart(type, days) {
     const labels = filtered.map(f => formatTime(f.created_at));
     const isLight = document.body.classList.contains('light-theme');
     const tempColor = isLight ? '#e65100' : '#ff6b6b';
-    const humidColor = isLight ? '#0288d1' : '#4ecdc4';
+    const humidColor = isLight ? '#0288d1' : '#ffd700';
     
     const tempCtx = document.getElementById('tempChart').getContext('2d');
     const humidCtx = document.getElementById('humidChart').getContext('2d');
@@ -975,7 +975,7 @@ function renderExtraChart(type, days) {
     } else if (type === 'power') {
         humidContainer.style.display = 'none';
         tempTitle.textContent = `⚡ HS300 耗電量 (${timeLabel})`;
-        tempChart = createChart(tempCtx, labels, filtered.map(f => parseFloat(f.field6)), '#4ecdc4');
+        tempChart = createChart(tempCtx, labels, filtered.map(f => parseFloat(f.field6)), '#ffd700');
     }
 }
 
@@ -989,7 +989,7 @@ function renderMiniCharts() {
     const isLight = document.body.classList.contains('light-theme');
     const gridColor = isLight ? 'rgba(0,0,0,0.08)' : 'rgba(255,255,255,0.05)';
     const tempColor = isLight ? '#e65100' : '#ff6b6b';
-    const humidColor = isLight ? '#0288d1' : '#4ecdc4';
+    const humidColor = isLight ? '#0288d1' : '#ffd700';
     
     const now = new Date();
     const startTime = new Date(now.getTime() - 24 * 60 * 60 * 1000);
@@ -1078,7 +1078,7 @@ initTheme();
 fetchData();
 fetchWeather();
 fetchPM25();
-prefetch24hData().then(() => { prefetchFullData(); });
+prefetch24hData().then(() => { renderMiniCharts(); prefetchFullData(); });
 prefetchExtra24h().then(() => { prefetchExtraFull(); });
 setInterval(fetchData, 30000);
 setInterval(() => { fetchWeather(); fetchPM25(); }, 10 * 60 * 1000);
