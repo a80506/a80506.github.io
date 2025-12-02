@@ -126,6 +126,33 @@
             transform: translateY(-50%) scale(1.1);
         }
 
+        .overview-btn {
+            position: absolute;
+            top: 50%;
+            right: clamp(55px, 8vw, 75px);
+            transform: translateY(-50%);
+            background: var(--metric-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 50%;
+            width: clamp(32px, 5vh, 40px);
+            height: clamp(32px, 5vh, 40px);
+            font-size: clamp(1rem, 2vh, 1.2rem);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .overview-btn:hover {
+            transform: translateY(-50%) scale(1.1);
+            border-color: var(--room-name-color);
+        }
+
+        .overview-btn.humid-btn {
+            right: clamp(100px, 14vw, 130px);
+        }
+
         h1 {
             font-size: clamp(1.5rem, 4vh, 2.5rem);
             background: var(--title-gradient);
@@ -490,6 +517,173 @@
             min-height: 0;
             max-height: clamp(120px, 25vh, 250px);
         }
+
+        .overview-modal {
+            max-width: min(1200px, 95vw);
+        }
+
+        .overview-charts-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: clamp(10px, 1.5vh, 20px);
+            flex: 1;
+            min-height: 0;
+        }
+
+        .overview-charts-grid .chart-container {
+            margin-bottom: 0;
+        }
+
+        .overview-charts-grid .chart-container canvas {
+            max-height: clamp(100px, 20vh, 180px);
+        }
+
+        .overview-time-btn {
+            padding: clamp(6px, 1vh, 10px) clamp(12px, 2vw, 20px);
+            border: 1px solid var(--card-border);
+            background: var(--metric-bg);
+            color: var(--text-color);
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: clamp(0.75rem, 1.3vh, 0.9rem);
+            transition: all 0.2s ease;
+        }
+
+        .overview-time-btn:hover {
+            border-color: #ffd700;
+        }
+
+        .overview-time-btn.active {
+            background: #ffd700;
+            color: #000;
+            border-color: #ffd700;
+        }
+
+        body.light-theme .overview-time-btn:hover {
+            border-color: var(--room-name-color);
+        }
+
+        body.light-theme .overview-time-btn.active {
+            background: var(--room-name-color);
+            color: #fff;
+            border-color: var(--room-name-color);
+        }
+
+        .humid-overview-time-btn {
+            padding: clamp(6px, 1vh, 10px) clamp(12px, 2vw, 20px);
+            border: 1px solid var(--card-border);
+            background: var(--metric-bg);
+            color: var(--text-color);
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: clamp(0.75rem, 1.3vh, 0.9rem);
+            transition: all 0.2s ease;
+        }
+
+        .humid-overview-time-btn:hover {
+            border-color: #46a3ff;
+        }
+
+        .humid-overview-time-btn.active {
+            background: #46a3ff;
+            color: #fff;
+            border-color: #46a3ff;
+        }
+
+        body.light-theme .humid-overview-time-btn:hover {
+            border-color: #0288d1;
+        }
+
+        body.light-theme .humid-overview-time-btn.active {
+            background: #0288d1;
+            color: #fff;
+            border-color: #0288d1;
+        }
+
+        @media (max-width: 600px) {
+            .overview-charts-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .outdoor-toggle-btn {
+            padding: clamp(6px, 1vh, 10px) clamp(12px, 2vw, 20px);
+            border: 1px solid var(--card-border);
+            background: var(--metric-bg);
+            color: var(--text-color);
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: clamp(0.75rem, 1.3vh, 0.9rem);
+            transition: all 0.2s ease;
+            margin-left: auto;
+        }
+
+        .outdoor-toggle-btn:hover {
+            border-color: #ff9800;
+        }
+
+        .outdoor-toggle-btn.active {
+            background: #ff9800;
+            color: #000;
+            border-color: #ff9800;
+        }
+
+        .floating-outdoor-chart {
+            display: none;
+            position: fixed;
+            width: 320px;
+            height: 220px;
+            background: var(--modal-bg);
+            border: 1px solid var(--modal-border);
+            border-radius: 12px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+            z-index: 10001;
+            overflow: hidden;
+        }
+
+        .floating-outdoor-chart.active {
+            display: block;
+        }
+
+        .floating-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 12px;
+            background: rgba(255, 152, 0, 0.2);
+            cursor: move;
+            user-select: none;
+        }
+
+        .floating-title {
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: #ff9800;
+        }
+
+        .floating-close {
+            background: none;
+            border: none;
+            color: var(--metric-label-color);
+            font-size: 1.2rem;
+            cursor: pointer;
+            line-height: 1;
+            padding: 0;
+        }
+
+        .floating-close:hover {
+            color: #ff6b6b;
+        }
+
+        .floating-content {
+            padding: 10px;
+            height: calc(100% - 40px);
+        }
+
+        .floating-content canvas {
+            width: 100% !important;
+            height: 100% !important;
+        }
 </style>
 </head>
 <body>
@@ -498,6 +692,8 @@
             <h1>🏠 智慧溫濕度監控系統</h1>
             <p class="update-time">最後更新: <span id="lastUpdate">載入中...</span></p>
             <button class="theme-toggle" id="themeToggle" title="切換主題">🌙</button>
+            <button class="overview-btn" id="overviewBtn" title="4房間溫度總覽">🌡️</button>
+            <button class="overview-btn humid-btn" id="humidOverviewBtn" title="4房間濕度總覽">💧</button>
         </header>
         
         <div class="outdoor-info">
@@ -554,6 +750,84 @@
         </div>
     </div>
 
+    <div class="modal-overlay" id="overviewModalOverlay">
+        <div class="modal overview-modal">
+            <div class="modal-header">
+                <h2 class="modal-title">📊 4房間溫度總覽</h2>
+                <button class="modal-close" id="overviewModalClose">&times;</button>
+            </div>
+            <div class="time-range-btns">
+                <button class="overview-time-btn active" data-days="1">24 小時</button>
+                <button class="overview-time-btn" data-days="3">3 天</button>
+                <button class="overview-time-btn" data-days="7">7 天</button>
+                <button class="overview-time-btn" data-days="14">14 天</button>
+                <button class="outdoor-toggle-btn" id="tempOutdoorToggle">🌤️ 顯示戶外</button>
+            </div>
+            <div class="overview-charts-grid">
+                <div class="chart-container">
+                    <div class="chart-title">🌡️ 客廳</div>
+                    <canvas id="overviewChart0"></canvas>
+                </div>
+                <div class="chart-container">
+                    <div class="chart-title">🌡️ 房間</div>
+                    <canvas id="overviewChart1"></canvas>
+                </div>
+                <div class="chart-container">
+                    <div class="chart-title">🌡️ 陽台</div>
+                    <canvas id="overviewChart2"></canvas>
+                </div>
+                <div class="chart-container">
+                    <div class="chart-title">🌡️ 書房</div>
+                    <canvas id="overviewChart3"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="humidOverviewModalOverlay">
+        <div class="modal overview-modal">
+            <div class="modal-header">
+                <h2 class="modal-title">💧 4房間濕度總覽</h2>
+                <button class="modal-close" id="humidOverviewModalClose">&times;</button>
+            </div>
+            <div class="time-range-btns">
+                <button class="humid-overview-time-btn active" data-days="1">24 小時</button>
+                <button class="humid-overview-time-btn" data-days="3">3 天</button>
+                <button class="humid-overview-time-btn" data-days="7">7 天</button>
+                <button class="humid-overview-time-btn" data-days="14">14 天</button>
+                <button class="outdoor-toggle-btn" id="humidOutdoorToggle">🌤️ 顯示戶外</button>
+            </div>
+            <div class="overview-charts-grid">
+                <div class="chart-container">
+                    <div class="chart-title">💧 客廳</div>
+                    <canvas id="humidOverviewChart0"></canvas>
+                </div>
+                <div class="chart-container">
+                    <div class="chart-title">💧 房間</div>
+                    <canvas id="humidOverviewChart1"></canvas>
+                </div>
+                <div class="chart-container">
+                    <div class="chart-title">💧 陽台</div>
+                    <canvas id="humidOverviewChart2"></canvas>
+                </div>
+                <div class="chart-container">
+                    <div class="chart-title">💧 書房</div>
+                    <canvas id="humidOverviewChart3"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="floating-outdoor-chart" id="floatingOutdoorChart">
+        <div class="floating-header" id="floatingHeader">
+            <span class="floating-title" id="floatingTitle">🌤️ 戶外溫度</span>
+            <button class="floating-close" id="floatingClose">&times;</button>
+        </div>
+        <div class="floating-content">
+            <canvas id="outdoorFloatingCanvas"></canvas>
+        </div>
+    </div>
+
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="config.js"></script>
     <script>
@@ -577,6 +851,12 @@ let cachedExtra24h = null;
 let cachedExtraFull = null;
 let currentModalType = null; // 'room', 'weather', 'pm25', 'miner', 'power'
 let cachedFeedsFull = null;
+let overviewCharts = [null, null, null, null];
+let overviewDays = 1;
+let humidOverviewCharts = [null, null, null, null];
+let humidOverviewDays = 1;
+let outdoorFloatingChart = null;
+let currentOutdoorType = null; // 'temp' or 'humid'
 
 function formatValue(value, unit) {
     if (value === null || value === undefined || value === '') {
@@ -723,6 +1003,140 @@ async function prefetch24hData() {
     } catch (e) { console.error('Error prefetching 24h:', e); }
 }
 
+function toggleOutdoorFloat(type) {
+    const floatingEl = document.getElementById('floatingOutdoorChart');
+    const tempBtn = document.getElementById('tempOutdoorToggle');
+    const humidBtn = document.getElementById('humidOutdoorToggle');
+    
+    if (currentOutdoorType === type) {
+        // 關閉
+        floatingEl.classList.remove('active');
+        currentOutdoorType = null;
+        if (tempBtn) tempBtn.classList.remove('active');
+        if (humidBtn) humidBtn.classList.remove('active');
+        tempBtn.textContent = '🌤️ 顯示戶外';
+        humidBtn.textContent = '🌤️ 顯示戶外';
+        return;
+    }
+    
+    currentOutdoorType = type;
+    const days = type === 'temp' ? overviewDays : humidOverviewDays;
+    
+    // 更新按鈕狀態
+    if (type === 'temp') {
+        tempBtn.classList.add('active');
+        tempBtn.textContent = '🌤️ 隱藏戶外';
+        if (humidBtn) humidBtn.classList.remove('active');
+        if (humidBtn) humidBtn.textContent = '🌤️ 顯示戶外';
+    } else {
+        humidBtn.classList.add('active');
+        humidBtn.textContent = '🌤️ 隱藏戶外';
+        if (tempBtn) tempBtn.classList.remove('active');
+        if (tempBtn) tempBtn.textContent = '🌤️ 顯示戶外';
+    }
+    
+    // 設定位置（右下角）
+    const modalEl = type === 'temp' 
+        ? document.getElementById('overviewModalOverlay')
+        : document.getElementById('humidOverviewModalOverlay');
+    const rect = modalEl.getBoundingClientRect();
+    floatingEl.style.right = '50px';
+    floatingEl.style.bottom = '50px';
+    floatingEl.style.left = 'auto';
+    floatingEl.style.top = 'auto';
+    
+    floatingEl.classList.add('active');
+    renderOutdoorFloatingChart(type, days);
+}
+
+function renderOutdoorFloatingChart(type, days) {
+    const feeds = days === 1 ? (cachedExtra24h || cachedExtraFull) : cachedExtraFull;
+    if (!feeds) return;
+    
+    if (outdoorFloatingChart) { outdoorFloatingChart.destroy(); outdoorFloatingChart = null; }
+    
+    const field = type === 'temp' ? 'field1' : 'field2';
+    const title = type === 'temp' ? '🌤️ 戶外溫度' : '🌤️ 戶外濕度';
+    const color = type === 'temp' ? '#ff9800' : '#29b6f6';
+    const timeLabel = days === 1 ? '24小時' : `${days} 天`;
+    
+    document.getElementById('floatingTitle').textContent = `${title} (${timeLabel})`;
+    
+    const now = new Date();
+    const cutoff = new Date(now.getTime() - days * 24 * 60 * 60 * 1000);
+    const filtered = feeds.filter(f => new Date(f.created_at) >= cutoff && f[field]);
+    
+    const sampled = [];
+    const step = days === 1 ? 2 : (days <= 3 ? 4 : 8);
+    for (let i = 0; i < filtered.length; i += step) {
+        sampled.push(filtered[i]);
+    }
+    
+    const labels = sampled.map(f => formatTime(f.created_at));
+    const data = sampled.map(f => parseFloat(f[field]));
+    
+    const ctx = document.getElementById('outdoorFloatingCanvas').getContext('2d');
+    outdoorFloatingChart = createChart(ctx, labels, data, color);
+}
+
+function closeOutdoorFloat() {
+    document.getElementById('floatingOutdoorChart').classList.remove('active');
+    currentOutdoorType = null;
+    document.getElementById('tempOutdoorToggle').classList.remove('active');
+    document.getElementById('humidOutdoorToggle').classList.remove('active');
+    document.getElementById('tempOutdoorToggle').textContent = '🌤️ 顯示戶外';
+    document.getElementById('humidOutdoorToggle').textContent = '🌤️ 顯示戶外';
+}
+
+// 拖曳功能
+function initFloatingDrag() {
+    const floatingEl = document.getElementById('floatingOutdoorChart');
+    const header = document.getElementById('floatingHeader');
+    let isDragging = false;
+    let offsetX, offsetY;
+    
+    header.addEventListener('mousedown', (e) => {
+        isDragging = true;
+        const rect = floatingEl.getBoundingClientRect();
+        offsetX = e.clientX - rect.left;
+        offsetY = e.clientY - rect.top;
+        floatingEl.style.right = 'auto';
+        floatingEl.style.bottom = 'auto';
+    });
+    
+    document.addEventListener('mousemove', (e) => {
+        if (!isDragging) return;
+        floatingEl.style.left = (e.clientX - offsetX) + 'px';
+        floatingEl.style.top = (e.clientY - offsetY) + 'px';
+    });
+    
+    document.addEventListener('mouseup', () => {
+        isDragging = false;
+    });
+    
+    // 觸控支援
+    header.addEventListener('touchstart', (e) => {
+        isDragging = true;
+        const touch = e.touches[0];
+        const rect = floatingEl.getBoundingClientRect();
+        offsetX = touch.clientX - rect.left;
+        offsetY = touch.clientY - rect.top;
+        floatingEl.style.right = 'auto';
+        floatingEl.style.bottom = 'auto';
+    });
+    
+    document.addEventListener('touchmove', (e) => {
+        if (!isDragging) return;
+        const touch = e.touches[0];
+        floatingEl.style.left = (touch.clientX - offsetX) + 'px';
+        floatingEl.style.top = (touch.clientY - offsetY) + 'px';
+    });
+    
+    document.addEventListener('touchend', () => {
+        isDragging = false;
+    });
+}
+
 async function prefetchFullData() {
     try {
         const res = await fetch(`${API_URL_HISTORY}?results=6000`);
@@ -752,6 +1166,74 @@ async function showRoomDetail(roomIndex) {
 
 function closeModal() {
     document.getElementById('modalOverlay').classList.remove('active');
+}
+
+function showOverview() {
+    document.getElementById('overviewModalOverlay').classList.add('active');
+    document.querySelectorAll('.overview-time-btn').forEach(btn => btn.classList.toggle('active', btn.dataset.days === '1'));
+    overviewDays = 1;
+    renderOverviewCharts(1);
+}
+
+function closeOverviewModal() {
+    document.getElementById('overviewModalOverlay').classList.remove('active');
+    if (currentOutdoorType === 'temp') closeOutdoorFloat();
+}
+
+function renderOverviewCharts(days) {
+    const feeds = days === 1 ? (cachedFeeds24h || cachedFeedsFull) : cachedFeedsFull;
+    if (!feeds) return;
+    
+    const isLight = document.body.classList.contains('light-theme');
+    const colors = ['#ff6b6b', '#ffd700', '#4ecdc4', '#a78bfa'];
+    const timeLabel = days === 1 ? '24小時' : `${days} 天`;
+    
+    rooms.forEach((room, idx) => {
+        if (overviewCharts[idx]) { overviewCharts[idx].destroy(); overviewCharts[idx] = null; }
+        
+        const { labels, tempData } = getRoomHistoryData(feeds, room, days);
+        const ctx = document.getElementById(`overviewChart${idx}`)?.getContext('2d');
+        if (!ctx) return;
+        
+        const chartTitle = document.getElementById(`overviewChart${idx}`)?.parentElement?.querySelector('.chart-title');
+        if (chartTitle) chartTitle.textContent = `🌡️ ${room.name} (${timeLabel})`;
+        
+        overviewCharts[idx] = createChart(ctx, labels, tempData, colors[idx]);
+    });
+}
+
+function showHumidOverview() {
+    document.getElementById('humidOverviewModalOverlay').classList.add('active');
+    document.querySelectorAll('.humid-overview-time-btn').forEach(btn => btn.classList.toggle('active', btn.dataset.days === '1'));
+    humidOverviewDays = 1;
+    renderHumidOverviewCharts(1);
+}
+
+function closeHumidOverviewModal() {
+    document.getElementById('humidOverviewModalOverlay').classList.remove('active');
+    if (currentOutdoorType === 'humid') closeOutdoorFloat();
+}
+
+function renderHumidOverviewCharts(days) {
+    const feeds = days === 1 ? (cachedFeeds24h || cachedFeedsFull) : cachedFeedsFull;
+    if (!feeds) return;
+    
+    const isLight = document.body.classList.contains('light-theme');
+    const colors = ['#ff6b6b', '#ffd700', '#4ecdc4', '#a78bfa'];
+    const timeLabel = days === 1 ? '24小時' : `${days} 天`;
+    
+    rooms.forEach((room, idx) => {
+        if (humidOverviewCharts[idx]) { humidOverviewCharts[idx].destroy(); humidOverviewCharts[idx] = null; }
+        
+        const { labels, humidData } = getRoomHistoryData(feeds, room, days);
+        const ctx = document.getElementById(`humidOverviewChart${idx}`)?.getContext('2d');
+        if (!ctx) return;
+        
+        const chartTitle = document.getElementById(`humidOverviewChart${idx}`)?.parentElement?.querySelector('.chart-title');
+        if (chartTitle) chartTitle.textContent = `💧 ${room.name} (${timeLabel})`;
+        
+        humidOverviewCharts[idx] = createChart(ctx, labels, humidData, colors[idx]);
+    });
 }
 
 async function fetchData() {
@@ -794,6 +1276,39 @@ function toggleTheme() {
 document.getElementById('modalClose').addEventListener('click', closeModal);
 document.getElementById('modalOverlay').addEventListener('click', (e) => { if (e.target.id === 'modalOverlay') closeModal(); });
 document.getElementById('themeToggle').addEventListener('click', toggleTheme);
+document.getElementById('overviewBtn').addEventListener('click', showOverview);
+document.getElementById('overviewModalClose').addEventListener('click', closeOverviewModal);
+document.getElementById('overviewModalOverlay').addEventListener('click', (e) => { if (e.target.id === 'overviewModalOverlay') closeOverviewModal(); });
+document.querySelectorAll('.overview-time-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+        const days = parseInt(btn.dataset.days);
+        if (days === overviewDays) return;
+        overviewDays = days;
+        document.querySelectorAll('.overview-time-btn').forEach(b => b.classList.toggle('active', b.dataset.days === String(days)));
+        renderOverviewCharts(days);
+        if (currentOutdoorType === 'temp') renderOutdoorFloatingChart('temp', days);
+    });
+});
+document.getElementById('humidOverviewBtn').addEventListener('click', showHumidOverview);
+document.getElementById('humidOverviewModalClose').addEventListener('click', closeHumidOverviewModal);
+document.getElementById('humidOverviewModalOverlay').addEventListener('click', (e) => { if (e.target.id === 'humidOverviewModalOverlay') closeHumidOverviewModal(); });
+document.querySelectorAll('.humid-overview-time-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+        const days = parseInt(btn.dataset.days);
+        if (days === humidOverviewDays) return;
+        humidOverviewDays = days;
+        document.querySelectorAll('.humid-overview-time-btn').forEach(b => b.classList.toggle('active', b.dataset.days === String(days)));
+        renderHumidOverviewCharts(days);
+        if (currentOutdoorType === 'humid') renderOutdoorFloatingChart('humid', days);
+    });
+});
+
+// 浮動戶外圖表事件
+document.getElementById('tempOutdoorToggle').addEventListener('click', () => toggleOutdoorFloat('temp'));
+document.getElementById('humidOutdoorToggle').addEventListener('click', () => toggleOutdoorFloat('humid'));
+document.getElementById('floatingClose').addEventListener('click', closeOutdoorFloat);
+initFloatingDrag();
+
 document.querySelectorAll('.time-range-btn').forEach(btn => {
     btn.addEventListener('click', () => {
         const days = parseInt(btn.dataset.days);
