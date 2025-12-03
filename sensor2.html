@@ -220,6 +220,10 @@
             color: #ff9800;
         }
 
+        body.light-theme .outdoor-value.pm-high {
+            color: #e65100;
+        }
+
         .outdoor-value.pm-danger {
             color: #f44336;
         }
@@ -490,6 +494,13 @@
             border-color: var(--room-name-color);
         }
 
+        .data-count {
+            margin-left: auto;
+            font-size: clamp(0.7rem, 1.2vh, 0.85rem);
+            color: var(--metric-label-color);
+            align-self: center;
+        }
+
         .chart-container {
             background: var(--chart-bg);
             border-radius: clamp(8px, 1.5vh, 15px);
@@ -738,6 +749,7 @@
                 <button class="time-range-btn" data-days="3">3 天</button>
                 <button class="time-range-btn" data-days="7">7 天</button>
                 <button class="time-range-btn" data-days="14">14 天</button>
+                <span class="data-count" id="dataCount"></span>
             </div>
             <div class="chart-container">
                 <div class="chart-title" id="tempChartTitle">🌡️ 溫度變化 (24小時)</div>
@@ -993,6 +1005,7 @@ function renderChart(roomIndex, days) {
     const timeLabel = days === 1 ? '24小時' : `${days} 天`;
     document.getElementById('tempChartTitle').textContent = `🌡️ 溫度變化 (${timeLabel})`;
     document.getElementById('humidChartTitle').textContent = `💧 濕度變化 (${timeLabel})`;
+    document.getElementById('dataCount').textContent = `📊 ${labels.length} 筆`;
 }
 
 async function prefetch24hData() {
@@ -1492,6 +1505,7 @@ function renderExtraChart(type, days) {
         tempTitle.textContent = `⚡ HS300 耗電量 (${timeLabel})`;
         tempChart = createChart(tempCtx, labels, filtered.map(f => parseFloat(f.field6)), '#ffd700');
     }
+    document.getElementById('dataCount').textContent = `📊 ${labels.length} 筆`;
 }
 
 // 迷你圖表
