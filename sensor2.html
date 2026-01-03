@@ -240,16 +240,21 @@
 
         .rooms-grid {
             display: grid;
-            grid-template-columns: repeat(4, 1fr);
+            grid-template-columns: repeat(5, 1fr);
             gap: clamp(10px, 2vh, 25px);
-            max-width: 1200px;
+            max-width: 1400px;
             margin: 0 auto;
         }
 
-        @media (max-width: 1000px) {
-            .rooms-grid { 
+        @media (max-width: 1200px) {
+            .rooms-grid {
+                grid-template-columns: repeat(3, 1fr);
+            }
+        }
+
+        @media (max-width: 800px) {
+            .rooms-grid {
                 grid-template-columns: repeat(2, 1fr);
-                max-width: 700px;
             }
         }
 
@@ -535,7 +540,7 @@
 
         .overview-charts-grid {
             display: grid;
-            grid-template-columns: repeat(2, 1fr);
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
             gap: clamp(10px, 1.5vh, 20px);
             flex: 1;
             min-height: 0;
@@ -765,7 +770,7 @@
     <div class="modal-overlay" id="overviewModalOverlay">
         <div class="modal overview-modal">
             <div class="modal-header">
-                <h2 class="modal-title">📊 4房間溫度總覽</h2>
+                <h2 class="modal-title">📊 房間溫度總覽</h2>
                 <button class="modal-close" id="overviewModalClose">&times;</button>
             </div>
             <div class="time-range-btns">
@@ -792,6 +797,10 @@
                     <div class="chart-title">🌡️ 書房</div>
                     <canvas id="overviewChart3"></canvas>
                 </div>
+                <div class="chart-container">
+                    <div class="chart-title">🌡️ 主臥</div>
+                    <canvas id="overviewChart4"></canvas>
+                </div>
             </div>
         </div>
     </div>
@@ -799,7 +808,7 @@
     <div class="modal-overlay" id="humidOverviewModalOverlay">
         <div class="modal overview-modal">
             <div class="modal-header">
-                <h2 class="modal-title">💧 4房間濕度總覽</h2>
+                <h2 class="modal-title">💧 房間濕度總覽</h2>
                 <button class="modal-close" id="humidOverviewModalClose">&times;</button>
             </div>
             <div class="time-range-btns">
@@ -826,6 +835,10 @@
                     <div class="chart-title">💧 書房</div>
                     <canvas id="humidOverviewChart3"></canvas>
                 </div>
+                <div class="chart-container">
+                    <div class="chart-title">💧 主臥</div>
+                    <canvas id="humidOverviewChart4"></canvas>
+                </div>
             </div>
         </div>
     </div>
@@ -848,10 +861,11 @@ const API_URL_HISTORY = 'https://api.thingspeak.com/channels/72313/feeds.json';
 const API_URL_EXTRA = 'https://api.thingspeak.com/channels/565880/feeds.json';
 
 const rooms = [
-    { name: '客廳', tempField: 'field1', humidField: 'field2' },
-    { name: '房間', tempField: 'field3', humidField: 'field4' },
-    { name: '陽台', tempField: 'field5', humidField: 'field6' },
-    { name: '書房', tempField: 'field7', humidField: 'field8' }
+    { name: '客廳', tempField: 'field1', humidField: 'field2', channel: '72313' },
+    { name: '房間', tempField: 'field3', humidField: 'field4', channel: '72313' },
+    { name: '陽台', tempField: 'field5', humidField: 'field6', channel: '72313' },
+    { name: '書房', tempField: 'field7', humidField: 'field8', channel: '72313' },
+    { name: '主臥', tempField: 'field7', humidField: 'field8', channel: '565880' }
 ];
 
 let tempChart = null;
@@ -863,9 +877,9 @@ let cachedExtra24h = null;
 let cachedExtraFull = null;
 let currentModalType = null; // 'room', 'weather', 'pm25', 'miner', 'power'
 let cachedFeedsFull = null;
-let overviewCharts = [null, null, null, null];
+let overviewCharts = [null, null, null, null, null];
 let overviewDays = 1;
-let humidOverviewCharts = [null, null, null, null];
+let humidOverviewCharts = [null, null, null, null, null];
 let humidOverviewDays = 1;
 let outdoorFloatingChart = null;
 let currentOutdoorType = null; // 'temp' or 'humid'
@@ -896,15 +910,19 @@ function hasData(value) {
     return value !== null && value !== undefined && value !== '';
 }
 
-function getLatestDataPerRoom(feeds) {
+function getLatestDataPerRoom(feeds, channel = '72313') {
     const latestData = {}, latestTime = {};
     for (let i = feeds.length - 1; i >= 0; i--) {
         const feed = feeds[i];
         for (const room of rooms) {
-            if (hasData(feed[room.tempField]) && !hasData(latestData[room.tempField])) {
-                latestData[room.tempField] = feed[room.tempField];
-                latestData[room.humidField] = feed[room.humidField];
-                latestTime[room.name] = feed.created_at;
+            if (room.channel === channel) {
+                if (hasData(feed[room.tempField]) && !hasData(latestData[room.name])) {
+                    latestData[room.name] = {
+                        temp: feed[room.tempField],
+                        humid: feed[room.humidField]
+                    };
+                    latestTime[room.name] = feed.created_at;
+                }
             }
         }
     }
@@ -912,8 +930,9 @@ function getLatestDataPerRoom(feeds) {
 }
 
 function createRoomCard(room, data, updateTime, index) {
-    const temp = data[room.tempField];
-    const humid = data[room.humidField];
+    const roomData = data[room.name];
+    const temp = roomData?.temp;
+    const humid = roomData?.humid;
     const hasRoomData = hasData(temp) || hasData(humid);
     const timeStr = updateTime ? formatDateTime(updateTime) : '';
     return `
@@ -961,6 +980,13 @@ function getRoomHistoryData(feeds, room, days) {
     return { labels, tempData, humidData };
 }
 
+function getFeedsByChannel(room, days) {
+    if (room.channel === '565880') {
+        return days === 1 ? (cachedExtra24h || cachedExtraFull) : cachedExtraFull;
+    }
+    return days === 1 ? (cachedFeeds24h || cachedFeedsFull) : cachedFeedsFull;
+}
+
 function createChart(ctx, labels, data, color) {
     const isLight = document.body.classList.contains('light-theme');
     const gridColor = isLight ? 'rgba(0,0,0,0.08)' : 'rgba(255,255,255,0.05)';
@@ -996,7 +1022,7 @@ function renderChart(roomIndex, days) {
     const room = rooms[roomIndex];
     if (tempChart) { tempChart.destroy(); tempChart = null; }
     if (humidChart) { humidChart.destroy(); humidChart = null; }
-    const feeds = days === 1 ? (cachedFeeds24h || cachedFeedsFull) : cachedFeedsFull;
+    const feeds = getFeedsByChannel(room, days);
     if (!feeds) return;
     const { labels, tempData, humidData } = getRoomHistoryData(feeds, room, days);
     const isLight = document.body.classList.contains('light-theme');
@@ -1194,15 +1220,15 @@ function closeOverviewModal() {
 }
 
 function renderOverviewCharts(days) {
-    const feeds = days === 1 ? (cachedFeeds24h || cachedFeedsFull) : cachedFeedsFull;
-    if (!feeds) return;
-    
     const isLight = document.body.classList.contains('light-theme');
-    const colors = ['#ff6b6b', '#ffd700', '#4ecdc4', '#a78bfa'];
+    const colors = ['#ff6b6b', '#ffd700', '#4ecdc4', '#a78bfa', '#ff9800'];
     const timeLabel = days === 1 ? '24小時' : `${days} 天`;
     
     rooms.forEach((room, idx) => {
         if (overviewCharts[idx]) { overviewCharts[idx].destroy(); overviewCharts[idx] = null; }
+        
+        const feeds = getFeedsByChannel(room, days);
+        if (!feeds) return;
         
         const { labels, tempData } = getRoomHistoryData(feeds, room, days);
         const ctx = document.getElementById(`overviewChart${idx}`)?.getContext('2d');
@@ -1228,15 +1254,15 @@ function closeHumidOverviewModal() {
 }
 
 function renderHumidOverviewCharts(days) {
-    const feeds = days === 1 ? (cachedFeeds24h || cachedFeedsFull) : cachedFeedsFull;
-    if (!feeds) return;
-    
     const isLight = document.body.classList.contains('light-theme');
-    const colors = ['#ff6b6b', '#ffd700', '#4ecdc4', '#a78bfa'];
+    const colors = ['#ff6b6b', '#ffd700', '#4ecdc4', '#a78bfa', '#ff9800'];
     const timeLabel = days === 1 ? '24小時' : `${days} 天`;
     
     rooms.forEach((room, idx) => {
         if (humidOverviewCharts[idx]) { humidOverviewCharts[idx].destroy(); humidOverviewCharts[idx] = null; }
+        
+        const feeds = getFeedsByChannel(room, days);
+        if (!feeds) return;
         
         const { labels, humidData } = getRoomHistoryData(feeds, room, days);
         const ctx = document.getElementById(`humidOverviewChart${idx}`)?.getContext('2d');
@@ -1252,16 +1278,31 @@ function renderHumidOverviewCharts(days) {
 async function fetchData() {
     const grid = document.getElementById('roomsGrid');
     try {
-        const res = await fetch(API_URL);
-        const json = await res.json();
-        if (json.feeds && json.feeds.length > 0) {
-            const { data, times } = getLatestDataPerRoom(json.feeds);
-            grid.innerHTML = rooms.map((room, index) => createRoomCard(room, data, times[room.name], index)).join('');
+        const [res1, res2] = await Promise.all([
+            fetch(API_URL),
+            fetch(API_URL_EXTRA + '?results=10')
+        ]);
+        const json1 = await res1.json();
+        const json2 = await res2.json();
+
+        if (json1.feeds && json1.feeds.length > 0) {
+            const { data: data1, times: times1 } = getLatestDataPerRoom(json1.feeds, '72313');
+            let combinedData = { ...data1 };
+            let combinedTimes = { ...times1 };
+
+            if (json2.feeds && json2.feeds.length > 0) {
+                const { data: data2, times: times2 } = getLatestDataPerRoom(json2.feeds, '565880');
+                combinedData = { ...combinedData, ...data2 };
+                combinedTimes = { ...combinedTimes, ...times2 };
+            }
+
+            grid.innerHTML = rooms.map((room, index) => createRoomCard(room, combinedData, combinedTimes[room.name], index)).join('');
             document.querySelectorAll('.room-card').forEach(card => {
                 card.addEventListener('click', () => showRoomDetail(parseInt(card.dataset.roomIndex)));
             });
-            document.getElementById('lastUpdate').textContent = formatDateTime(json.feeds[json.feeds.length - 1].created_at);
-            // 渲染迷你圖表
+
+            const lastTime = json1.feeds[json1.feeds.length - 1].created_at;
+            document.getElementById('lastUpdate').textContent = formatDateTime(lastTime);
             renderMiniCharts();
         }
     } catch (e) {
@@ -1509,11 +1550,12 @@ function renderExtraChart(type, days) {
 }
 
 // 迷你圖表
-let miniCharts = [null, null, null, null];
+let miniCharts = [null, null, null, null, null];
 
 function renderMiniCharts() {
-    if (!cachedFeeds24h && !cachedFeedsFull) return;
-    const feeds = cachedFeeds24h || cachedFeedsFull;
+    if (!cachedFeeds24h && !cachedFeedsFull && !cachedExtra24h && !cachedExtraFull) return;
+    const mainFeeds = cachedFeeds24h || cachedFeedsFull;
+    const extraFeeds = cachedExtra24h || cachedExtraFull;
     
     const isLight = document.body.classList.contains('light-theme');
     const gridColor = isLight ? 'rgba(0,0,0,0.08)' : 'rgba(255,255,255,0.05)';
@@ -1526,12 +1568,14 @@ function renderMiniCharts() {
     rooms.forEach((room, idx) => {
         if (miniCharts[idx]) { miniCharts[idx].destroy(); miniCharts[idx] = null; }
         
+        const feeds = room.channel === '565880' ? extraFeeds : mainFeeds;
+        if (!feeds) return;
+        
         const roomFeeds = feeds.filter(f => {
             const t = new Date(f.created_at);
             return t >= startTime && hasData(f[room.tempField]);
         });
         
-        // 降採樣
         const sampled = [];
         for (let i = 0; i < roomFeeds.length; i += 4) {
             sampled.push(roomFeeds[i]);
@@ -1595,7 +1639,6 @@ function renderMiniCharts() {
             }
         });
         
-        // 圖表載入完成後顯示
         if (chartContainer) {
             setTimeout(() => chartContainer.classList.add('loaded'), 50);
         }
