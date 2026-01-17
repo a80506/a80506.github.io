@@ -490,7 +490,7 @@
                 let pm25_str = "";
 
                 for (const city of citiesToCheck) {
-                    for (const record of data.records) {
+                    for (const record of data) {
                         if (record.sitename === city && parseInt(record["pm2.5"]) > 0) {
                             found = 1;
                             site = record.sitename;
