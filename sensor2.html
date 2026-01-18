@@ -1421,7 +1421,7 @@ async function fetchPM25() {
         const cities = ['新莊', '林口', '菜寮', '五股', '蘆洲', '板橋'];
         
         for (const city of cities) {
-            const record = data.records?.find(r => r.sitename === city && parseInt(r['pm2.5']) > 0);
+            const record = data?.find(r => r.sitename === city && parseInt(r['pm2.5']) > 0);
             if (record) {
                 const pm25 = parseInt(record['pm2.5']);
                 const el = document.getElementById('pm25Value');
