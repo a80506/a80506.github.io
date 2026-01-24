@@ -794,10 +794,13 @@
                 <button class="modal-close" id="modalClose">&times;</button>
             </div>
             <div class="time-range-btns">
-                <button class="time-range-btn active" data-days="1">24 小時</button>
-                <button class="time-range-btn" data-days="3">3 天</button>
-                <button class="time-range-btn" data-days="7">7 天</button>
-                <button class="time-range-btn" data-days="14">14 天</button>
+                <button class="time-range-btn active" data-days="1">24H</button>
+                <button class="time-range-btn" data-days="3">3天</button>
+                <button class="time-range-btn" data-days="7">7天</button>
+                <button class="time-range-btn" data-days="30">30天</button>
+                <button class="time-range-btn" data-days="60">60天</button>
+                <button class="time-range-btn" data-days="90">90天</button>
+                <button class="time-range-btn" data-days="180">180天</button>
                 <span class="data-count" id="dataCount"></span>
             </div>
             <div class="chart-container">
@@ -818,10 +821,13 @@
                 <button class="modal-close" id="overviewModalClose">&times;</button>
             </div>
             <div class="time-range-btns">
-                <button class="overview-time-btn active" data-days="1">24 小時</button>
-                <button class="overview-time-btn" data-days="3">3 天</button>
-                <button class="overview-time-btn" data-days="7">7 天</button>
-                <button class="overview-time-btn" data-days="14">14 天</button>
+                <button class="overview-time-btn active" data-days="1">24H</button>
+                <button class="overview-time-btn" data-days="3">3天</button>
+                <button class="overview-time-btn" data-days="7">7天</button>
+                <button class="overview-time-btn" data-days="30">30天</button>
+                <button class="overview-time-btn" data-days="60">60天</button>
+                <button class="overview-time-btn" data-days="90">90天</button>
+                <button class="overview-time-btn" data-days="180">180天</button>
                 <button class="outdoor-toggle-btn" id="tempOutdoorToggle">🌤️ 顯示戶外</button>
             </div>
             <div class="overview-charts-grid">
@@ -856,10 +862,13 @@
                 <button class="modal-close" id="humidOverviewModalClose">&times;</button>
             </div>
             <div class="time-range-btns">
-                <button class="humid-overview-time-btn active" data-days="1">24 小時</button>
-                <button class="humid-overview-time-btn" data-days="3">3 天</button>
-                <button class="humid-overview-time-btn" data-days="7">7 天</button>
-                <button class="humid-overview-time-btn" data-days="14">14 天</button>
+                <button class="humid-overview-time-btn active" data-days="1">24H</button>
+                <button class="humid-overview-time-btn" data-days="3">3天</button>
+                <button class="humid-overview-time-btn" data-days="7">7天</button>
+                <button class="humid-overview-time-btn" data-days="30">30天</button>
+                <button class="humid-overview-time-btn" data-days="60">60天</button>
+                <button class="humid-overview-time-btn" data-days="90">90天</button>
+                <button class="humid-overview-time-btn" data-days="180">180天</button>
                 <button class="outdoor-toggle-btn" id="humidOutdoorToggle">🌤️ 顯示戶外</button>
             </div>
             <div class="overview-charts-grid">
@@ -904,23 +913,44 @@
         const API_URL_HISTORY = 'https://api.thingspeak.com/channels/72313/feeds.json';
         const API_URL_EXTRA = 'https://api.thingspeak.com/channels/565880/feeds.json';
 
+        const API_URL_LONG_TERM_1 = `https://api.thingspeak.com/channels/${CONFIG.LONG_TERM_CHANNEL_1}/feeds.json`;
+        const API_URL_LONG_TERM_2 = `https://api.thingspeak.com/channels/${CONFIG.LONG_TERM_CHANNEL_2}/feeds.json`;
+
         const rooms = [
-            { name: '客廳', tempField: 'field1', humidField: 'field2', channel: '72313' },
-            { name: '房間', tempField: 'field3', humidField: 'field4', channel: '72313' },
-            { name: '陽台', tempField: 'field5', humidField: 'field6', channel: '72313' },
-            { name: '書房', tempField: 'field7', humidField: 'field8', channel: '72313' },
-            { name: '主臥', tempField: 'field7', humidField: 'field8', channel: '565880' }
+            {
+                name: '客廳', tempField: 'field1', humidField: 'field2', channel: '72313',
+                longTerm: { channel: CONFIG.LONG_TERM_CHANNEL_1, tempField: 'field1', humidField: 'field2' }
+            },
+            {
+                name: '房間', tempField: 'field3', humidField: 'field4', channel: '72313',
+                longTerm: { channel: CONFIG.LONG_TERM_CHANNEL_1, tempField: 'field3', humidField: 'field4' }
+            },
+            {
+                name: '陽台', tempField: 'field5', humidField: 'field6', channel: '72313',
+                longTerm: { channel: CONFIG.LONG_TERM_CHANNEL_1, tempField: 'field5', humidField: 'field6' }
+            },
+            {
+                name: '書房', tempField: 'field7', humidField: 'field8', channel: '72313',
+                longTerm: { channel: CONFIG.LONG_TERM_CHANNEL_1, tempField: 'field7', humidField: 'field8' }
+            },
+            {
+                name: '主臥', tempField: 'field7', humidField: 'field8', channel: '565880',
+                longTerm: { channel: CONFIG.LONG_TERM_CHANNEL_2, tempField: 'field7', humidField: 'field8' }
+            }
         ];
 
         let tempChart = null;
         let humidChart = null;
         let currentRoomIndex = null;
         let currentDays = 1;
-        let cachedFeeds24h = null;
-        let cachedExtra24h = null;
-        let cachedExtraFull = null;
+        // let cachedFeeds24h = null; // Removed
+        let cachedFeedsFull = null; // Stores ~7 days high res
+        // let cachedExtra24h = null; // Removed
+        let cachedExtraFull = null; // Stores ~7 days high res
+        let cachedLongTerm1 = {}; // cached by duration
+        let cachedLongTerm2 = {}; // cached by duration
+        let isLongTermReady = false;
         let currentModalType = null; // 'room', 'weather', 'pm25', 'miner', 'power'
-        let cachedFeedsFull = null;
         let overviewCharts = [null, null, null, null, null];
         let overviewDays = 1;
         let humidOverviewCharts = [null, null, null, null, null];
@@ -1018,7 +1048,13 @@
                 const feedTime = new Date(feed.created_at);
                 return feedTime >= startTime && hasData(feed[room.tempField]);
             });
-            const sampleRate = days === 1 ? 1 : days === 3 ? 3 : days === 7 ? 6 : 12;
+            // Disable sampling for 3/7 days if using high-res data, or keep it low. 
+            // 7 days * 1440 mins / 20 mins interval = ~500 points.
+            // If we revert to high-res for 7 days: 7 * 288 (5 min interval) = 2016 points. 
+            // Let's set sample rate to 1 for all, chart.js handles it well, or minimal sampling.
+            // Disable sampling for 3/7 days if using long-term data (1 point/hour is already sparse enough). 
+            // 7 days * 24 points = 168 points. Chart.js handles this easily.
+            const sampleRate = days === 1 ? 1 : days === 3 ? 1 : days === 7 ? 1 : days <= 30 ? 1 : days <= 60 ? 2 : 4;
             const labels = [], tempData = [], humidData = [];
             for (let i = 0; i < filteredFeeds.length; i += sampleRate) {
                 const feed = filteredFeeds[i];
@@ -1030,10 +1066,26 @@
         }
 
         function getFeedsByChannel(room, days) {
-            if (room.channel === '565880') {
-                return days === 1 ? (cachedExtra24h || cachedExtraFull) : cachedExtraFull;
+            if (days >= 3) {
+                // Long Term Data (for >= 3 days)
+                if (room.longTerm.channel === CONFIG.LONG_TERM_CHANNEL_1) {
+                    return cachedLongTerm1['full'];
+                } else if (room.longTerm.channel === CONFIG.LONG_TERM_CHANNEL_2) {
+                    return cachedLongTerm2['full'];
+                }
             }
-            return days === 1 ? (cachedFeeds24h || cachedFeedsFull) : cachedFeedsFull;
+            if (room.channel === '565880') {
+                return cachedExtraFull;
+            }
+            return cachedFeedsFull;
+        }
+
+        // Ensure fetching correct fields for long term data
+        function getRoomDataFields(room, days) {
+            if (days >= 3 && room.longTerm) {
+                return { tempField: room.longTerm.tempField, humidField: room.longTerm.humidField };
+            }
+            return { tempField: room.tempField, humidField: room.humidField };
         }
 
         function createChart(ctx, labels, data, color) {
@@ -1073,8 +1125,29 @@
             if (tempChart) { tempChart.destroy(); tempChart = null; }
             if (humidChart) { humidChart.destroy(); humidChart = null; }
             const feeds = getFeedsByChannel(room, days);
-            if (!feeds) return;
-            const { labels, tempData, humidData } = getRoomHistoryData(feeds, room, days);
+            if (!feeds) {
+                // If long term data not cached, fetch it
+                // If long term data not cached, fetch it
+                if (days >= 3) {
+                    fetchLongTermData(days).then(() => {
+                        if (currentRoomIndex === roomIndex && currentDays === days) {
+                            renderChart(roomIndex, days);
+                        }
+                    });
+                    return;
+                } else if (days > 1 && !cachedFeedsFull) {
+                    // Ensure full history is fetched for 3/7 days
+                    prefetchFullData().then(() => {
+                        if (currentRoomIndex === roomIndex && currentDays === days) renderChart(roomIndex, days);
+                    });
+                    prefetchExtraFull(); // Also fetch extra
+                    return;
+                }
+                return;
+            }
+            // Use correct fields for long term data
+            const fields = getRoomDataFields(room, days);
+            const { labels, tempData, humidData } = getRoomHistoryData(feeds, { ...room, ...fields }, days);
             const isLight = document.body.classList.contains('light-theme');
             tempChart = createChart(document.getElementById('tempChart').getContext('2d'), labels, tempData, isLight ? '#e65100' : '#ff6b6b');
             humidChart = createChart(document.getElementById('humidChart').getContext('2d'), labels, humidData, isLight ? '#0288d1' : '#ffd700');
@@ -1139,7 +1212,7 @@
         }
 
         function renderOutdoorFloatingChart(type, days) {
-            const feeds = days === 1 ? (cachedExtra24h || cachedExtraFull) : cachedExtraFull;
+            const feeds = getExtraFeeds(days);
             if (!feeds) return;
 
             if (outdoorFloatingChart) { outdoorFloatingChart.destroy(); outdoorFloatingChart = null; }
@@ -1235,6 +1308,10 @@
         }
 
         async function showRoomDetail(roomIndex) {
+            if (!isLongTermReady) {
+                alert('詳細資料載入中，請稍候...');
+                return;
+            }
             currentRoomIndex = roomIndex;
             currentModalType = 'room';
             currentDays = 1;
@@ -1245,10 +1322,10 @@
             document.getElementById('modalTitle').textContent = `${rooms[roomIndex].name} - 歷史數據`;
             document.getElementById('modalOverlay').classList.add('active');
             document.querySelectorAll('.time-range-btn').forEach(btn => btn.classList.toggle('active', btn.dataset.days === '1'));
-            if (cachedFeeds24h || cachedFeedsFull) {
+            if (cachedFeedsFull) {
                 renderChart(roomIndex, 1);
             } else {
-                await prefetch24hData();
+                await fetchHighResHistory();
                 renderChart(roomIndex, 1);
             }
         }
@@ -1258,6 +1335,10 @@
         }
 
         function showOverview() {
+            if (!isLongTermReady) {
+                alert('詳細資料載入中，請稍候...');
+                return;
+            }
             document.getElementById('overviewModalOverlay').classList.add('active');
             document.querySelectorAll('.overview-time-btn').forEach(btn => btn.classList.toggle('active', btn.dataset.days === '1'));
             overviewDays = 1;
@@ -1280,7 +1361,24 @@
                 const feeds = getFeedsByChannel(room, days);
                 if (!feeds) return;
 
-                const { labels, tempData } = getRoomHistoryData(feeds, room, days);
+                if (days >= 3 && !feeds) {
+                    fetchLongTermData(days).then(() => { if (overviewDays === days) renderOverviewCharts(days); });
+                    return;
+                }
+                if (!feeds) return;
+
+                if (days >= 3 && !feeds) {
+                    fetchLongTermData(days).then(() => { if (overviewDays === days) renderOverviewCharts(days); });
+                    return;
+                }
+                if (!feeds) {
+                    if (days > 1) prefetchFullData().then(() => { if (overviewDays === days) renderOverviewCharts(days); });
+                    return;
+                }
+
+                // Use correct fields for long term data
+                const fields = getRoomDataFields(room, days);
+                const { labels, tempData } = getRoomHistoryData(feeds, { ...room, ...fields }, days);
                 const ctx = document.getElementById(`overviewChart${idx}`)?.getContext('2d');
                 if (!ctx) return;
 
@@ -1292,6 +1390,10 @@
         }
 
         function showHumidOverview() {
+            if (!isLongTermReady) {
+                alert('詳細資料載入中，請稍候...');
+                return;
+            }
             document.getElementById('humidOverviewModalOverlay').classList.add('active');
             document.querySelectorAll('.humid-overview-time-btn').forEach(btn => btn.classList.toggle('active', btn.dataset.days === '1'));
             humidOverviewDays = 1;
@@ -1314,7 +1416,24 @@
                 const feeds = getFeedsByChannel(room, days);
                 if (!feeds) return;
 
-                const { labels, humidData } = getRoomHistoryData(feeds, room, days);
+                if (days >= 3 && !feeds) {
+                    fetchLongTermData(days).then(() => { if (humidOverviewDays === days) renderHumidOverviewCharts(days); });
+                    return;
+                }
+                if (!feeds) {
+                    if (days > 1) prefetchFullData().then(() => { if (humidOverviewDays === days) renderHumidOverviewCharts(days); });
+                    return;
+                }
+
+                if (days >= 3 && !feeds) {
+                    fetchLongTermData(days).then(() => { if (humidOverviewDays === days) renderHumidOverviewCharts(days); });
+                    return;
+                }
+                if (!feeds) return;
+
+                // Use correct fields for long term data
+                const fields = getRoomDataFields(room, days);
+                const { labels, humidData } = getRoomHistoryData(feeds, { ...room, ...fields }, days);
                 const ctx = document.getElementById(`humidOverviewChart${idx}`)?.getContext('2d');
                 if (!ctx) return;
 
@@ -1498,7 +1617,7 @@
                         const humid = station.WeatherElement.RelativeHumidity;
                         const obsTime = station.ObsTime?.DateTime;
 
-                        if (obsTime && Date.now() - Date.parse(obsTime) > 3600000) continue; // 1 hour timeout
+                        // if (obsTime && Date.now() - Date.parse(obsTime) > 3600000) continue; // 1 hour timeout (Disabled for 2026 Sim)
                         if (temp && humid && parseFloat(temp) > -10 && parseFloat(humid) > 0) {
                             const el = document.getElementById('weatherValue');
                             el.textContent = `${city} ${temp}°C ${parseInt(humid)}%`;
@@ -1558,16 +1677,34 @@
             } catch (e) { console.error('Error prefetching extra 24h:', e); }
         }
 
-        async function prefetchExtraFull() {
+        async function fetchHighResHistory() {
             try {
-                const res = await fetch(`${API_URL_EXTRA}?results=1344`);
+                // Fetch 24H (1440 mins) only, as >= 3 days uses Long Term data
+                const res = await fetch(`${API_URL_HISTORY}?minutes=1440`);
                 const json = await res.json();
-                if (json.feeds) cachedExtraFull = json.feeds;
-            } catch (e) { console.error('Error prefetching extra full:', e); }
+                if (json.feeds) cachedFeedsFull = json.feeds;
+            } catch (e) { console.error('Error fetching high res history:', e); }
         }
 
+        async function fetchExtraHighResHistory() {
+            try {
+                const res = await fetch(`${API_URL_EXTRA}?minutes=1440`);
+                const json = await res.json();
+                if (json.feeds) cachedExtraFull = json.feeds;
+            } catch (e) { console.error('Error fetching extra high res:', e); }
+        }
+
+        function getExtraFeeds(days) {
+            if (days > 2) {
+                return cachedLongTerm2['full'];
+            }
+            return cachedExtraFull;
+        }
+
+
+
         function updateExtraDisplay() {
-            const feeds = cachedExtra24h || cachedExtraFull;
+            const feeds = cachedExtraFull;
             if (!feeds || feeds.length === 0) return;
             const latest = feeds[feeds.length - 1];
 
@@ -1591,6 +1728,34 @@
             if (power) {
                 document.getElementById('powerValue').textContent = `${power} W`;
             }
+        }
+
+        async function prefetchLongTermFull() {
+            // Fetch max duration (180 days) immediately
+            const minutes = 180 * 1440;
+            try {
+                const [res1, res2] = await Promise.all([
+                    fetch(`${API_URL_LONG_TERM_1}?minutes=${minutes}`),
+                    fetch(`${API_URL_LONG_TERM_2}?minutes=${minutes}`)
+                ]);
+                const json1 = await res1.json();
+                const json2 = await res2.json();
+
+                // Cache the full dataset as the source for all long-term durations
+                cachedLongTerm1['full'] = json1.feeds || [];
+                cachedLongTerm2['full'] = json2.feeds || [];
+                isLongTermReady = true;
+                // Optional: alert('Data Ready'); or update UI state
+
+            } catch (e) { console.error('Error prefetching long term full:', e); }
+        }
+
+        async function fetchLongTermData(days) {
+            // If full data is already cached, no need to fetch anything
+            if (cachedLongTerm1['full'] && cachedLongTerm2['full']) return;
+
+            // Fallback: if somehow not preloaded, fetch specific duration (or just fetch full)
+            await prefetchLongTermFull();
         }
 
         // 顯示額外資料的 Modal
@@ -1625,7 +1790,7 @@
             if (tempChart) { tempChart.destroy(); tempChart = null; }
             if (humidChart) { humidChart.destroy(); humidChart = null; }
 
-            const feeds = days === 1 ? (cachedExtra24h || cachedExtraFull) : cachedExtraFull;
+            const feeds = getExtraFeeds(days);
             if (!feeds) return;
 
             const now = new Date();
@@ -1672,9 +1837,9 @@
         let miniCharts = [null, null, null, null, null];
 
         function renderMiniCharts() {
-            if (!cachedFeeds24h && !cachedFeedsFull && !cachedExtra24h && !cachedExtraFull) return;
-            const mainFeeds = cachedFeeds24h || cachedFeedsFull;
-            const extraFeeds = cachedExtra24h || cachedExtraFull;
+            if (!cachedFeedsFull && !cachedExtraFull) return;
+            const mainFeeds = cachedFeedsFull;
+            const extraFeeds = cachedExtraFull;
 
             const isLight = document.body.classList.contains('light-theme');
             const gridColor = isLight ? 'rgba(0,0,0,0.08)' : 'rgba(255,255,255,0.05)';
@@ -1766,15 +1931,25 @@
 
         // 初始化
         initTheme();
-        fetchData();
+        fetchData().then(() => {
+            // After main data is loaded and rendered, start heavy tasks
+            prefetchLongTermFull();
+        });
         fetchWeather();
         fetchPM25();
-        prefetch24hData().then(() => { renderMiniCharts(); prefetchFullData(); });
-        prefetchExtra24h().then(() => { renderMiniCharts(); prefetchExtraFull(); });
+
+        // Single consolidated fetch for high-res history (7 Days)
+        fetchHighResHistory().then(() => { renderMiniCharts(); });
+        fetchExtraHighResHistory().then(() => { renderMiniCharts(); });
+
         setInterval(fetchData, 30000);
         setInterval(() => { fetchWeather(); fetchPM25(); }, 10 * 60 * 1000);
-        setInterval(() => { prefetch24hData().then(() => prefetchFullData()); }, 5 * 60 * 1000);
-        setInterval(() => { prefetchExtra24h().then(() => { renderMiniCharts(); prefetchExtraFull(); }); }, 5 * 60 * 1000);
+
+        // Refresh high-res history every 5 mins
+        setInterval(() => { fetchHighResHistory().then(() => renderMiniCharts()); }, 5 * 60 * 1000);
+        setInterval(() => { fetchExtraHighResHistory().then(() => renderMiniCharts()); }, 5 * 60 * 1000);
+
+        setInterval(prefetchLongTermFull, 15 * 60 * 1000); // Refresh long term data every 15 min
     </script>
 </body>
 
