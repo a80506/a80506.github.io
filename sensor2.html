@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="zh-TW">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -11,7 +12,8 @@
             box-sizing: border-box;
         }
 
-        html, body {
+        html,
+        body {
             height: 100%;
         }
 
@@ -23,7 +25,7 @@
             display: flex;
             flex-direction: column;
             transition: all 0.3s ease;
-            
+
             /* 暗色主題變數 */
             --bg: linear-gradient(135deg, #0a0a0f 0%, #1a1a2e 50%, #0f0f1a 100%);
             --text-color: #e0e0e0;
@@ -50,7 +52,7 @@
             --modal-border: rgba(255, 215, 0, 0.3);
             --chart-bg: rgba(0, 0, 0, 0.3);
             --chart-grid: rgba(255, 255, 255, 0.05);
-            
+
             background: var(--bg);
             color: var(--text-color);
         }
@@ -82,7 +84,7 @@
             --modal-border: #e0e0e0;
             --chart-bg: #f8f9fa;
             --chart-grid: rgba(0, 0, 0, 0.05);
-            
+
             background: var(--bg);
             color: var(--text-color);
         }
@@ -165,8 +167,15 @@
         }
 
         @keyframes gradient {
-            0%, 100% { background-position: 0% center; }
-            50% { background-position: 100% center; }
+
+            0%,
+            100% {
+                background-position: 0% center;
+            }
+
+            50% {
+                background-position: 100% center;
+            }
         }
 
         .update-time {
@@ -259,7 +268,9 @@
         }
 
         @media (max-width: 500px) {
-            .rooms-grid { grid-template-columns: 1fr; }
+            .rooms-grid {
+                grid-template-columns: 1fr;
+            }
         }
 
         .room-mini-chart {
@@ -268,7 +279,9 @@
         }
 
         @media (min-height: 600px) {
-            .room-mini-chart { display: block; }
+            .room-mini-chart {
+                display: block;
+            }
         }
 
         .room-mini-chart canvas {
@@ -331,8 +344,15 @@
         }
 
         @keyframes pulse {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.5; }
+
+            0%,
+            100% {
+                opacity: 1;
+            }
+
+            50% {
+                opacity: 0.5;
+            }
         }
 
         .offline-badge {
@@ -344,9 +364,17 @@
             margin-left: auto;
         }
 
-        .no-data-card { opacity: 0.5; }
-        .no-data-card:hover { transform: none; }
-        .no-data-card .room-name { color: #888; }
+        .no-data-card {
+            opacity: 0.5;
+        }
+
+        .no-data-card:hover {
+            transform: none;
+        }
+
+        .no-data-card .room-name {
+            color: #888;
+        }
 
         .room-update-time {
             margin-top: clamp(8px, 1vh, 15px);
@@ -390,9 +418,18 @@
             letter-spacing: 1px;
         }
 
-        .temp .metric-value { color: var(--temp-color); }
-        .humid .metric-value { color: var(--humid-color); }
-        .no-data { color: #666; font-size: 1.5rem; }
+        .temp .metric-value {
+            color: var(--temp-color);
+        }
+
+        .humid .metric-value {
+            color: var(--humid-color);
+        }
+
+        .no-data {
+            color: #666;
+            font-size: 1.5rem;
+        }
 
         .loading {
             text-align: center;
@@ -416,7 +453,9 @@
             padding: 2vh 2vw;
         }
 
-        .modal-overlay.active { display: flex; }
+        .modal-overlay.active {
+            display: flex;
+        }
 
         .modal {
             background: var(--modal-bg);
@@ -459,7 +498,9 @@
             line-height: 1;
         }
 
-        .modal-close:hover { color: #ff6b6b; }
+        .modal-close:hover {
+            color: #ff6b6b;
+        }
 
         .time-range-btns {
             display: flex;
@@ -517,7 +558,9 @@
             flex-direction: column;
         }
 
-        .chart-container:last-child { margin-bottom: 0; }
+        .chart-container:last-child {
+            margin-bottom: 0;
+        }
 
         .chart-title {
             color: var(--metric-label-color);
@@ -700,8 +743,9 @@
             width: 100% !important;
             height: 100% !important;
         }
-</style>
+    </style>
 </head>
+
 <body>
     <div class="container">
         <header>
@@ -711,7 +755,7 @@
             <button class="overview-btn" id="overviewBtn" title="4房間溫度總覽">🌡️</button>
             <button class="overview-btn humid-btn" id="humidOverviewBtn" title="4房間濕度總覽">💧</button>
         </header>
-        
+
         <div class="outdoor-info">
             <div class="outdoor-item clickable" id="weatherItem">
                 <span class="outdoor-icon">🌤️</span>
@@ -724,7 +768,7 @@
                 <span class="outdoor-value" id="pm25Value">--</span>
             </div>
         </div>
-        
+
         <div class="outdoor-info">
             <div class="outdoor-item clickable" id="minerItem">
                 <span class="outdoor-icon">⛏️</span>
@@ -737,9 +781,9 @@
                 <span class="outdoor-value" id="powerValue">--</span>
             </div>
         </div>
-        
+
         <div class="rooms-grid" id="roomsGrid"></div>
-        
+
 
     </div>
 
@@ -856,806 +900,882 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="config.js"></script>
     <script>
-const API_URL = 'https://api.thingspeak.com/channels/72313/feeds.json?results=50';
-const API_URL_HISTORY = 'https://api.thingspeak.com/channels/72313/feeds.json';
-const API_URL_EXTRA = 'https://api.thingspeak.com/channels/565880/feeds.json';
+        const API_URL = 'https://api.thingspeak.com/channels/72313/feeds.json?results=50';
+        const API_URL_HISTORY = 'https://api.thingspeak.com/channels/72313/feeds.json';
+        const API_URL_EXTRA = 'https://api.thingspeak.com/channels/565880/feeds.json';
 
-const rooms = [
-    { name: '客廳', tempField: 'field1', humidField: 'field2', channel: '72313' },
-    { name: '房間', tempField: 'field3', humidField: 'field4', channel: '72313' },
-    { name: '陽台', tempField: 'field5', humidField: 'field6', channel: '72313' },
-    { name: '書房', tempField: 'field7', humidField: 'field8', channel: '72313' },
-    { name: '主臥', tempField: 'field7', humidField: 'field8', channel: '565880' }
-];
+        const rooms = [
+            { name: '客廳', tempField: 'field1', humidField: 'field2', channel: '72313' },
+            { name: '房間', tempField: 'field3', humidField: 'field4', channel: '72313' },
+            { name: '陽台', tempField: 'field5', humidField: 'field6', channel: '72313' },
+            { name: '書房', tempField: 'field7', humidField: 'field8', channel: '72313' },
+            { name: '主臥', tempField: 'field7', humidField: 'field8', channel: '565880' }
+        ];
 
-let tempChart = null;
-let humidChart = null;
-let currentRoomIndex = null;
-let currentDays = 1;
-let cachedFeeds24h = null;
-let cachedExtra24h = null;
-let cachedExtraFull = null;
-let currentModalType = null; // 'room', 'weather', 'pm25', 'miner', 'power'
-let cachedFeedsFull = null;
-let overviewCharts = [null, null, null, null, null];
-let overviewDays = 1;
-let humidOverviewCharts = [null, null, null, null, null];
-let humidOverviewDays = 1;
-let outdoorFloatingChart = null;
-let currentOutdoorType = null; // 'temp' or 'humid'
+        let tempChart = null;
+        let humidChart = null;
+        let currentRoomIndex = null;
+        let currentDays = 1;
+        let cachedFeeds24h = null;
+        let cachedExtra24h = null;
+        let cachedExtraFull = null;
+        let currentModalType = null; // 'room', 'weather', 'pm25', 'miner', 'power'
+        let cachedFeedsFull = null;
+        let overviewCharts = [null, null, null, null, null];
+        let overviewDays = 1;
+        let humidOverviewCharts = [null, null, null, null, null];
+        let humidOverviewDays = 1;
+        let outdoorFloatingChart = null;
+        let currentOutdoorType = null; // 'temp' or 'humid'
 
-function formatValue(value, unit) {
-    if (value === null || value === undefined || value === '') {
-        return '<span class="no-data">--</span>';
-    }
-    return `${parseFloat(value).toFixed(1)}${unit}`;
-}
+        function formatValue(value, unit) {
+            if (value === null || value === undefined || value === '') {
+                return '<span class="no-data">--</span>';
+            }
+            return `${parseFloat(value).toFixed(1)}${unit}`;
+        }
 
-function formatDateTime(dateStr) {
-    const date = new Date(dateStr);
-    return date.toLocaleString('zh-TW', {
-        year: 'numeric', month: '2-digit', day: '2-digit',
-        hour: '2-digit', minute: '2-digit', second: '2-digit'
-    });
-}
+        function formatDateTime(dateStr) {
+            const date = new Date(dateStr);
+            return date.toLocaleString('zh-TW', {
+                year: 'numeric', month: '2-digit', day: '2-digit',
+                hour: '2-digit', minute: '2-digit', second: '2-digit'
+            });
+        }
 
-function formatTime(dateStr) {
-    const date = new Date(dateStr);
-    const datePart = date.toLocaleString('en-US', { month: '2-digit', day: '2-digit' });
-    const timePart = date.toLocaleString('en-US', { hour: '2-digit', minute: '2-digit', hour12: false });
-    return [datePart, timePart];
-}
+        function formatTime(dateStr) {
+            const date = new Date(dateStr);
+            const datePart = date.toLocaleString('en-US', { month: '2-digit', day: '2-digit' });
+            const timePart = date.toLocaleString('en-US', { hour: '2-digit', minute: '2-digit', hour12: false });
+            return [datePart, timePart];
+        }
 
-function hasData(value) {
-    return value !== null && value !== undefined && value !== '';
-}
+        function hasData(value) {
+            return value !== null && value !== undefined && value !== '';
+        }
 
-function getLatestDataPerRoom(feeds, channel = '72313') {
-    const latestData = {}, latestTime = {};
-    for (let i = feeds.length - 1; i >= 0; i--) {
-        const feed = feeds[i];
-        for (const room of rooms) {
-            if (room.channel === channel) {
-                if (hasData(feed[room.tempField]) && !hasData(latestData[room.name])) {
-                    latestData[room.name] = {
-                        temp: feed[room.tempField],
-                        humid: feed[room.humidField]
-                    };
-                    latestTime[room.name] = feed.created_at;
+        function getLatestDataPerRoom(feeds, channel = '72313') {
+            const latestData = {}, latestTime = {};
+            for (let i = feeds.length - 1; i >= 0; i--) {
+                const feed = feeds[i];
+                for (const room of rooms) {
+                    if (room.channel === channel) {
+                        if (hasData(feed[room.tempField]) && !hasData(latestData[room.name])) {
+                            latestData[room.name] = {
+                                temp: feed[room.tempField],
+                                humid: feed[room.humidField]
+                            };
+                            latestTime[room.name] = feed.created_at;
+                        }
+                    }
                 }
             }
+            return { data: latestData, times: latestTime };
         }
-    }
-    return { data: latestData, times: latestTime };
-}
 
-function createRoomCard(room, data, updateTime, index) {
-    const roomData = data[room.name];
-    const temp = roomData?.temp;
-    const humid = roomData?.humid;
-    const hasRoomData = hasData(temp) || hasData(humid);
-    const timeStr = updateTime ? formatDateTime(updateTime) : '';
-    return `
-        <div class="room-card ${hasRoomData ? '' : 'no-data-card'}" data-room-index="${index}">
+        function createRoomCard(room, data, updateTime, index) {
+            const roomData = data[room.name];
+            const temp = roomData?.temp;
+            const humid = roomData?.humid;
+            const hasRoomData = hasData(temp) || hasData(humid);
+            const timeStr = updateTime ? formatDateTime(updateTime) : '';
+
+            // Check if data is stale (> 1 hour)
+            const isStale = updateTime && (new Date() - new Date(updateTime).getTime() > 60 * 60 * 1000);
+            const displayData = isStale ? false : hasRoomData;
+
+            return `
+        <div class="room-card ${displayData ? '' : 'no-data-card'}" data-room-index="${index}">
             <div class="room-name">
-                <span class="status-dot ${hasRoomData ? 'online' : 'offline'}"></span>
+                <span class="status-dot ${displayData ? 'online' : 'offline'}"></span>
                 ${room.name}
-                ${hasRoomData ? '' : '<span class="offline-badge">離線</span>'}
+                ${displayData ? '' : '<span class="offline-badge">離線</span>'}
             </div>
             <div class="metrics">
                 <div class="metric temp">
                     <div class="metric-icon">🌡️</div>
-                    <div class="metric-value">${formatValue(temp, '°C')}</div>
+                    <div class="metric-value">${isStale ? '--' : formatValue(temp, '°C')}</div>
                     <div class="metric-label">溫度</div>
                 </div>
                 <div class="metric humid">
                     <div class="metric-icon">💧</div>
-                    <div class="metric-value">${formatValue(humid, '%')}</div>
+                    <div class="metric-value">${isStale ? '--' : formatValue(humid, '%')}</div>
                     <div class="metric-label">濕度</div>
                 </div>
             </div>
             <div class="room-mini-chart">
                 <canvas id="miniChart${index}"></canvas>
             </div>
-            ${hasRoomData ? `<div class="room-update-time">更新: ${timeStr}</div>` : ''}
+            ${displayData ? `<div class="room-update-time">更新: ${timeStr}</div>` : ''}
         </div>
     `;
-}
-
-function getRoomHistoryData(feeds, room, days) {
-    const now = new Date();
-    const startTime = new Date(now.getTime() - days * 24 * 60 * 60 * 1000);
-    const filteredFeeds = feeds.filter(feed => {
-        const feedTime = new Date(feed.created_at);
-        return feedTime >= startTime && hasData(feed[room.tempField]);
-    });
-    const sampleRate = days === 1 ? 1 : days === 3 ? 3 : days === 7 ? 6 : 12;
-    const labels = [], tempData = [], humidData = [];
-    for (let i = 0; i < filteredFeeds.length; i += sampleRate) {
-        const feed = filteredFeeds[i];
-        labels.push(formatTime(feed.created_at));
-        tempData.push(parseFloat(feed[room.tempField]));
-        humidData.push(parseFloat(feed[room.humidField]));
-    }
-    return { labels, tempData, humidData };
-}
-
-function getFeedsByChannel(room, days) {
-    if (room.channel === '565880') {
-        return days === 1 ? (cachedExtra24h || cachedExtraFull) : cachedExtraFull;
-    }
-    return days === 1 ? (cachedFeeds24h || cachedFeedsFull) : cachedFeedsFull;
-}
-
-function createChart(ctx, labels, data, color) {
-    const isLight = document.body.classList.contains('light-theme');
-    const gridColor = isLight ? 'rgba(0,0,0,0.08)' : 'rgba(255,255,255,0.05)';
-    const textColor = isLight ? '#666' : '#888';
-    return new Chart(ctx, {
-        type: 'line',
-        data: {
-            labels: labels,
-            datasets: [{
-                data: data,
-                borderColor: color,
-                backgroundColor: color + '20',
-                fill: true,
-                tension: 0.5,
-                borderWidth: 2,
-                pointRadius: 1,
-                pointHoverRadius: 4
-            }]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: { legend: { display: false } },
-            scales: {
-                x: { ticks: { color: textColor, maxTicksLimit: 8 }, grid: { color: gridColor } },
-                y: { ticks: { color: textColor }, grid: { color: gridColor } }
-            }
         }
-    });
-}
 
-function renderChart(roomIndex, days) {
-    const room = rooms[roomIndex];
-    if (tempChart) { tempChart.destroy(); tempChart = null; }
-    if (humidChart) { humidChart.destroy(); humidChart = null; }
-    const feeds = getFeedsByChannel(room, days);
-    if (!feeds) return;
-    const { labels, tempData, humidData } = getRoomHistoryData(feeds, room, days);
-    const isLight = document.body.classList.contains('light-theme');
-    tempChart = createChart(document.getElementById('tempChart').getContext('2d'), labels, tempData, isLight ? '#e65100' : '#ff6b6b');
-    humidChart = createChart(document.getElementById('humidChart').getContext('2d'), labels, humidData, isLight ? '#0288d1' : '#ffd700');
-    const timeLabel = days === 1 ? '24小時' : `${days} 天`;
-    document.getElementById('tempChartTitle').textContent = `🌡️ 溫度變化 (${timeLabel})`;
-    document.getElementById('humidChartTitle').textContent = `💧 濕度變化 (${timeLabel})`;
-    document.getElementById('dataCount').textContent = `📊 ${labels.length} 筆`;
-}
-
-async function prefetch24hData() {
-    try {
-        const res = await fetch(`${API_URL_HISTORY}?results=500`);
-        const json = await res.json();
-        if (json.feeds) cachedFeeds24h = json.feeds;
-    } catch (e) { console.error('Error prefetching 24h:', e); }
-}
-
-function toggleOutdoorFloat(type) {
-    const floatingEl = document.getElementById('floatingOutdoorChart');
-    const tempBtn = document.getElementById('tempOutdoorToggle');
-    const humidBtn = document.getElementById('humidOutdoorToggle');
-    
-    if (currentOutdoorType === type) {
-        // 關閉
-        floatingEl.classList.remove('active');
-        currentOutdoorType = null;
-        if (tempBtn) tempBtn.classList.remove('active');
-        if (humidBtn) humidBtn.classList.remove('active');
-        tempBtn.textContent = '🌤️ 顯示戶外';
-        humidBtn.textContent = '🌤️ 顯示戶外';
-        return;
-    }
-    
-    currentOutdoorType = type;
-    const days = type === 'temp' ? overviewDays : humidOverviewDays;
-    
-    // 更新按鈕狀態
-    if (type === 'temp') {
-        tempBtn.classList.add('active');
-        tempBtn.textContent = '🌤️ 隱藏戶外';
-        if (humidBtn) humidBtn.classList.remove('active');
-        if (humidBtn) humidBtn.textContent = '🌤️ 顯示戶外';
-    } else {
-        humidBtn.classList.add('active');
-        humidBtn.textContent = '🌤️ 隱藏戶外';
-        if (tempBtn) tempBtn.classList.remove('active');
-        if (tempBtn) tempBtn.textContent = '🌤️ 顯示戶外';
-    }
-    
-    // 設定位置（右下角）
-    const modalEl = type === 'temp' 
-        ? document.getElementById('overviewModalOverlay')
-        : document.getElementById('humidOverviewModalOverlay');
-    const rect = modalEl.getBoundingClientRect();
-    floatingEl.style.right = '50px';
-    floatingEl.style.bottom = '50px';
-    floatingEl.style.left = 'auto';
-    floatingEl.style.top = 'auto';
-    
-    floatingEl.classList.add('active');
-    renderOutdoorFloatingChart(type, days);
-}
-
-function renderOutdoorFloatingChart(type, days) {
-    const feeds = days === 1 ? (cachedExtra24h || cachedExtraFull) : cachedExtraFull;
-    if (!feeds) return;
-    
-    if (outdoorFloatingChart) { outdoorFloatingChart.destroy(); outdoorFloatingChart = null; }
-    
-    const field = type === 'temp' ? 'field1' : 'field2';
-    const title = type === 'temp' ? '🌤️ 戶外溫度' : '🌤️ 戶外濕度';
-    const color = type === 'temp' ? '#ff9800' : '#29b6f6';
-    const timeLabel = days === 1 ? '24小時' : `${days} 天`;
-    
-    document.getElementById('floatingTitle').textContent = `${title} (${timeLabel})`;
-    
-    const now = new Date();
-    const cutoff = new Date(now.getTime() - days * 24 * 60 * 60 * 1000);
-    const filtered = feeds.filter(f => new Date(f.created_at) >= cutoff && f[field]);
-    
-    const sampled = [];
-    const step = days === 1 ? 2 : (days <= 3 ? 4 : 8);
-    for (let i = 0; i < filtered.length; i += step) {
-        sampled.push(filtered[i]);
-    }
-    
-    const labels = sampled.map(f => formatTime(f.created_at));
-    const data = sampled.map(f => parseFloat(f[field]));
-    
-    const ctx = document.getElementById('outdoorFloatingCanvas').getContext('2d');
-    outdoorFloatingChart = createChart(ctx, labels, data, color);
-}
-
-function closeOutdoorFloat() {
-    document.getElementById('floatingOutdoorChart').classList.remove('active');
-    currentOutdoorType = null;
-    document.getElementById('tempOutdoorToggle').classList.remove('active');
-    document.getElementById('humidOutdoorToggle').classList.remove('active');
-    document.getElementById('tempOutdoorToggle').textContent = '🌤️ 顯示戶外';
-    document.getElementById('humidOutdoorToggle').textContent = '🌤️ 顯示戶外';
-}
-
-// 拖曳功能
-function initFloatingDrag() {
-    const floatingEl = document.getElementById('floatingOutdoorChart');
-    const header = document.getElementById('floatingHeader');
-    let isDragging = false;
-    let offsetX, offsetY;
-    
-    header.addEventListener('mousedown', (e) => {
-        isDragging = true;
-        const rect = floatingEl.getBoundingClientRect();
-        offsetX = e.clientX - rect.left;
-        offsetY = e.clientY - rect.top;
-        floatingEl.style.right = 'auto';
-        floatingEl.style.bottom = 'auto';
-    });
-    
-    document.addEventListener('mousemove', (e) => {
-        if (!isDragging) return;
-        floatingEl.style.left = (e.clientX - offsetX) + 'px';
-        floatingEl.style.top = (e.clientY - offsetY) + 'px';
-    });
-    
-    document.addEventListener('mouseup', () => {
-        isDragging = false;
-    });
-    
-    // 觸控支援
-    header.addEventListener('touchstart', (e) => {
-        isDragging = true;
-        const touch = e.touches[0];
-        const rect = floatingEl.getBoundingClientRect();
-        offsetX = touch.clientX - rect.left;
-        offsetY = touch.clientY - rect.top;
-        floatingEl.style.right = 'auto';
-        floatingEl.style.bottom = 'auto';
-    });
-    
-    document.addEventListener('touchmove', (e) => {
-        if (!isDragging) return;
-        const touch = e.touches[0];
-        floatingEl.style.left = (touch.clientX - offsetX) + 'px';
-        floatingEl.style.top = (touch.clientY - offsetY) + 'px';
-    });
-    
-    document.addEventListener('touchend', () => {
-        isDragging = false;
-    });
-}
-
-async function prefetchFullData() {
-    try {
-        const res = await fetch(`${API_URL_HISTORY}?results=6000`);
-        const json = await res.json();
-        if (json.feeds) cachedFeedsFull = json.feeds;
-    } catch (e) { console.error('Error prefetching full:', e); }
-}
-
-async function showRoomDetail(roomIndex) {
-    currentRoomIndex = roomIndex;
-    currentModalType = 'room';
-    currentDays = 1;
-    
-    // 確保濕度圖表顯示
-    document.getElementById('humidChart').parentElement.style.display = '';
-    
-    document.getElementById('modalTitle').textContent = `${rooms[roomIndex].name} - 歷史數據`;
-    document.getElementById('modalOverlay').classList.add('active');
-    document.querySelectorAll('.time-range-btn').forEach(btn => btn.classList.toggle('active', btn.dataset.days === '1'));
-    if (cachedFeeds24h || cachedFeedsFull) {
-        renderChart(roomIndex, 1);
-    } else {
-        await prefetch24hData();
-        renderChart(roomIndex, 1);
-    }
-}
-
-function closeModal() {
-    document.getElementById('modalOverlay').classList.remove('active');
-}
-
-function showOverview() {
-    document.getElementById('overviewModalOverlay').classList.add('active');
-    document.querySelectorAll('.overview-time-btn').forEach(btn => btn.classList.toggle('active', btn.dataset.days === '1'));
-    overviewDays = 1;
-    renderOverviewCharts(1);
-}
-
-function closeOverviewModal() {
-    document.getElementById('overviewModalOverlay').classList.remove('active');
-    if (currentOutdoorType === 'temp') closeOutdoorFloat();
-}
-
-function renderOverviewCharts(days) {
-    const isLight = document.body.classList.contains('light-theme');
-    const colors = ['#ff6b6b', '#ffd700', '#4ecdc4', '#a78bfa', '#ff9800'];
-    const timeLabel = days === 1 ? '24小時' : `${days} 天`;
-    
-    rooms.forEach((room, idx) => {
-        if (overviewCharts[idx]) { overviewCharts[idx].destroy(); overviewCharts[idx] = null; }
-        
-        const feeds = getFeedsByChannel(room, days);
-        if (!feeds) return;
-        
-        const { labels, tempData } = getRoomHistoryData(feeds, room, days);
-        const ctx = document.getElementById(`overviewChart${idx}`)?.getContext('2d');
-        if (!ctx) return;
-        
-        const chartTitle = document.getElementById(`overviewChart${idx}`)?.parentElement?.querySelector('.chart-title');
-        if (chartTitle) chartTitle.textContent = `🌡️ ${room.name} (${timeLabel})`;
-        
-        overviewCharts[idx] = createChart(ctx, labels, tempData, colors[idx]);
-    });
-}
-
-function showHumidOverview() {
-    document.getElementById('humidOverviewModalOverlay').classList.add('active');
-    document.querySelectorAll('.humid-overview-time-btn').forEach(btn => btn.classList.toggle('active', btn.dataset.days === '1'));
-    humidOverviewDays = 1;
-    renderHumidOverviewCharts(1);
-}
-
-function closeHumidOverviewModal() {
-    document.getElementById('humidOverviewModalOverlay').classList.remove('active');
-    if (currentOutdoorType === 'humid') closeOutdoorFloat();
-}
-
-function renderHumidOverviewCharts(days) {
-    const isLight = document.body.classList.contains('light-theme');
-    const colors = ['#ff6b6b', '#ffd700', '#4ecdc4', '#a78bfa', '#ff9800'];
-    const timeLabel = days === 1 ? '24小時' : `${days} 天`;
-    
-    rooms.forEach((room, idx) => {
-        if (humidOverviewCharts[idx]) { humidOverviewCharts[idx].destroy(); humidOverviewCharts[idx] = null; }
-        
-        const feeds = getFeedsByChannel(room, days);
-        if (!feeds) return;
-        
-        const { labels, humidData } = getRoomHistoryData(feeds, room, days);
-        const ctx = document.getElementById(`humidOverviewChart${idx}`)?.getContext('2d');
-        if (!ctx) return;
-        
-        const chartTitle = document.getElementById(`humidOverviewChart${idx}`)?.parentElement?.querySelector('.chart-title');
-        if (chartTitle) chartTitle.textContent = `💧 ${room.name} (${timeLabel})`;
-        
-        humidOverviewCharts[idx] = createChart(ctx, labels, humidData, colors[idx]);
-    });
-}
-
-async function fetchData() {
-    const grid = document.getElementById('roomsGrid');
-    try {
-        const [res1, res2] = await Promise.all([
-            fetch(API_URL),
-            fetch(API_URL_EXTRA + '?results=10')
-        ]);
-        const json1 = await res1.json();
-        const json2 = await res2.json();
-
-        if (json1.feeds && json1.feeds.length > 0) {
-            const { data: data1, times: times1 } = getLatestDataPerRoom(json1.feeds, '72313');
-            let combinedData = { ...data1 };
-            let combinedTimes = { ...times1 };
-
-            if (json2.feeds && json2.feeds.length > 0) {
-                const { data: data2, times: times2 } = getLatestDataPerRoom(json2.feeds, '565880');
-                combinedData = { ...combinedData, ...data2 };
-                combinedTimes = { ...combinedTimes, ...times2 };
-            }
-
-            grid.innerHTML = rooms.map((room, index) => createRoomCard(room, combinedData, combinedTimes[room.name], index)).join('');
-            document.querySelectorAll('.room-card').forEach(card => {
-                card.addEventListener('click', () => showRoomDetail(parseInt(card.dataset.roomIndex)));
+        function getRoomHistoryData(feeds, room, days) {
+            const now = new Date();
+            const startTime = new Date(now.getTime() - days * 24 * 60 * 60 * 1000);
+            const filteredFeeds = feeds.filter(feed => {
+                const feedTime = new Date(feed.created_at);
+                return feedTime >= startTime && hasData(feed[room.tempField]);
             });
-
-            const lastTime = json1.feeds[json1.feeds.length - 1].created_at;
-            document.getElementById('lastUpdate').textContent = formatDateTime(lastTime);
-            renderMiniCharts();
-        }
-    } catch (e) {
-        console.error('Error fetching data:', e);
-        grid.innerHTML = '<div class="loading">資料載入失敗，請稍後再試</div>';
-    }
-}
-
-function initTheme() {
-    const saved = localStorage.getItem('theme');
-    if (saved === 'light') {
-        document.body.classList.add('light-theme');
-        document.getElementById('themeToggle').textContent = '☀️';
-    }
-}
-
-function toggleTheme() {
-    document.body.classList.toggle('light-theme');
-    const isLight = document.body.classList.contains('light-theme');
-    document.getElementById('themeToggle').textContent = isLight ? '☀️' : '🌙';
-    localStorage.setItem('theme', isLight ? 'light' : 'dark');
-}
-
-// 事件綁定
-document.getElementById('modalClose').addEventListener('click', closeModal);
-document.getElementById('modalOverlay').addEventListener('click', (e) => { if (e.target.id === 'modalOverlay') closeModal(); });
-document.getElementById('themeToggle').addEventListener('click', toggleTheme);
-document.getElementById('overviewBtn').addEventListener('click', showOverview);
-document.getElementById('overviewModalClose').addEventListener('click', closeOverviewModal);
-document.getElementById('overviewModalOverlay').addEventListener('click', (e) => { if (e.target.id === 'overviewModalOverlay') closeOverviewModal(); });
-document.querySelectorAll('.overview-time-btn').forEach(btn => {
-    btn.addEventListener('click', () => {
-        const days = parseInt(btn.dataset.days);
-        if (days === overviewDays) return;
-        overviewDays = days;
-        document.querySelectorAll('.overview-time-btn').forEach(b => b.classList.toggle('active', b.dataset.days === String(days)));
-        renderOverviewCharts(days);
-        if (currentOutdoorType === 'temp') renderOutdoorFloatingChart('temp', days);
-    });
-});
-document.getElementById('humidOverviewBtn').addEventListener('click', showHumidOverview);
-document.getElementById('humidOverviewModalClose').addEventListener('click', closeHumidOverviewModal);
-document.getElementById('humidOverviewModalOverlay').addEventListener('click', (e) => { if (e.target.id === 'humidOverviewModalOverlay') closeHumidOverviewModal(); });
-document.querySelectorAll('.humid-overview-time-btn').forEach(btn => {
-    btn.addEventListener('click', () => {
-        const days = parseInt(btn.dataset.days);
-        if (days === humidOverviewDays) return;
-        humidOverviewDays = days;
-        document.querySelectorAll('.humid-overview-time-btn').forEach(b => b.classList.toggle('active', b.dataset.days === String(days)));
-        renderHumidOverviewCharts(days);
-        if (currentOutdoorType === 'humid') renderOutdoorFloatingChart('humid', days);
-    });
-});
-
-// 浮動戶外圖表事件
-document.getElementById('tempOutdoorToggle').addEventListener('click', () => toggleOutdoorFloat('temp'));
-document.getElementById('humidOutdoorToggle').addEventListener('click', () => toggleOutdoorFloat('humid'));
-document.getElementById('floatingClose').addEventListener('click', closeOutdoorFloat);
-initFloatingDrag();
-
-document.querySelectorAll('.time-range-btn').forEach(btn => {
-    btn.addEventListener('click', () => {
-        const days = parseInt(btn.dataset.days);
-        if (days === currentDays) return;
-        currentDays = days;
-        document.querySelectorAll('.time-range-btn').forEach(b => b.classList.toggle('active', b.dataset.days === String(days)));
-        
-        if (currentModalType && currentModalType !== 'room') {
-            renderExtraChart(currentModalType, days);
-        } else if (currentRoomIndex !== null) {
-            renderChart(currentRoomIndex, days);
-        }
-    });
-});
-
-// 額外資料點擊事件
-document.getElementById('weatherItem').addEventListener('click', () => showExtraDetail('weather'));
-document.getElementById('pm25Item').addEventListener('click', () => showExtraDetail('pm25'));
-document.getElementById('minerItem').addEventListener('click', () => showExtraDetail('miner'));
-document.getElementById('powerItem').addEventListener('click', () => showExtraDetail('power'));
-
-// 戶外天氣
-async function fetchWeather() {
-    try {
-        const res = await fetch(`https://opendata.cwa.gov.tw/fileapi/v1/opendataapi/O-A0001-001?Authorization=${CONFIG.CWB_APIKEY}&downloadType=WEB&format=JSON`);
-        const data = await res.json();
-        const cities = ['新莊', '三重', '五股', '蘆洲', '板橋'];
-        const stations = data.cwaopendata?.dataset?.Station || [];
-        
-        for (const city of cities) {
-            const station = stations.find(s => s.StationName === city);
-            if (station?.WeatherElement) {
-                const temp = station.WeatherElement.AirTemperature;
-                const humid = station.WeatherElement.RelativeHumidity;
-                const obsTime = station.ObsTime?.DateTime;
-                
-                if (obsTime && Date.now() - Date.parse(obsTime) > 5400000) continue;
-                if (temp && humid && parseFloat(temp) > -10 && parseFloat(humid) > 0) {
-                    const el = document.getElementById('weatherValue');
-                    el.textContent = `${city} ${temp}°C ${parseInt(humid)}%`;
-                    el.classList.remove('hot', 'humid');
-                    if (parseInt(temp) >= 32) el.classList.add('hot');
-                    else if (parseInt(humid) >= 80) el.classList.add('humid');
-                    return;
-                }
+            const sampleRate = days === 1 ? 1 : days === 3 ? 3 : days === 7 ? 6 : 12;
+            const labels = [], tempData = [], humidData = [];
+            for (let i = 0; i < filteredFeeds.length; i += sampleRate) {
+                const feed = filteredFeeds[i];
+                labels.push(formatTime(feed.created_at));
+                tempData.push(parseFloat(feed[room.tempField]));
+                humidData.push(parseFloat(feed[room.humidField]));
             }
+            return { labels, tempData, humidData };
         }
-    } catch (e) { console.error('Error fetching weather:', e); }
-}
 
-// PM2.5
-async function fetchPM25() {
-    try {
-        const res = await fetch(`https://data.moenv.gov.tw/api/v2/aqx_p_432?api_key=${CONFIG.MOENV_KEY}&format=JSON`);
-        const data = await res.json();
-        const cities = ['新莊', '林口', '菜寮', '五股', '蘆洲', '板橋'];
-        
-        for (const city of cities) {
-            const record = data?.find(r => r.sitename === city && parseInt(r['pm2.5']) > 0);
-            if (record) {
-                const pm25 = parseInt(record['pm2.5']);
-                const el = document.getElementById('pm25Value');
-                el.textContent = `${city} ${pm25}`;
-                el.classList.remove('pm-high', 'pm-danger');
-                if (pm25 > 40) el.classList.add('pm-danger');
-                else if (pm25 > 20) el.classList.add('pm-high');
+        function getFeedsByChannel(room, days) {
+            if (room.channel === '565880') {
+                return days === 1 ? (cachedExtra24h || cachedExtraFull) : cachedExtraFull;
+            }
+            return days === 1 ? (cachedFeeds24h || cachedFeedsFull) : cachedFeedsFull;
+        }
+
+        function createChart(ctx, labels, data, color) {
+            const isLight = document.body.classList.contains('light-theme');
+            const gridColor = isLight ? 'rgba(0,0,0,0.08)' : 'rgba(255,255,255,0.05)';
+            const textColor = isLight ? '#666' : '#888';
+            return new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        data: data,
+                        borderColor: color,
+                        backgroundColor: color + '20',
+                        fill: true,
+                        tension: 0.5,
+                        borderWidth: 2,
+                        pointRadius: 1,
+                        pointHoverRadius: 4,
+                        spanGaps: true
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: false } },
+                    scales: {
+                        x: { ticks: { color: textColor, maxTicksLimit: 8 }, grid: { color: gridColor } },
+                        y: { ticks: { color: textColor }, grid: { color: gridColor } }
+                    }
+                }
+            });
+        }
+
+        function renderChart(roomIndex, days) {
+            const room = rooms[roomIndex];
+            if (tempChart) { tempChart.destroy(); tempChart = null; }
+            if (humidChart) { humidChart.destroy(); humidChart = null; }
+            const feeds = getFeedsByChannel(room, days);
+            if (!feeds) return;
+            const { labels, tempData, humidData } = getRoomHistoryData(feeds, room, days);
+            const isLight = document.body.classList.contains('light-theme');
+            tempChart = createChart(document.getElementById('tempChart').getContext('2d'), labels, tempData, isLight ? '#e65100' : '#ff6b6b');
+            humidChart = createChart(document.getElementById('humidChart').getContext('2d'), labels, humidData, isLight ? '#0288d1' : '#ffd700');
+            const timeLabel = days === 1 ? '24小時' : `${days} 天`;
+            document.getElementById('tempChartTitle').textContent = `🌡️ 溫度變化 (${timeLabel})`;
+            document.getElementById('humidChartTitle').textContent = `💧 濕度變化 (${timeLabel})`;
+            document.getElementById('dataCount').textContent = `📊 ${labels.length} 筆`;
+        }
+
+        async function prefetch24hData() {
+            try {
+                const res = await fetch(`${API_URL_HISTORY}?minutes=1440`);
+                const json = await res.json();
+                if (json.feeds) cachedFeeds24h = json.feeds;
+            } catch (e) { console.error('Error prefetching 24h:', e); }
+        }
+
+        function toggleOutdoorFloat(type) {
+            const floatingEl = document.getElementById('floatingOutdoorChart');
+            const tempBtn = document.getElementById('tempOutdoorToggle');
+            const humidBtn = document.getElementById('humidOutdoorToggle');
+
+            if (currentOutdoorType === type) {
+                // 關閉
+                floatingEl.classList.remove('active');
+                currentOutdoorType = null;
+                if (tempBtn) tempBtn.classList.remove('active');
+                if (humidBtn) humidBtn.classList.remove('active');
+                tempBtn.textContent = '🌤️ 顯示戶外';
+                humidBtn.textContent = '🌤️ 顯示戶外';
                 return;
             }
+
+            currentOutdoorType = type;
+            const days = type === 'temp' ? overviewDays : humidOverviewDays;
+
+            // 更新按鈕狀態
+            if (type === 'temp') {
+                tempBtn.classList.add('active');
+                tempBtn.textContent = '🌤️ 隱藏戶外';
+                if (humidBtn) humidBtn.classList.remove('active');
+                if (humidBtn) humidBtn.textContent = '🌤️ 顯示戶外';
+            } else {
+                humidBtn.classList.add('active');
+                humidBtn.textContent = '🌤️ 隱藏戶外';
+                if (tempBtn) tempBtn.classList.remove('active');
+                if (tempBtn) tempBtn.textContent = '🌤️ 顯示戶外';
+            }
+
+            // 設定位置（右下角）
+            const modalEl = type === 'temp'
+                ? document.getElementById('overviewModalOverlay')
+                : document.getElementById('humidOverviewModalOverlay');
+            const rect = modalEl.getBoundingClientRect();
+            floatingEl.style.right = '50px';
+            floatingEl.style.bottom = '50px';
+            floatingEl.style.left = 'auto';
+            floatingEl.style.top = 'auto';
+
+            floatingEl.classList.add('active');
+            renderOutdoorFloatingChart(type, days);
         }
-    } catch (e) { console.error('Error fetching PM2.5:', e); }
-}
 
-// 額外資料預載
-async function prefetchExtra24h() {
-    try {
-        const res = await fetch(`${API_URL_EXTRA}?results=96`);
-        const json = await res.json();
-        if (json.feeds) {
-            cachedExtra24h = json.feeds;
-            updateExtraDisplay();
+        function renderOutdoorFloatingChart(type, days) {
+            const feeds = days === 1 ? (cachedExtra24h || cachedExtraFull) : cachedExtraFull;
+            if (!feeds) return;
+
+            if (outdoorFloatingChart) { outdoorFloatingChart.destroy(); outdoorFloatingChart = null; }
+
+            const field = type === 'temp' ? 'field1' : 'field2';
+            const title = type === 'temp' ? '🌤️ 戶外溫度' : '🌤️ 戶外濕度';
+            const color = type === 'temp' ? '#ff9800' : '#29b6f6';
+            const timeLabel = days === 1 ? '24小時' : `${days} 天`;
+
+            document.getElementById('floatingTitle').textContent = `${title} (${timeLabel})`;
+
+            const now = new Date();
+            const cutoff = new Date(now.getTime() - days * 24 * 60 * 60 * 1000);
+            const filtered = feeds.filter(f => new Date(f.created_at) >= cutoff && f[field]);
+
+            const sampled = [];
+            const step = days === 1 ? 2 : (days <= 3 ? 4 : 8);
+            for (let i = 0; i < filtered.length; i += step) {
+                sampled.push(filtered[i]);
+            }
+
+            const labels = sampled.map(f => formatTime(f.created_at));
+            const data = sampled.map(f => parseFloat(f[field]));
+
+            const ctx = document.getElementById('outdoorFloatingCanvas').getContext('2d');
+            outdoorFloatingChart = createChart(ctx, labels, data, color);
         }
-    } catch (e) { console.error('Error prefetching extra 24h:', e); }
-}
 
-async function prefetchExtraFull() {
-    try {
-        const res = await fetch(`${API_URL_EXTRA}?results=1344`);
-        const json = await res.json();
-        if (json.feeds) cachedExtraFull = json.feeds;
-    } catch (e) { console.error('Error prefetching extra full:', e); }
-}
-
-function updateExtraDisplay() {
-    const feeds = cachedExtra24h || cachedExtraFull;
-    if (!feeds || feeds.length === 0) return;
-    const latest = feeds[feeds.length - 1];
-    
-    // 礦機資訊
-    const minerTemp = latest.field4;
-    const minerHash = latest.field5;
-    if (minerTemp && minerHash) {
-        document.getElementById('minerValue').textContent = `${minerTemp}°C / ${minerHash} GH`;
-    }
-    
-    // 耗電量
-    const power = latest.field6;
-    if (power) {
-        document.getElementById('powerValue').textContent = `${power} W`;
-    }
-}
-
-// 顯示額外資料的 Modal
-function showExtraDetail(type) {
-    currentModalType = type;
-    currentDays = 1;
-    
-    const modal = document.getElementById('modalOverlay');
-    const title = document.getElementById('modalTitle');
-    const tempTitle = document.getElementById('tempChartTitle');
-    const humidTitle = document.getElementById('humidChartTitle');
-    const humidContainer = document.getElementById('humidChart').parentElement;
-    
-    const titles = {
-        weather: '戶外溫濕度 - 歷史數據',
-        pm25: 'PM2.5 - 歷史數據',
-        miner: '礦機資訊 - 歷史數據',
-        power: 'HS300 耗電量 - 歷史數據'
-    };
-    
-    title.textContent = titles[type];
-    modal.classList.add('active');
-    
-    document.querySelectorAll('.time-range-btn').forEach(btn => {
-        btn.classList.toggle('active', btn.dataset.days === '1');
-    });
-    
-    renderExtraChart(type, 1);
-}
-
-function renderExtraChart(type, days) {
-    if (tempChart) { tempChart.destroy(); tempChart = null; }
-    if (humidChart) { humidChart.destroy(); humidChart = null; }
-    
-    const feeds = days === 1 ? (cachedExtra24h || cachedExtraFull) : cachedExtraFull;
-    if (!feeds) return;
-    
-    const now = new Date();
-    const startTime = new Date(now.getTime() - days * 24 * 60 * 60 * 1000);
-    const filtered = feeds.filter(f => new Date(f.created_at) >= startTime);
-    
-    const labels = filtered.map(f => formatTime(f.created_at));
-    const isLight = document.body.classList.contains('light-theme');
-    const tempColor = isLight ? '#e65100' : '#ff6b6b';
-    const humidColor = isLight ? '#0288d1' : '#ffd700';
-    
-    const tempCtx = document.getElementById('tempChart').getContext('2d');
-    const humidCtx = document.getElementById('humidChart').getContext('2d');
-    const humidContainer = document.getElementById('humidChart').parentElement;
-    const tempTitle = document.getElementById('tempChartTitle');
-    const humidTitle = document.getElementById('humidChartTitle');
-    const timeLabel = days === 1 ? '24小時' : `${days} 天`;
-    
-    if (type === 'weather') {
-        humidContainer.style.display = '';
-        tempTitle.textContent = `🌡️ 戶外溫度 (${timeLabel})`;
-        humidTitle.textContent = `💧 戶外濕度 (${timeLabel})`;
-        tempChart = createChart(tempCtx, labels, filtered.map(f => parseFloat(f.field1)), tempColor);
-        humidChart = createChart(humidCtx, labels, filtered.map(f => parseFloat(f.field2)), humidColor);
-    } else if (type === 'pm25') {
-        humidContainer.style.display = 'none';
-        tempTitle.textContent = `🌫️ PM2.5 (${timeLabel})`;
-        tempChart = createChart(tempCtx, labels, filtered.map(f => parseFloat(f.field3)), '#ff9800');
-    } else if (type === 'miner') {
-        humidContainer.style.display = '';
-        tempTitle.textContent = `🌡️ 礦機溫度 (${timeLabel})`;
-        humidTitle.textContent = `⛏️ 礦機算力 (${timeLabel})`;
-        tempChart = createChart(tempCtx, labels, filtered.map(f => parseFloat(f.field4)), tempColor);
-        humidChart = createChart(humidCtx, labels, filtered.map(f => parseFloat(f.field5)), '#e6a800');
-    } else if (type === 'power') {
-        humidContainer.style.display = 'none';
-        tempTitle.textContent = `⚡ HS300 耗電量 (${timeLabel})`;
-        tempChart = createChart(tempCtx, labels, filtered.map(f => parseFloat(f.field6)), '#ffd700');
-    }
-    document.getElementById('dataCount').textContent = `📊 ${labels.length} 筆`;
-}
-
-// 迷你圖表
-let miniCharts = [null, null, null, null, null];
-
-function renderMiniCharts() {
-    if (!cachedFeeds24h && !cachedFeedsFull && !cachedExtra24h && !cachedExtraFull) return;
-    const mainFeeds = cachedFeeds24h || cachedFeedsFull;
-    const extraFeeds = cachedExtra24h || cachedExtraFull;
-    
-    const isLight = document.body.classList.contains('light-theme');
-    const gridColor = isLight ? 'rgba(0,0,0,0.08)' : 'rgba(255,255,255,0.05)';
-    const tempColor = isLight ? '#e65100' : '#ff6b6b';
-    const humidColor = isLight ? '#0288d1' : '#ffd700';
-    
-    const now = new Date();
-    const startTime = new Date(now.getTime() - 24 * 60 * 60 * 1000);
-    
-    rooms.forEach((room, idx) => {
-        if (miniCharts[idx]) { miniCharts[idx].destroy(); miniCharts[idx] = null; }
-        
-        const feeds = room.channel === '565880' ? extraFeeds : mainFeeds;
-        if (!feeds) return;
-        
-        const roomFeeds = feeds.filter(f => {
-            const t = new Date(f.created_at);
-            return t >= startTime && hasData(f[room.tempField]);
-        });
-        
-        const sampled = [];
-        for (let i = 0; i < roomFeeds.length; i += 4) {
-            sampled.push(roomFeeds[i]);
+        function closeOutdoorFloat() {
+            document.getElementById('floatingOutdoorChart').classList.remove('active');
+            currentOutdoorType = null;
+            document.getElementById('tempOutdoorToggle').classList.remove('active');
+            document.getElementById('humidOutdoorToggle').classList.remove('active');
+            document.getElementById('tempOutdoorToggle').textContent = '🌤️ 顯示戶外';
+            document.getElementById('humidOutdoorToggle').textContent = '🌤️ 顯示戶外';
         }
-        
-        const labels = sampled.map(f => formatTime(f.created_at));
-        const tempData = sampled.map(f => parseFloat(f[room.tempField]));
-        const humidData = sampled.map(f => parseFloat(f[room.humidField]));
-        
-        const ctx = document.getElementById(`miniChart${idx}`)?.getContext('2d');
-        if (!ctx) return;
-        
-        const chartContainer = document.getElementById(`miniChart${idx}`)?.parentElement;
-        
-        miniCharts[idx] = new Chart(ctx, {
-            type: 'line',
-            data: {
-                labels,
-                datasets: [
-                    {
-                        label: '溫度',
-                        data: tempData,
-                        borderColor: tempColor,
-                        backgroundColor: tempColor + '20',
-                        fill: false,
-                        tension: 0.5,
-                        borderWidth: 1.5,
-                        pointRadius: 0,
-                        yAxisID: 'y'
-                    },
-                    {
-                        label: '濕度',
-                        data: humidData,
-                        borderColor: humidColor,
-                        backgroundColor: humidColor + '20',
-                        fill: false,
-                        tension: 0.5,
-                        borderWidth: 1.5,
-                        pointRadius: 0,
-                        yAxisID: 'y1'
+
+        // 拖曳功能
+        function initFloatingDrag() {
+            const floatingEl = document.getElementById('floatingOutdoorChart');
+            const header = document.getElementById('floatingHeader');
+            let isDragging = false;
+            let offsetX, offsetY;
+
+            header.addEventListener('mousedown', (e) => {
+                isDragging = true;
+                const rect = floatingEl.getBoundingClientRect();
+                offsetX = e.clientX - rect.left;
+                offsetY = e.clientY - rect.top;
+                floatingEl.style.right = 'auto';
+                floatingEl.style.bottom = 'auto';
+            });
+
+            document.addEventListener('mousemove', (e) => {
+                if (!isDragging) return;
+                floatingEl.style.left = (e.clientX - offsetX) + 'px';
+                floatingEl.style.top = (e.clientY - offsetY) + 'px';
+            });
+
+            document.addEventListener('mouseup', () => {
+                isDragging = false;
+            });
+
+            // 觸控支援
+            header.addEventListener('touchstart', (e) => {
+                isDragging = true;
+                const touch = e.touches[0];
+                const rect = floatingEl.getBoundingClientRect();
+                offsetX = touch.clientX - rect.left;
+                offsetY = touch.clientY - rect.top;
+                floatingEl.style.right = 'auto';
+                floatingEl.style.bottom = 'auto';
+            });
+
+            document.addEventListener('touchmove', (e) => {
+                if (!isDragging) return;
+                const touch = e.touches[0];
+                floatingEl.style.left = (touch.clientX - offsetX) + 'px';
+                floatingEl.style.top = (touch.clientY - offsetY) + 'px';
+            });
+
+            document.addEventListener('touchend', () => {
+                isDragging = false;
+            });
+        }
+
+        async function prefetchFullData() {
+            try {
+                const res = await fetch(`${API_URL_HISTORY}?results=6000`);
+                const json = await res.json();
+                if (json.feeds) cachedFeedsFull = json.feeds;
+            } catch (e) { console.error('Error prefetching full:', e); }
+        }
+
+        async function showRoomDetail(roomIndex) {
+            currentRoomIndex = roomIndex;
+            currentModalType = 'room';
+            currentDays = 1;
+
+            // 確保濕度圖表顯示
+            document.getElementById('humidChart').parentElement.style.display = '';
+
+            document.getElementById('modalTitle').textContent = `${rooms[roomIndex].name} - 歷史數據`;
+            document.getElementById('modalOverlay').classList.add('active');
+            document.querySelectorAll('.time-range-btn').forEach(btn => btn.classList.toggle('active', btn.dataset.days === '1'));
+            if (cachedFeeds24h || cachedFeedsFull) {
+                renderChart(roomIndex, 1);
+            } else {
+                await prefetch24hData();
+                renderChart(roomIndex, 1);
+            }
+        }
+
+        function closeModal() {
+            document.getElementById('modalOverlay').classList.remove('active');
+        }
+
+        function showOverview() {
+            document.getElementById('overviewModalOverlay').classList.add('active');
+            document.querySelectorAll('.overview-time-btn').forEach(btn => btn.classList.toggle('active', btn.dataset.days === '1'));
+            overviewDays = 1;
+            renderOverviewCharts(1);
+        }
+
+        function closeOverviewModal() {
+            document.getElementById('overviewModalOverlay').classList.remove('active');
+            if (currentOutdoorType === 'temp') closeOutdoorFloat();
+        }
+
+        function renderOverviewCharts(days) {
+            const isLight = document.body.classList.contains('light-theme');
+            const colors = ['#ff6b6b', '#ffd700', '#4ecdc4', '#a78bfa', '#ff9800'];
+            const timeLabel = days === 1 ? '24小時' : `${days} 天`;
+
+            rooms.forEach((room, idx) => {
+                if (overviewCharts[idx]) { overviewCharts[idx].destroy(); overviewCharts[idx] = null; }
+
+                const feeds = getFeedsByChannel(room, days);
+                if (!feeds) return;
+
+                const { labels, tempData } = getRoomHistoryData(feeds, room, days);
+                const ctx = document.getElementById(`overviewChart${idx}`)?.getContext('2d');
+                if (!ctx) return;
+
+                const chartTitle = document.getElementById(`overviewChart${idx}`)?.parentElement?.querySelector('.chart-title');
+                if (chartTitle) chartTitle.textContent = `🌡️ ${room.name} (${timeLabel})`;
+
+                overviewCharts[idx] = createChart(ctx, labels, tempData, colors[idx]);
+            });
+        }
+
+        function showHumidOverview() {
+            document.getElementById('humidOverviewModalOverlay').classList.add('active');
+            document.querySelectorAll('.humid-overview-time-btn').forEach(btn => btn.classList.toggle('active', btn.dataset.days === '1'));
+            humidOverviewDays = 1;
+            renderHumidOverviewCharts(1);
+        }
+
+        function closeHumidOverviewModal() {
+            document.getElementById('humidOverviewModalOverlay').classList.remove('active');
+            if (currentOutdoorType === 'humid') closeOutdoorFloat();
+        }
+
+        function renderHumidOverviewCharts(days) {
+            const isLight = document.body.classList.contains('light-theme');
+            const colors = ['#ff6b6b', '#ffd700', '#4ecdc4', '#a78bfa', '#ff9800'];
+            const timeLabel = days === 1 ? '24小時' : `${days} 天`;
+
+            rooms.forEach((room, idx) => {
+                if (humidOverviewCharts[idx]) { humidOverviewCharts[idx].destroy(); humidOverviewCharts[idx] = null; }
+
+                const feeds = getFeedsByChannel(room, days);
+                if (!feeds) return;
+
+                const { labels, humidData } = getRoomHistoryData(feeds, room, days);
+                const ctx = document.getElementById(`humidOverviewChart${idx}`)?.getContext('2d');
+                if (!ctx) return;
+
+                const chartTitle = document.getElementById(`humidOverviewChart${idx}`)?.parentElement?.querySelector('.chart-title');
+                if (chartTitle) chartTitle.textContent = `💧 ${room.name} (${timeLabel})`;
+
+                humidOverviewCharts[idx] = createChart(ctx, labels, humidData, colors[idx]);
+            });
+        }
+
+        async function fetchData() {
+            const grid = document.getElementById('roomsGrid');
+            try {
+                const [json1, json2] = await Promise.all([
+                    fetch(API_URL).then(r => r.json()),
+                    fetchWithRetry(API_URL_EXTRA + '?results=10', 2)
+                ]);
+
+                if (json1.feeds && json1.feeds.length > 0) {
+                    const { data: data1, times: times1 } = getLatestDataPerRoom(json1.feeds, '72313');
+                    let combinedData = { ...data1 };
+                    let combinedTimes = { ...times1 };
+
+                    if (json2.feeds && json2.feeds.length > 0) {
+                        const { data: data2, times: times2 } = getLatestDataPerRoom(json2.feeds, '565880');
+                        combinedData = { ...combinedData, ...data2 };
+                        combinedTimes = { ...combinedTimes, ...times2 };
+
+                        // Find latest valid data for each sensor type
+                        let minerData = null;
+                        let powerData = null;
+
+                        for (let i = json2.feeds.length - 1; i >= 0; i--) {
+                            const feed = json2.feeds[i];
+
+                            // Look for Miner Data (Field 4 & 5)
+                            if (!minerData && feed.field4 && feed.field5) {
+                                minerData = feed;
+                            }
+
+                            // Look for Power Data (Field 6)
+                            if (!powerData && feed.field6) {
+                                powerData = feed;
+                            }
+
+                            if (minerData && powerData) break;
+                        }
+
+                        // Update Miner Info
+                        if (minerData) {
+                            const feedTime = new Date(minerData.created_at);
+                            const isStale = (new Date() - feedTime > 60 * 60 * 1000);
+                            const minerTemp = minerData.field4;
+                            const minerHash = minerData.field5;
+                            const minerEl = document.getElementById('minerValue');
+
+                            if (minerTemp && minerHash) {
+                                minerEl.textContent = `${minerTemp}°C / ${minerHash} GH`;
+                                minerEl.classList.toggle('stale', isStale);
+                            }
+                        } else {
+                            document.getElementById('minerValue').textContent = '--';
+                        }
+
+                        // Update Power Info
+                        if (powerData) {
+                            const feedTime = new Date(powerData.created_at);
+                            const isStale = (new Date() - feedTime > 60 * 60 * 1000);
+                            const power = powerData.field6;
+                            const powerEl = document.getElementById('powerValue');
+
+                            if (power) {
+                                powerEl.textContent = `${power} W`;
+                                powerEl.classList.toggle('stale', isStale);
+                            }
+                        } else {
+                            document.getElementById('powerValue').textContent = '--';
+                        }
                     }
-                ]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: { legend: { display: false } },
-                scales: {
-                    x: { display: false },
-                    y: {
-                        position: 'left',
-                        ticks: { color: tempColor, font: { size: 9 }, maxTicksLimit: 3 },
-                        grid: { color: gridColor }
-                    },
-                    y1: {
-                        position: 'right',
-                        ticks: { color: humidColor, font: { size: 9 }, maxTicksLimit: 3 },
-                        grid: { display: false }
+
+                    grid.innerHTML = rooms.map((room, index) => createRoomCard(room, combinedData, combinedTimes[room.name], index)).join('');
+                    document.querySelectorAll('.room-card').forEach(card => {
+                        card.addEventListener('click', () => showRoomDetail(parseInt(card.dataset.roomIndex)));
+                    });
+
+                    const lastTime = json1.feeds[json1.feeds.length - 1].created_at;
+                    document.getElementById('lastUpdate').textContent = formatDateTime(lastTime);
+                    renderMiniCharts();
+                }
+            } catch (e) {
+                console.error('Error fetching data:', e);
+                grid.innerHTML = '<div class="loading">資料載入失敗，請稍後再試</div>';
+            }
+        }
+
+        function initTheme() {
+            const saved = localStorage.getItem('theme');
+            if (saved === 'light') {
+                document.body.classList.add('light-theme');
+                document.getElementById('themeToggle').textContent = '☀️';
+            }
+        }
+
+        function toggleTheme() {
+            document.body.classList.toggle('light-theme');
+            const isLight = document.body.classList.contains('light-theme');
+            document.getElementById('themeToggle').textContent = isLight ? '☀️' : '🌙';
+            localStorage.setItem('theme', isLight ? 'light' : 'dark');
+        }
+
+        // 事件綁定
+        document.getElementById('modalClose').addEventListener('click', closeModal);
+        document.getElementById('modalOverlay').addEventListener('click', (e) => { if (e.target.id === 'modalOverlay') closeModal(); });
+        document.getElementById('themeToggle').addEventListener('click', toggleTheme);
+        document.getElementById('overviewBtn').addEventListener('click', showOverview);
+        document.getElementById('overviewModalClose').addEventListener('click', closeOverviewModal);
+        document.getElementById('overviewModalOverlay').addEventListener('click', (e) => { if (e.target.id === 'overviewModalOverlay') closeOverviewModal(); });
+        document.querySelectorAll('.overview-time-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const days = parseInt(btn.dataset.days);
+                if (days === overviewDays) return;
+                overviewDays = days;
+                document.querySelectorAll('.overview-time-btn').forEach(b => b.classList.toggle('active', b.dataset.days === String(days)));
+                renderOverviewCharts(days);
+                if (currentOutdoorType === 'temp') renderOutdoorFloatingChart('temp', days);
+            });
+        });
+        document.getElementById('humidOverviewBtn').addEventListener('click', showHumidOverview);
+        document.getElementById('humidOverviewModalClose').addEventListener('click', closeHumidOverviewModal);
+        document.getElementById('humidOverviewModalOverlay').addEventListener('click', (e) => { if (e.target.id === 'humidOverviewModalOverlay') closeHumidOverviewModal(); });
+        document.querySelectorAll('.humid-overview-time-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const days = parseInt(btn.dataset.days);
+                if (days === humidOverviewDays) return;
+                humidOverviewDays = days;
+                document.querySelectorAll('.humid-overview-time-btn').forEach(b => b.classList.toggle('active', b.dataset.days === String(days)));
+                renderHumidOverviewCharts(days);
+                if (currentOutdoorType === 'humid') renderOutdoorFloatingChart('humid', days);
+            });
+        });
+
+        // 浮動戶外圖表事件
+        document.getElementById('tempOutdoorToggle').addEventListener('click', () => toggleOutdoorFloat('temp'));
+        document.getElementById('humidOutdoorToggle').addEventListener('click', () => toggleOutdoorFloat('humid'));
+        document.getElementById('floatingClose').addEventListener('click', closeOutdoorFloat);
+        initFloatingDrag();
+
+        document.querySelectorAll('.time-range-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const days = parseInt(btn.dataset.days);
+                if (days === currentDays) return;
+                currentDays = days;
+                document.querySelectorAll('.time-range-btn').forEach(b => b.classList.toggle('active', b.dataset.days === String(days)));
+
+                if (currentModalType && currentModalType !== 'room') {
+                    renderExtraChart(currentModalType, days);
+                } else if (currentRoomIndex !== null) {
+                    renderChart(currentRoomIndex, days);
+                }
+            });
+        });
+
+        // 額外資料點擊事件
+        document.getElementById('weatherItem').addEventListener('click', () => showExtraDetail('weather'));
+        document.getElementById('pm25Item').addEventListener('click', () => showExtraDetail('pm25'));
+        document.getElementById('minerItem').addEventListener('click', () => showExtraDetail('miner'));
+        document.getElementById('powerItem').addEventListener('click', () => showExtraDetail('power'));
+
+        // 戶外天氣
+        async function fetchWeather() {
+            try {
+                const res = await fetch(`https://opendata.cwa.gov.tw/fileapi/v1/opendataapi/O-A0001-001?Authorization=${CONFIG.CWB_APIKEY}&downloadType=WEB&format=JSON`);
+                const data = await res.json();
+                const cities = ['新莊', '三重', '五股', '蘆洲', '板橋'];
+                const stations = data.cwaopendata?.dataset?.Station || [];
+
+                for (const city of cities) {
+                    const station = stations.find(s => s.StationName === city);
+                    if (station?.WeatherElement) {
+                        const temp = station.WeatherElement.AirTemperature;
+                        const humid = station.WeatherElement.RelativeHumidity;
+                        const obsTime = station.ObsTime?.DateTime;
+
+                        if (obsTime && Date.now() - Date.parse(obsTime) > 3600000) continue; // 1 hour timeout
+                        if (temp && humid && parseFloat(temp) > -10 && parseFloat(humid) > 0) {
+                            const el = document.getElementById('weatherValue');
+                            el.textContent = `${city} ${temp}°C ${parseInt(humid)}%`;
+                            el.classList.remove('hot', 'humid');
+                            if (parseInt(temp) >= 32) el.classList.add('hot');
+                            else if (parseInt(humid) >= 80) el.classList.add('humid');
+                            return;
+                        }
                     }
                 }
-            }
-        });
-        
-        if (chartContainer) {
-            setTimeout(() => chartContainer.classList.add('loaded'), 50);
+            } catch (e) { console.error('Error fetching weather:', e); }
         }
-    });
-}
 
-// 初始化
-initTheme();
-fetchData();
-fetchWeather();
-fetchPM25();
-prefetch24hData().then(() => { renderMiniCharts(); prefetchFullData(); });
-prefetchExtra24h().then(() => { prefetchExtraFull(); });
-setInterval(fetchData, 30000);
-setInterval(() => { fetchWeather(); fetchPM25(); }, 10 * 60 * 1000);
-setInterval(() => { prefetch24hData().then(() => prefetchFullData()); }, 5 * 60 * 1000);
-setInterval(() => { prefetchExtra24h().then(() => prefetchExtraFull()); }, 5 * 60 * 1000);
+        async function fetchWithRetry(url, retries = 2) {
+            for (let i = 0; i <= retries; i++) {
+                try {
+                    const res = await fetch(url);
+                    if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
+                    return await res.json();
+                } catch (e) {
+                    if (i === retries) throw e;
+                    await new Promise(r => setTimeout(r, 1000)); // wait 1s before retry
+                }
+            }
+        }
+        // PM2.5
+        async function fetchPM25() {
+            try {
+                const res = await fetch(`https://data.moenv.gov.tw/api/v2/aqx_p_432?api_key=${CONFIG.MOENV_KEY}&format=JSON`);
+                const data = await res.json();
+                const cities = ['新莊', '林口', '菜寮', '五股', '蘆洲', '板橋'];
+
+                for (const city of cities) {
+                    const record = data?.find(r => r.sitename === city && parseInt(r['pm2.5']) > 0);
+                    if (record) {
+                        const pm25 = parseInt(record['pm2.5']);
+                        const el = document.getElementById('pm25Value');
+                        el.textContent = `${city} ${pm25}`;
+                        el.classList.remove('pm-high', 'pm-danger');
+                        if (pm25 > 40) el.classList.add('pm-danger');
+                        else if (pm25 > 20) el.classList.add('pm-high');
+                        return;
+                    }
+                }
+            } catch (e) { console.error('Error fetching PM2.5:', e); }
+        }
+
+        // 額外資料預載
+        async function prefetchExtra24h() {
+            try {
+                const res = await fetch(`${API_URL_EXTRA}?minutes=1440`);
+                const json = await res.json();
+                if (json.feeds) {
+                    cachedExtra24h = json.feeds;
+                    updateExtraDisplay();
+                }
+            } catch (e) { console.error('Error prefetching extra 24h:', e); }
+        }
+
+        async function prefetchExtraFull() {
+            try {
+                const res = await fetch(`${API_URL_EXTRA}?results=1344`);
+                const json = await res.json();
+                if (json.feeds) cachedExtraFull = json.feeds;
+            } catch (e) { console.error('Error prefetching extra full:', e); }
+        }
+
+        function updateExtraDisplay() {
+            const feeds = cachedExtra24h || cachedExtraFull;
+            if (!feeds || feeds.length === 0) return;
+            const latest = feeds[feeds.length - 1];
+
+            // Check if data is fresh (< 1 hour)
+            const feedTime = new Date(latest.created_at);
+            if (new Date() - feedTime > 60 * 60 * 1000) {
+                document.getElementById('minerValue').textContent = '--';
+                document.getElementById('powerValue').textContent = '--';
+                return;
+            }
+
+            // Miner Info
+            const minerTemp = latest.field4;
+            const minerHash = latest.field5;
+            if (minerTemp && minerHash) {
+                document.getElementById('minerValue').textContent = `${minerTemp}°C / ${minerHash} GH`;
+            }
+
+            // 耗電量
+            const power = latest.field6;
+            if (power) {
+                document.getElementById('powerValue').textContent = `${power} W`;
+            }
+        }
+
+        // 顯示額外資料的 Modal
+        function showExtraDetail(type) {
+            currentModalType = type;
+            currentDays = 1;
+
+            const modal = document.getElementById('modalOverlay');
+            const title = document.getElementById('modalTitle');
+            const tempTitle = document.getElementById('tempChartTitle');
+            const humidTitle = document.getElementById('humidChartTitle');
+            const humidContainer = document.getElementById('humidChart').parentElement;
+
+            const titles = {
+                weather: '戶外溫濕度 - 歷史數據',
+                pm25: 'PM2.5 - 歷史數據',
+                miner: '礦機資訊 - 歷史數據',
+                power: 'HS300 耗電量 - 歷史數據'
+            };
+
+            title.textContent = titles[type];
+            modal.classList.add('active');
+
+            document.querySelectorAll('.time-range-btn').forEach(btn => {
+                btn.classList.toggle('active', btn.dataset.days === '1');
+            });
+
+            renderExtraChart(type, 1);
+        }
+
+        function renderExtraChart(type, days) {
+            if (tempChart) { tempChart.destroy(); tempChart = null; }
+            if (humidChart) { humidChart.destroy(); humidChart = null; }
+
+            const feeds = days === 1 ? (cachedExtra24h || cachedExtraFull) : cachedExtraFull;
+            if (!feeds) return;
+
+            const now = new Date();
+            const startTime = new Date(now.getTime() - days * 24 * 60 * 60 * 1000);
+            const filtered = feeds.filter(f => new Date(f.created_at) >= startTime);
+
+            const labels = filtered.map(f => formatTime(f.created_at));
+            const isLight = document.body.classList.contains('light-theme');
+            const tempColor = isLight ? '#e65100' : '#ff6b6b';
+            const humidColor = isLight ? '#0288d1' : '#ffd700';
+
+            const tempCtx = document.getElementById('tempChart').getContext('2d');
+            const humidCtx = document.getElementById('humidChart').getContext('2d');
+            const humidContainer = document.getElementById('humidChart').parentElement;
+            const tempTitle = document.getElementById('tempChartTitle');
+            const humidTitle = document.getElementById('humidChartTitle');
+            const timeLabel = days === 1 ? '24小時' : `${days} 天`;
+
+            if (type === 'weather') {
+                humidContainer.style.display = '';
+                tempTitle.textContent = `🌡️ 戶外溫度 (${timeLabel})`;
+                humidTitle.textContent = `💧 戶外濕度 (${timeLabel})`;
+                tempChart = createChart(tempCtx, labels, filtered.map(f => parseFloat(f.field1)), tempColor);
+                humidChart = createChart(humidCtx, labels, filtered.map(f => parseFloat(f.field2)), humidColor);
+            } else if (type === 'pm25') {
+                humidContainer.style.display = 'none';
+                tempTitle.textContent = `🌫️ PM2.5 (${timeLabel})`;
+                tempChart = createChart(tempCtx, labels, filtered.map(f => parseFloat(f.field3)), '#ff9800');
+            } else if (type === 'miner') {
+                humidContainer.style.display = '';
+                tempTitle.textContent = `🌡️ 礦機溫度 (${timeLabel})`;
+                humidTitle.textContent = `⛏️ 礦機算力 (${timeLabel})`;
+                tempChart = createChart(tempCtx, labels, filtered.map(f => parseFloat(f.field4)), tempColor);
+                humidChart = createChart(humidCtx, labels, filtered.map(f => parseFloat(f.field5)), '#e6a800');
+            } else if (type === 'power') {
+                humidContainer.style.display = 'none';
+                tempTitle.textContent = `⚡ HS300 耗電量 (${timeLabel})`;
+                tempChart = createChart(tempCtx, labels, filtered.map(f => parseFloat(f.field6)), '#ffd700');
+            }
+            document.getElementById('dataCount').textContent = `📊 ${labels.length} 筆`;
+        }
+
+        // 迷你圖表
+        let miniCharts = [null, null, null, null, null];
+
+        function renderMiniCharts() {
+            if (!cachedFeeds24h && !cachedFeedsFull && !cachedExtra24h && !cachedExtraFull) return;
+            const mainFeeds = cachedFeeds24h || cachedFeedsFull;
+            const extraFeeds = cachedExtra24h || cachedExtraFull;
+
+            const isLight = document.body.classList.contains('light-theme');
+            const gridColor = isLight ? 'rgba(0,0,0,0.08)' : 'rgba(255,255,255,0.05)';
+            const tempColor = isLight ? '#e65100' : '#ff6b6b';
+            const humidColor = isLight ? '#0288d1' : '#ffd700';
+
+            const now = new Date();
+            const startTime = new Date(now.getTime() - 24 * 60 * 60 * 1000);
+
+            rooms.forEach((room, idx) => {
+                if (miniCharts[idx]) { miniCharts[idx].destroy(); miniCharts[idx] = null; }
+
+                const feeds = room.channel === '565880' ? extraFeeds : mainFeeds;
+                if (!feeds) return;
+
+                const roomFeeds = feeds.filter(f => {
+                    const t = new Date(f.created_at);
+                    return t >= startTime && hasData(f[room.tempField]);
+                });
+
+                const sampled = [];
+                for (let i = 0; i < roomFeeds.length; i += 4) {
+                    sampled.push(roomFeeds[i]);
+                }
+
+                const labels = sampled.map(f => formatTime(f.created_at));
+                const tempData = sampled.map(f => parseFloat(f[room.tempField]));
+                const humidData = sampled.map(f => parseFloat(f[room.humidField]));
+
+                const ctx = document.getElementById(`miniChart${idx}`)?.getContext('2d');
+                if (!ctx) return;
+
+                const chartContainer = document.getElementById(`miniChart${idx}`)?.parentElement;
+
+                miniCharts[idx] = new Chart(ctx, {
+                    type: 'line',
+                    data: {
+                        labels,
+                        datasets: [
+                            {
+                                label: '溫度',
+                                data: tempData,
+                                borderColor: tempColor,
+                                backgroundColor: tempColor + '20',
+                                fill: false,
+                                tension: 0.5,
+                                borderWidth: 1.5,
+                                pointRadius: 0,
+                                yAxisID: 'y'
+                            },
+                            {
+                                label: '濕度',
+                                data: humidData,
+                                borderColor: humidColor,
+                                backgroundColor: humidColor + '20',
+                                fill: false,
+                                tension: 0.5,
+                                borderWidth: 1.5,
+                                pointRadius: 0,
+                                yAxisID: 'y1'
+                            }
+                        ]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: { legend: { display: false } },
+                        scales: {
+                            x: { display: false },
+                            y: {
+                                position: 'left',
+                                ticks: { color: tempColor, font: { size: 9 }, maxTicksLimit: 3 },
+                                grid: { color: gridColor }
+                            },
+                            y1: {
+                                position: 'right',
+                                ticks: { color: humidColor, font: { size: 9 }, maxTicksLimit: 3 },
+                                grid: { display: false }
+                            }
+                        }
+                    }
+                });
+
+                if (chartContainer) {
+                    setTimeout(() => chartContainer.classList.add('loaded'), 50);
+                }
+            });
+        }
+
+        // 初始化
+        initTheme();
+        fetchData();
+        fetchWeather();
+        fetchPM25();
+        prefetch24hData().then(() => { renderMiniCharts(); prefetchFullData(); });
+        prefetchExtra24h().then(() => { renderMiniCharts(); prefetchExtraFull(); });
+        setInterval(fetchData, 30000);
+        setInterval(() => { fetchWeather(); fetchPM25(); }, 10 * 60 * 1000);
+        setInterval(() => { prefetch24hData().then(() => prefetchFullData()); }, 5 * 60 * 1000);
+        setInterval(() => { prefetchExtra24h().then(() => { renderMiniCharts(); prefetchExtraFull(); }); }, 5 * 60 * 1000);
     </script>
 </body>
+
 </html>
