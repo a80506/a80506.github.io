@@ -80,10 +80,11 @@
             items: [
                 { div: "", title: "三大法人-期貨", url: "http://www.taifex.com.tw/cht/3/futContractsDateExcel" },
                 //{ div: "", title: "三大法人-選擇權", url: "http://www.taifex.com.tw/cht/3/optContractsDateExcel" },
-                { div: "", title: "三大法人-現貨", url: "http://www.twse.com.tw/zh/page/trading/fund/BFI82U.html" },
+                //{ div: "", title: "三大法人-現貨", url: "http://www.twse.com.tw/zh/page/trading/fund/BFI82U.html" },
                 { div: "nasdaq", title: "外資買賣超", url: "https://fubon-ebrokerdj.fbs.com.tw/Z/ZG/ZGK_D.djhtm" },
                 { div: "TSE", title: "", url: "" },
                 { div: "OTC", title: "", url: "" },
+				{ div: "ratio00647", title: "", url: "" },
                 { div: "STOCK_2", title: "SensorBK1", url: "https://thingspeak.mathworks.com/channels/1729950" },
                 { div: "STOCK_3", title: "SensorBK2", url: "https://thingspeak.mathworks.com/channels/72839" },
             ]
@@ -1133,6 +1134,9 @@
                 $("div.OTC").css("color", "red");
             }
 			$("div.OTC").html(data.otc_last.toString() + ", " + data.otc_change.toString() + ", " + data.otc_change_percent.toString());
+			if (data.ratio00647) {
+				$("div.ratio00647").html(data.ratio00647);
+			}
             //<div class="nasdaq" id="nasdaqDataContainer" align="center"></div>
             //$("div.nasdaqDataContainer").html(data.latest_price.toString() + " / " );
         } catch (error) {
