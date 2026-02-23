@@ -83,7 +83,7 @@
                 { div: "", title: "三大法人-現貨", url: "http://www.twse.com.tw/zh/page/trading/fund/BFI82U.html" },
                 { div: "nasdaq", title: "外資買賣超", url: "https://fubon-ebrokerdj.fbs.com.tw/Z/ZG/ZGK_D.djhtm" },
                 { div: "TSE", title: "", url: "" },
-                { div: "STOCK_1", title: "", url: "" },
+                { div: "OTC", title: "", url: "" },
                 { div: "STOCK_2", title: "SensorBK1", url: "https://thingspeak.mathworks.com/channels/1729950" },
                 { div: "STOCK_3", title: "SensorBK2", url: "https://thingspeak.mathworks.com/channels/72839" },
             ]
@@ -1120,6 +1120,19 @@
                 $("div.nasdaq").css("color", "red");
                 $("div.nasdaq").html(data.latest_price.toString() + ", " + data.price_change.toString() + ", " + data.price_change_percent.toString() + "% " + status);
             }
+            if (data.tse_change != 0) {
+                $("div.TSE").css("color", "#80FF00");
+            } else {
+                $("div.TSE").css("color", "red");
+            }
+			$("div.TSE").html(data.tse_last.toString() + ", " + data.tse_change.toString() + ", " + data.tse_change_percent.toString());
+            if (data.otc_change > 0) {
+                $("div.OTC").css("color", "#80FF00");
+                
+            } else {
+                $("div.OTC").css("color", "red");
+            }
+			$("div.OTC").html(data.otc_last.toString() + ", " + data.otc_change.toString() + ", " + data.otc_change_percent.toString());
             //<div class="nasdaq" id="nasdaqDataContainer" align="center"></div>
             //$("div.nasdaqDataContainer").html(data.latest_price.toString() + " / " );
         } catch (error) {
