@@ -1121,7 +1121,7 @@
                 $("div.nasdaq").css("color", "red");
                 $("div.nasdaq").html(data.latest_price.toString() + ", " + data.price_change.toString() + ", " + data.price_change_percent.toString() + "% " + status);
             }
-            if (data.tse_change != 0) {
+            if (data.tse_change > 0) {
                 $("div.TSE").css("color", "#80FF00");
             } else {
                 $("div.TSE").css("color", "red");
