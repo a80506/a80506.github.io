@@ -78,9 +78,10 @@
         { // [6]
             title: "股市資訊",
             items: [
-                { div: "", title: "三大法人-期貨", url: "http://www.taifex.com.tw/cht/3/futContractsDateExcel" },
+                //{ div: "", title: "三大法人-期貨", url: "http://www.taifex.com.tw/cht/3/futContractsDateExcel" },
                 //{ div: "", title: "三大法人-選擇權", url: "http://www.taifex.com.tw/cht/3/optContractsDateExcel" },
                 //{ div: "", title: "三大法人-現貨", url: "http://www.twse.com.tw/zh/page/trading/fund/BFI82U.html" },
+				{ div: "OIL", title: "", url: "" },
                 { div: "nasdaq", title: "外資買賣超", url: "https://fubon-ebrokerdj.fbs.com.tw/Z/ZG/ZGK_D.djhtm" },
                 { div: "TSE", title: "", url: "" },
                 { div: "OTC", title: "", url: "" },
@@ -1137,6 +1138,13 @@
 			if (data.ratio00647) {
 				$("div.ratio00647").html(data.ratio00647);
 			}
+            if (data.b_oil_latest_price > 0) {
+                $("div.OIL").css("color", "#80FF00");
+                $("div.OIL").html(data.b_oil_latest_price.toString() + ", +" + data.b_oil_price_change.toString() + ", +" + data.b_oil_price_change_percent.toString() + "% " + status);
+            } else {
+                $("div.OIL").css("color", "red");
+                $("div.OIL").html(data.b_oil_latest_price.toString() + ", " + data.b_oil_price_change.toString() + ", " + data.b_oil_price_change_percent.toString() + "% " + status);
+            }
             //<div class="nasdaq" id="nasdaqDataContainer" align="center"></div>
             //$("div.nasdaqDataContainer").html(data.latest_price.toString() + " / " );
         } catch (error) {
