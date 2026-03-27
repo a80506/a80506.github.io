@@ -1138,13 +1138,16 @@
 			if (data.ratio00647) {
 				$("div.ratio00647").html(data.ratio00647);
 			}
-            if (data.b_oil_latest_price > 0) {
-                $("div.OIL").css("color", "#80FF00");
-                $("div.OIL").html(data.b_oil_latest_price.toString() + ", +" + data.b_oil_price_change.toString() + ", +" + data.b_oil_price_change_percent.toString() + "% " + status);
-            } else {
-                $("div.OIL").css("color", "red");
-                $("div.OIL").html(data.b_oil_latest_price.toString() + ", " + data.b_oil_price_change.toString() + ", " + data.b_oil_price_change_percent.toString() + "% " + status);
-            }
+
+			if (data.b_oil_latest_price > 0) {
+	            if (data.b_oil_price_change > 0) {
+	                $("div.OIL").css("color", "#80FF00");
+	                $("div.OIL").html(data.b_oil_latest_price.toString() + ", +" + data.b_oil_price_change.toString() + ", +" + data.b_oil_price_change_percent.toString() + "% " + status);
+	            } else {
+	                $("div.OIL").css("color", "red");
+	                $("div.OIL").html(data.b_oil_latest_price.toString() + ", " + data.b_oil_price_change.toString() + ", " + data.b_oil_price_change_percent.toString() + "% " + status);
+	            }
+			}
             //<div class="nasdaq" id="nasdaqDataContainer" align="center"></div>
             //$("div.nasdaqDataContainer").html(data.latest_price.toString() + " / " );
         } catch (error) {
