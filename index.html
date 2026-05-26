@@ -70,7 +70,7 @@
                 { div: "", title: "Yahoo 大盤線圖", url: "https://tw.stock.yahoo.com/t/idx.php" },
                 { div: "", title: "HiStock 大盤指標", url: "https://histock.tw/stock/tchart.aspx?no=0000&m=b" },
                 { div: "IPO", title: "HiStock 股票申購", url: "https://histock.tw/stock/public.aspx" },
-                { div: "", title: "TWSE 競拍公告", url: "https://www.twse.com.tw/zh/announcement/auction.html" },
+                { div: "IPO_public", title: "TWSE 競拍公告", url: "https://www.twse.com.tw/zh/announcement/auction.html" },
                 { div: "", title: "Investing 期貨", url: "https://www.investing.com/indices/indices-futures" },
                 { div: "", title: "ETF淨值", url: "https://mis.twse.com.tw/stock/etf_nav.jsp?ex=tse" }
             ]
@@ -1194,6 +1194,7 @@
     }
 
     $("div.IPO").html("<a href='https://histock.tw/stock/public.aspx' style='color: #80FF00';>HiStock 股票申購</a>");
+	$("div.IPO_public").html("<a href=\"https://www.twse.com.tw/zh/announcement/auction.html\">競拍公告</a> / <a href=\"https://www.twse.com.tw/zh/announcement/public.html\">抽籤公告</a>");
     $("div.btc_etf_flow").html("<a href='https://farside.co.uk/btc/' style='color: #80FF00';>BTC ETF Flow</a>");
 
     fetchEthereumTVL();
