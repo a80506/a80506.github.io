@@ -149,7 +149,7 @@
                 { div: "living_room", title: "客廳：00°C, 00%", url: "" },
                 { div: "room3", title: "書房：00°C, 00%", url: "" },
                 { div: "room2", title: "陽台：00°C, 00%", url: "" },
-                { div: "", title: "Crypto2025", url: "https://tinyurl.com/alexcrypto2025" },
+                { div: "power", title: "瓦數：-- W", url: "" },
                 //                { div: "", title: "BTC Dominance", url: "https://tw.tradingview.com/chart/?symbol=CRYPTOCAP%3ABTC.D" },
                 //                { div: "btc_etf_flow", title: "BTC ETF Flow", url: "https://farside.co.uk/btc/" },
                 //                { div: "", title: "BTC 1Y HODL Wave", url: "https://www.lookintobitcoin.com/charts/1-year-hodl-wave/" },
@@ -412,6 +412,146 @@
             padding: 30px;
             color: #999;
         }
+
+        /* Event 漂浮視窗 */
+        .event-float {
+            position: fixed;
+            top: 18px;
+            left: 18px;
+            width: 200px;
+            color: #edf3ff;
+            background: linear-gradient(155deg, #171d2b 0%, #10141f 100%);
+            border: 1px solid #34435d;
+            border-radius: 14px;
+            box-shadow: 0 18px 45px rgba(0, 0, 0, 0.62), 0 0 0 1px rgba(63, 83, 115, 0.16);
+            overflow: hidden;
+            z-index: 1200;
+            font-family: Arial, "Microsoft JhengHei", sans-serif;
+        }
+
+        .event-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 8px 9px 7px 11px;
+            background: rgba(26, 34, 51, 0.95);
+            border-bottom: 1px solid #2a364c;
+            cursor: move;
+            user-select: none;
+            touch-action: none;
+        }
+
+        .event-heading {
+            display: flex;
+            align-items: center;
+            gap: 9px;
+            font-size: 14px;
+            font-weight: bold;
+            letter-spacing: 0.5px;
+        }
+
+        .event-pulse {
+            position: relative;
+            width: 9px;
+            height: 9px;
+            border-radius: 50%;
+            background-color: #ff4757;
+            box-shadow: 0 0 8px #ff4757;
+        }
+
+        .event-pulse::after {
+            content: "";
+            position: absolute;
+            inset: -5px;
+            border: 1px solid rgba(255, 71, 87, 0.5);
+            border-radius: 50%;
+            animation: event-pulse 1.8s ease-out infinite;
+        }
+
+        @keyframes event-pulse {
+            from {
+                transform: scale(0.65);
+                opacity: 1;
+            }
+            to {
+                transform: scale(1.7);
+                opacity: 0;
+            }
+        }
+
+        .event-actions {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .event-minimize {
+            width: 22px;
+            height: 22px;
+            color: #b5c3da;
+            background-color: #222c3d;
+            border: 1px solid #37465d;
+            border-radius: 7px;
+            cursor: pointer;
+            font-size: 15px;
+            line-height: 17px;
+        }
+
+        .event-minimize:hover {
+            color: #fff;
+            background-color: #33425a;
+        }
+
+        .event-body {
+            padding: 7px;
+        }
+
+        .event-item {
+            position: relative;
+            padding: 7px 8px 7px 11px;
+            margin-bottom: 5px;
+            background-color: rgba(37, 47, 66, 0.76);
+            border: 1px solid #29364b;
+            border-radius: 9px;
+        }
+
+        .event-item::before {
+            content: "";
+            position: absolute;
+            top: 8px;
+            bottom: 8px;
+            left: 0;
+            width: 3px;
+            border-radius: 2px;
+            background-color: #ff4757;
+        }
+
+        .event-title {
+            color: #eef4ff;
+            font-size: 13px;
+            font-weight: bold;
+            line-height: 1.45;
+        }
+
+        a.event-title:hover {
+            color: #ff9aa4;
+        }
+
+        .event-empty {
+            padding: 7px 4px;
+            color: #718096;
+            font-size: 11px;
+            text-align: center;
+        }
+
+        .event-float.compact .event-body {
+            display: none;
+        }
+
+        .event-float.dragging {
+            opacity: 0.94;
+            box-shadow: 0 25px 54px rgba(0, 0, 0, 0.7);
+        }
     </style>
     <style type="text/css"></style>
 </head>
@@ -420,6 +560,23 @@
 <script src="config.js"></script>
 
 <body>
+    <!-- Event 漂浮視窗：標題列可拖曳 -->
+    <section class="event-float" id="eventFloat" aria-label="Event">
+        <div class="event-header" id="eventDragHandle">
+            <div class="event-heading">
+                <span class="event-pulse"></span>
+                <span>Event</span>
+            </div>
+            <div class="event-actions">
+                <button class="event-minimize" id="eventMinimize" type="button" aria-label="縮小事件視窗"
+                    aria-expanded="true">−</button>
+            </div>
+        </div>
+        <div class="event-body">
+            <div id="eventList"></div>
+        </div>
+    </section>
+
     <!-- Todoist 漂浮視窗 -->
     <div class="todoist-float-icon" id="todoistIcon"></div>
     <div class="todoist-panel" id="todoistPanel">
@@ -534,6 +691,7 @@
 
             if (cwa_t != "" && cwa_h != "" && parseFloat(cwa_t) > -10 && parseFloat(cwa_h) > 0) {
                 $("div.weather").html(station + "：" + cwa_t + "°C, " + String(parseInt(cwa_h)) + "%");
+                updateWeatherTemperatureEvent(station, parseFloat(cwa_t));
                 if (parseInt(cwa_h) >= 80) {
                     $("div.weather").css("color", "#46a3ff");
                     $("div.weather").css("font-weight", "bold");
@@ -1148,11 +1306,13 @@
 	                $("div.OIL").html(data.b_oil_latest_price.toString() + ", " + data.b_oil_price_change.toString() + ", " + data.b_oil_price_change_percent.toString() + "% " + status);
 	            }
 			}
+            updateMarketEvents(data);
             //<div class="nasdaq" id="nasdaqDataContainer" align="center"></div>
             //$("div.nasdaqDataContainer").html(data.latest_price.toString() + " / " );
         } catch (error) {
             // Handle any errors
             $("div.nasdaq").html("No data");
+            updateEventGroup('market', []);
             console.error('Fetch error:', error);
         }
     }
@@ -1294,7 +1454,7 @@
         }
 
         $.ajax({
-            url: 'https://api.todoist.com/rest/v2/tasks',
+            url: 'https://api.todoist.com/api/v1/tasks',
             method: 'GET',
             headers: {
                 'Authorization': 'Bearer ' + TODOIST_API_TOKEN
@@ -1344,7 +1504,7 @@
         }
 
         $.ajax({
-            url: 'https://api.todoist.com/rest/v2/tasks',
+            url: 'https://api.todoist.com/api/v1/tasks',
             method: 'GET',
             headers: {
                 'Authorization': 'Bearer ' + TODOIST_API_TOKEN
@@ -1542,6 +1702,366 @@
         div.textContent = text;
         return div.innerHTML;
     }
+
+    const eventGroups = {
+        todoist: [],
+        sensor: [],
+        weather: [],
+        market: [],
+        clock: []
+    };
+    const eventSensorRooms = [
+        { name: '客廳', channel: '72313', tempField: 'field1' },
+        { name: '房間', channel: '72313', tempField: 'field3' },
+        { name: '陽台', channel: '72313', tempField: 'field5' },
+        { name: '書房', channel: '72313', tempField: 'field7' },
+        { name: '主臥', channel: '565880', tempField: 'field7' }
+    ];
+
+    function updateEventGroup(group, events) {
+        eventGroups[group] = events;
+        renderActiveEvents();
+    }
+
+    function renderActiveEvents() {
+        const list = document.getElementById('eventList');
+        const activeEvents = eventGroups.sensor.concat(eventGroups.weather, eventGroups.market, eventGroups.clock, eventGroups.todoist);
+        let html = '';
+
+        activeEvents.forEach(function (event) {
+            const title = typeof event === 'string' ? event : event.title;
+            const titleHtml = event.url ?
+                `<a class="event-title" href="${escapeHtml(event.url)}" target="_blank" rel="noopener">${escapeHtml(title)}</a>` :
+                `<span class="event-title">${escapeHtml(title)}</span>`;
+            html += `
+                <article class="event-item">
+                    ${titleHtml}
+                </article>`;
+        });
+
+        list.innerHTML = html || '<div class="event-empty">目前無事件</div>';
+    }
+
+    function getLocalDateKey(date) {
+        const year = date.getFullYear();
+        const month = String(date.getMonth() + 1).padStart(2, '0');
+        const day = String(date.getDate()).padStart(2, '0');
+        return year + '-' + month + '-' + day;
+    }
+
+    function isTodoistEventTask(task, now) {
+        if (task.checked === true || task.is_completed === true) {
+            return false;
+        }
+
+        const dueValue = task.due_datetime || (task.due && (task.due.datetime || task.due.date)) || task.due_date;
+        if (!dueValue) {
+            return false;
+        }
+
+        const dueDay = String(dueValue).slice(0, 10);
+        if (dueDay === getLocalDateKey(now)) {
+            return true;
+        }
+
+        if (String(dueValue).length <= 10) {
+            return false;
+        }
+
+        const dueTime = new Date(dueValue).getTime();
+        const difference = dueTime - now.getTime();
+        return !isNaN(dueTime) && difference >= 0 && difference <= 30 * 60 * 1000;
+    }
+
+    function getTodoistEventTitle(task) {
+        const dueValue = task.due_datetime || (task.due && (task.due.datetime || task.due.date)) || task.due_date;
+        const hasTime = dueValue && String(dueValue).length > 10;
+        if (!hasTime) {
+            return task.content;
+        }
+
+        const scheduledTime = String(dueValue).slice(11, 16);
+        return task.content + ' (' + scheduledTime + ')';
+    }
+
+    async function refreshTodoistEvents() {
+        if (!TODOIST_API_TOKEN || TODOIST_API_TOKEN === 'YOUR_TODOIST_API_TOKEN') {
+            updateEventGroup('todoist', []);
+            return;
+        }
+
+        try {
+            let cursor = null;
+            let tasks = [];
+
+            do {
+                const query = cursor ? '&cursor=' + encodeURIComponent(cursor) : '';
+                const response = await fetch('https://api.todoist.com/api/v1/tasks?limit=200' + query, {
+                    headers: {
+                        'Authorization': 'Bearer ' + TODOIST_API_TOKEN
+                    }
+                });
+
+                if (!response.ok) {
+                    throw new Error('Todoist request failed: ' + response.status);
+                }
+
+                const page = await response.json();
+                tasks = tasks.concat(page.results || []);
+                cursor = page.next_cursor || null;
+            } while (cursor);
+
+            const now = new Date();
+            const events = tasks
+                .filter(function (task) {
+                    return isTodoistEventTask(task, now);
+                })
+                .map(function (task) {
+                    return {
+                        title: getTodoistEventTitle(task),
+                        url: 'https://app.todoist.com/app/task/' + encodeURIComponent(task.id)
+                    };
+                });
+
+            updateEventGroup('todoist', events);
+        } catch (error) {
+            updateEventGroup('todoist', []);
+            console.error('Todoist event fetch error:', error);
+        }
+    }
+
+    function findLatestEventFeed(feeds, field) {
+        for (let i = feeds.length - 1; i >= 0; i--) {
+            if (feeds[i][field] !== null && feeds[i][field] !== undefined && feeds[i][field] !== '') {
+                return feeds[i];
+            }
+        }
+        return null;
+    }
+
+    function appendStaleSensorEvent(events, room, feeds) {
+        const feed = findLatestEventFeed(feeds, room.tempField);
+        const value = feed ? parseFloat(feed[room.tempField]) : NaN;
+
+        if (!feed || isNaN(value) || value === 0 || Date.now() - Date.parse(feed.created_at) > 60 * 60 * 1000) {
+            events.push({ title: room.name + ' 無資料', url: 'sensor2.html' });
+        }
+    }
+
+    function updateWeatherTemperatureEvent(station, temperature) {
+        const events = [];
+        if (temperature > 35 || temperature < 16) {
+            events.push('氣溫 ' + temperature.toFixed(1) + '°C');
+        }
+        updateEventGroup('weather', events);
+    }
+
+    async function refreshSensorEvents() {
+        try {
+            const responses = await Promise.all([
+                fetch('https://api.thingspeak.com/channels/72313/feeds.json?results=50'),
+                fetch('https://api.thingspeak.com/channels/565880/feeds.json?results=50')
+            ]);
+            const data = await Promise.all(responses.map(function (response) {
+                if (!response.ok) {
+                    throw new Error('Sensor request failed: ' + response.status);
+                }
+                return response.json();
+            }));
+            const feedsByChannel = {
+                '72313': data[0].feeds || [],
+                '565880': data[1].feeds || []
+            };
+            const events = [];
+
+            eventSensorRooms.forEach(function (room) {
+                appendStaleSensorEvent(events, room, feedsByChannel[room.channel]);
+            });
+
+            const powerFeed = findLatestEventFeed(feedsByChannel['565880'], 'field6');
+            const powerElement = $("div.power");
+            if (powerFeed && !isNaN(parseFloat(powerFeed.field6))) {
+                const power = parseFloat(powerFeed.field6);
+                const isPowerStale = Date.now() - Date.parse(powerFeed.created_at) > 60 * 60 * 1000;
+                powerElement.html('瓦數：' + power.toFixed(0) + ' W' + (isPowerStale ? ' *' : ''));
+                powerElement.css('color', power > 200 ? 'red' : (power > 100 ? 'orange' : '#FFFF00'));
+                powerElement.css('font-weight', power > 100 ? 'bold' : 'normal');
+
+                if (!isPowerStale && power > 200) {
+                    events.push({ title: 'Power ' + power.toFixed(0) + ' W', url: 'sensor2.html' });
+                }
+            } else {
+                powerElement.html('瓦數：-- W');
+                powerElement.css('color', '#FFFF00');
+                powerElement.css('font-weight', 'normal');
+            }
+
+            const minerTempFeed = findLatestEventFeed(feedsByChannel['565880'], 'field4');
+            if (minerTempFeed && Date.now() - Date.parse(minerTempFeed.created_at) <= 60 * 60 * 1000) {
+                const minerTemperature = parseFloat(minerTempFeed.field4);
+                if (!isNaN(minerTemperature) && minerTemperature > 68) {
+                    events.push({ title: '礦機溫度 ' + minerTemperature.toFixed(1) + '°C', url: 'sensor2.html' });
+                }
+            }
+
+            const minerHashFeed = findLatestEventFeed(feedsByChannel['565880'], 'field5');
+            if (minerHashFeed && Date.now() - Date.parse(minerHashFeed.created_at) <= 60 * 60 * 1000) {
+                const minerHashRate = parseFloat(minerHashFeed.field5);
+                if (!isNaN(minerHashRate) && minerHashRate < 500) {
+                    events.push({ title: '礦機算力 ' + minerHashRate.toFixed(0) + ' GH', url: 'sensor2.html' });
+                }
+            }
+
+            updateEventGroup('sensor', events);
+        } catch (error) {
+            console.error('Sensor event fetch error:', error);
+        }
+    }
+
+    function appendMarketAlert(markets, name, value) {
+        const percent = parseFloat(value);
+        if (!isNaN(percent) && Math.abs(percent) > 1.5) {
+            markets.push(name);
+        }
+    }
+
+    function updateMarketEvents(data) {
+        const markets = [];
+        appendMarketAlert(markets, '美股', data.price_change_percent);
+        appendMarketAlert(markets, '台股', data.tse_change_percent);
+
+        if (data.b_oil_latest_price > 0) {
+            appendMarketAlert(markets, '石油', data.b_oil_price_change_percent);
+        }
+
+        updateEventGroup('market', markets.length ? [markets.join(' / ')] : []);
+    }
+
+    function updateClockEvent() {
+        const now = new Date();
+        const day = now.getDay();
+        const minutes = now.getHours() * 60 + now.getMinutes();
+        const isWeekday = day >= 1 && day <= 5;
+        const isClosingSoon = minutes >= (13 * 60 + 10) && minutes <= (13 * 60 + 29);
+        const isLunchOrderDay = day === 1 || day === 3 || day === 5;
+        const isLunchOrderTime = minutes >= (12 * 60) && minutes <= (12 * 60 + 15);
+        const events = [];
+
+        if (isLunchOrderDay && isLunchOrderTime) {
+            events.push('買便當');
+        }
+        if (isWeekday && isClosingSoon) {
+            events.push('即將收盤');
+        }
+
+        updateEventGroup('clock', events);
+    }
+
+    function initEventFloat() {
+        const panel = document.getElementById('eventFloat');
+        const handle = document.getElementById('eventDragHandle');
+        const minimize = document.getElementById('eventMinimize');
+        let dragStart = null;
+
+        renderActiveEvents();
+
+        try {
+            const savedPosition = JSON.parse(localStorage.getItem('eventFloatPositionV2'));
+            const isVisiblePosition = savedPosition &&
+                savedPosition.left >= 0 && savedPosition.top >= 0 &&
+                savedPosition.left < window.innerWidth - 60 &&
+                savedPosition.top < window.innerHeight - 35;
+
+            if (isVisiblePosition) {
+                panel.style.left = savedPosition.left + 'px';
+                panel.style.top = savedPosition.top + 'px';
+            }
+
+            if (localStorage.getItem('eventFloatCompact') === 'true') {
+                panel.classList.add('compact');
+                minimize.textContent = '+';
+                minimize.setAttribute('aria-expanded', 'false');
+            }
+        } catch (error) {
+            // Keep the default position when local storage is unavailable.
+        }
+
+        minimize.addEventListener('pointerdown', function (event) {
+            event.stopPropagation();
+        });
+
+        minimize.addEventListener('click', function () {
+            const compact = panel.classList.toggle('compact');
+            minimize.textContent = compact ? '+' : '−';
+            minimize.setAttribute('aria-expanded', compact ? 'false' : 'true');
+            try {
+                localStorage.setItem('eventFloatCompact', compact);
+            } catch (error) {
+                // The control remains usable without persistence.
+            }
+        });
+
+        handle.addEventListener('pointerdown', function (event) {
+            if (event.target.closest('button')) {
+                return;
+            }
+
+            const rect = panel.getBoundingClientRect();
+            dragStart = {
+                pointerId: event.pointerId,
+                x: event.clientX,
+                y: event.clientY,
+                left: rect.left,
+                top: rect.top
+            };
+            panel.style.left = rect.left + 'px';
+            panel.style.top = rect.top + 'px';
+            panel.classList.add('dragging');
+            handle.setPointerCapture(event.pointerId);
+        });
+
+        handle.addEventListener('pointermove', function (event) {
+            if (!dragStart || dragStart.pointerId !== event.pointerId) {
+                return;
+            }
+
+            const maxLeft = Math.max(8, window.innerWidth - panel.offsetWidth - 8);
+            const maxTop = Math.max(8, window.innerHeight - panel.offsetHeight - 8);
+            const left = Math.min(maxLeft, Math.max(8, dragStart.left + event.clientX - dragStart.x));
+            const top = Math.min(maxTop, Math.max(8, dragStart.top + event.clientY - dragStart.y));
+            panel.style.left = left + 'px';
+            panel.style.top = top + 'px';
+        });
+
+        function finishEventDrag(event) {
+            if (!dragStart || dragStart.pointerId !== event.pointerId) {
+                return;
+            }
+
+            panel.classList.remove('dragging');
+            handle.releasePointerCapture(event.pointerId);
+            dragStart = null;
+            try {
+                localStorage.setItem('eventFloatPositionV2', JSON.stringify({
+                    left: panel.offsetLeft,
+                    top: panel.offsetTop
+                }));
+            } catch (error) {
+                // The dragged position is still applied for this session.
+            }
+        }
+
+        handle.addEventListener('pointerup', finishEventDrag);
+        handle.addEventListener('pointercancel', finishEventDrag);
+    }
+
+    initEventFloat();
+    refreshTodoistEvents();
+    setInterval(refreshTodoistEvents, 60 * 1000);
+    refreshSensorEvents();
+    setInterval(refreshSensorEvents, 60 * 1000);
+    updateClockEvent();
+    setInterval(updateClockEvent, 60 * 1000);
     fetchAndUpdate();
     fetchAndUpdateBTC();
     /* Auto Reload */
