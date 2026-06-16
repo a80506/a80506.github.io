@@ -82,7 +82,7 @@
                 //{ div: "", title: "三大法人-選擇權", url: "http://www.taifex.com.tw/cht/3/optContractsDateExcel" },
                 //{ div: "", title: "三大法人-現貨", url: "http://www.twse.com.tw/zh/page/trading/fund/BFI82U.html" },
                 { div: "OIL", title: "", url: "" },
-                { div: "nasdaq", title: "外資買賣超", url: "https://fubon-ebrokerdj.fbs.com.tw/Z/ZG/ZGK_D.djhtm" },
+                { div: "nasdaq", title: "", url: "https://fubon-ebrokerdj.fbs.com.tw/Z/ZG/ZGK_D.djhtm" },
                 { div: "TSE", title: "", url: "" },
                 { div: "OTC", title: "", url: "" },
                 { div: "ratio00647", title: "", url: "" },
@@ -1286,13 +1286,14 @@
                 $("div.TSE").css("color", "red");
             }
             $("div.TSE").html(data.tse_last.toString() + ", " + data.tse_change.toString() + ", " + data.tse_change_percent.toString());
-            if (data.otc_change > 0) {
+            if (data.o5274_change > 0) {
                 $("div.OTC").css("color", "#80FF00");
                 
             } else {
                 $("div.OTC").css("color", "red");
+                $("div.OTC").css("font-weight", "bold");
             }
-            $("div.OTC").html(data.otc_last.toString() + ", " + data.otc_change.toString() + ", " + data.otc_change_percent.toString());
+            $("div.OTC").html(parseInt(data.o5274_last).toString() + ", " + parseInt(data.o5274_change).toString() + ", " + data.o5274_change_percent.toString());
             if (data.ratio00647) {
                 $("div.ratio00647").html(data.ratio00647);
             }
