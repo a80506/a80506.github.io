@@ -1423,6 +1423,13 @@
             appendMarketAlert(markets, '石油', data.b_oil_price_change_percent);
         }
 
+        const volEstimate = parseFloat(data.tse_vol_estimate);
+        const volLast = parseFloat(data.tse_vol_last);
+        if (!isNaN(volEstimate) && !isNaN(volLast) && volLast > 0 && volEstimate > volLast * 1.2) {
+            const volRatio = (volEstimate / volLast).toFixed(2);
+            markets.push('台股放量' + volRatio + '倍');
+        }
+
         updateEventGroup('market', markets.length ? [markets.join(' / ')] : []);
     }
 
