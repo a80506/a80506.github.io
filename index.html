@@ -375,7 +375,15 @@
             left: 0;
             width: 3px;
             border-radius: 2px;
-            background-color: #ff4757;
+            background-color: #2ed573; /* 非 todoist：綠 */
+        }
+
+        .event-item.event-tone-overdue::before {
+            background-color: #ff4757; /* todoist 過期：紅 */
+        }
+
+        .event-item.event-tone-todoist::before {
+            background-color: #ffa502; /* todoist 其他：橘 */
         }
 
         .event-title {
@@ -1306,7 +1314,8 @@
         sensor: [],
         weather: [],
         market: [],
-        clock: []
+        clock: [],
+        todoist: []
     };
     const eventSensorRooms = [
         { name: '客廳', channel: '72313', tempField: 'field1' },
@@ -1323,21 +1332,69 @@
 
     function renderActiveEvents() {
         const list = document.getElementById('eventList');
-        const activeEvents = eventGroups.sensor.concat(eventGroups.weather, eventGroups.market, eventGroups.clock);
+        // todoist 固定排在最下方
+        const activeEvents = eventGroups.sensor.concat(eventGroups.weather, eventGroups.market, eventGroups.clock, eventGroups.todoist);
         let html = '';
 
         activeEvents.forEach(function (event) {
             const title = typeof event === 'string' ? event : event.title;
-            const titleHtml = event.url ?
-                `<a class="event-title" href="${escapeHtml(event.url)}" target="_blank" rel="noopener">${escapeHtml(title)}</a>` :
-                `<span class="event-title">${escapeHtml(title)}</span>`;
+            const tone = typeof event === 'object' && event.tone ? event.tone : '';
+            const itemClass = tone ? ('event-item event-tone-' + tone) : 'event-item';
+            const usePopup = typeof event === 'object' && event.popup && event.url;
+            let titleHtml;
+            if (usePopup) {
+                titleHtml = `<a class="event-title event-popup-link" href="${escapeHtml(event.url)}" target="_blank" rel="noopener">${escapeHtml(title)}</a>`;
+            } else if (event.url) {
+                titleHtml = `<a class="event-title" href="${escapeHtml(event.url)}" target="_blank" rel="noopener">${escapeHtml(title)}</a>`;
+            } else {
+                titleHtml = `<span class="event-title">${escapeHtml(title)}</span>`;
+            }
             html += `
-                <article class="event-item">
+                <article class="${itemClass}">
                     ${titleHtml}
                 </article>`;
         });
 
         list.innerHTML = html || '<div class="event-empty">目前無事件</div>';
+    }
+
+    function openEventPopup(url) {
+        const width = 420;
+        const height = 720;
+        const left = Math.max(0, Math.round((window.screen.width - width) / 2));
+        const top = Math.max(0, Math.round((window.screen.height - height) / 2));
+        const features = [
+            'width=' + width,
+            'height=' + height,
+            'left=' + left,
+            'top=' + top,
+            'scrollbars=yes',
+            'resizable=yes'
+        ].join(',');
+        const popup = window.open(url, 'todoist_task', features);
+        if (popup) {
+            try { popup.focus(); } catch (e) { /* ignore */ }
+            return true;
+        }
+        // 被擋 popup 時改開新分頁
+        window.open(url, '_blank', 'noopener,noreferrer');
+        return false;
+    }
+
+    function bindEventPopupLinks() {
+        const list = document.getElementById('eventList');
+        if (!list || list.dataset.popupBound === '1') {
+            return;
+        }
+        list.dataset.popupBound = '1';
+        list.addEventListener('click', function (event) {
+            const link = event.target.closest('a.event-popup-link');
+            if (!link) {
+                return;
+            }
+            event.preventDefault();
+            openEventPopup(link.href);
+        });
     }
 
     function findLatestEventFeed(feeds, field) {
@@ -1474,12 +1531,161 @@
         updateEventGroup('clock', events);
     }
 
+    function getLocalDateKey(date) {
+        const year = date.getFullYear();
+        const month = String(date.getMonth() + 1).padStart(2, '0');
+        const day = String(date.getDate()).padStart(2, '0');
+        return year + '-' + month + '-' + day;
+    }
+
+    function extractTimeMinutes(text) {
+        if (!text) {
+            return null;
+        }
+        // "12:25 還書" / "8月5日12:25" / "5 Aug 20:00"
+        const match = String(text).match(/(\d{1,2}):(\d{2})\b/);
+        if (!match) {
+            return null;
+        }
+        const hour = parseInt(match[1], 10);
+        const minute = parseInt(match[2], 10);
+        if (hour > 23 || minute > 59) {
+            return null;
+        }
+        return hour * 60 + minute;
+    }
+
+    function formatMinutesAsTime(minutes) {
+        const hour = String(Math.floor(minutes / 60)).padStart(2, '0');
+        const minute = String(minutes % 60).padStart(2, '0');
+        return hour + ':' + minute;
+    }
+
+    function getTodoistTaskTimeMinutes(task) {
+        if (task.due_datetime) {
+            const due = new Date(task.due_datetime);
+            if (!isNaN(due.getTime())) {
+                return due.getHours() * 60 + due.getMinutes();
+            }
+        }
+
+        // content / due_string 內的時間（例如 "8月5日12:25"）
+        const fromContent = extractTimeMinutes(task.content);
+        if (fromContent !== null) {
+            return fromContent;
+        }
+        return extractTimeMinutes(task.due_string);
+    }
+
+    // json 的 is_overdue 常只標「跨日」；今天已過鐘點也視為過期
+    function isTodoistTaskOverdue(task, now) {
+        if (task.is_overdue) {
+            return true;
+        }
+
+        const dueDate = task.due_date ? String(task.due_date).slice(0, 10) : '';
+        if (!dueDate) {
+            return false;
+        }
+
+        const todayKey = getLocalDateKey(now);
+        if (dueDate < todayKey) {
+            return true;
+        }
+        if (dueDate > todayKey) {
+            return false;
+        }
+
+        const timeMinutes = getTodoistTaskTimeMinutes(task);
+        if (timeMinutes === null) {
+            return false; // 今天全天任務，未到隔日不算過期
+        }
+
+        const nowMinutes = now.getHours() * 60 + now.getMinutes();
+        return nowMinutes >= timeMinutes;
+    }
+
+    function taskToTodoistEvent(task, now) {
+        const content = task.content || '';
+        const isOverdue = isTodoistTaskOverdue(task, now);
+        const timeMinutes = getTodoistTaskTimeMinutes(task);
+        let title = content;
+
+        // content 沒帶時間時，從 due_string 補上，例如 "12:25 還書"
+        if (timeMinutes !== null && !extractTimeMinutes(content)) {
+            title = formatMinutesAsTime(timeMinutes) + ' ' + content;
+        }
+        if (isOverdue) {
+            title = '[過期] ' + title;
+        }
+
+        const event = {
+            title: title,
+            tone: isOverdue ? 'overdue' : 'todoist',
+            popup: true,
+            isOverdue: isOverdue,
+            timeMinutes: timeMinutes
+        };
+        // json 的 url 多半為 null，改用 task id 組 Todoist 任務頁
+        if (task.url) {
+            event.url = task.url;
+        } else if (task.id) {
+            event.url = 'https://app.todoist.com/app/task/' + encodeURIComponent(task.id);
+        }
+        return event;
+    }
+
+    async function refreshTodoistEvents() {
+        try {
+            const response = await fetch('https://' + CONFIG.MYSITE + '/linepic/todoist.json');
+            if (!response.ok) {
+                throw new Error('Todoist request failed: ' + response.status);
+            }
+
+            const data = await response.json();
+            // 優先用分好的陣列；過期在前、今天有時間的在後
+            let tasks = [];
+            if (Array.isArray(data.overdue_tasks) || Array.isArray(data.today_tasks)) {
+                tasks = (data.overdue_tasks || []).concat(data.today_tasks || []);
+            } else if (Array.isArray(data.tasks)) {
+                tasks = data.tasks.slice();
+            }
+
+            const now = new Date();
+            const events = tasks.map(function (task) {
+                return taskToTodoistEvent(task, now);
+            });
+
+            events.sort(function (a, b) {
+                if (!!a.isOverdue !== !!b.isOverdue) {
+                    return a.isOverdue ? -1 : 1; // 過期在上
+                }
+
+                const aHasTime = a.timeMinutes !== null && a.timeMinutes !== undefined;
+                const bHasTime = b.timeMinutes !== null && b.timeMinutes !== undefined;
+                if (aHasTime !== bHasTime) {
+                    return aHasTime ? -1 : 1; // 有時間的排在無時間上方
+                }
+                if (aHasTime && bHasTime && a.timeMinutes !== b.timeMinutes) {
+                    return a.timeMinutes - b.timeMinutes; // 時間早的在上
+                }
+                return 0;
+            });
+
+            updateEventGroup('todoist', events);
+        } catch (error) {
+            updateEventGroup('todoist', []);
+            console.error('Todoist event fetch error:', error);
+        }
+    }
+
     function initEventFloat() {
         const panel = document.getElementById('eventFloat');
         const handle = document.getElementById('eventDragHandle');
         const minimize = document.getElementById('eventMinimize');
         let dragStart = null;
 
+        bindEventPopupLinks();
         renderActiveEvents();
 
         try {
@@ -1577,6 +1783,8 @@
     setInterval(refreshSensorEvents, 60 * 1000);
     updateClockEvent();
     setInterval(updateClockEvent, 60 * 1000);
+    refreshTodoistEvents();
+    setInterval(refreshTodoistEvents, 60 * 1000);
     fetchAndUpdate();
     fetchAndUpdateBTC();
     /* Auto Reload */
