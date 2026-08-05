@@ -85,9 +85,140 @@
             max-width: 100%;
             height: 200px;
         }
+
+        /* Todoist 手機待辦卡 — 方案 A 冷白灰 */
+        .todoist-panel {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: calc(100% - 24px);
+            max-width: 420px;
+            z-index: 2000;
+            max-height: 42vh;
+            overflow: hidden;
+            color: #1a2332;
+            background: linear-gradient(155deg, #f4f7fb 0%, #e8eef6 100%);
+            border: 1px solid #c5d0e0;
+            border-radius: 14px;
+            box-shadow: 0 12px 28px rgba(26, 35, 50, 0.22);
+            font-family: Arial, "Microsoft JhengHei", sans-serif;
+            font-weight: normal;
+        }
+
+        .todoist-panel.is-visible {
+            display: block;
+        }
+
+        .todoist-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 10px 10px 8px 14px;
+            background: rgba(255, 255, 255, 0.72);
+            border-bottom: 1px solid #d5dee9;
+        }
+
+        .todoist-heading {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 15px;
+            font-weight: bold;
+            letter-spacing: 0.4px;
+            color: #1a2332;
+        }
+
+        .todoist-pulse {
+            width: 9px;
+            height: 9px;
+            border-radius: 50%;
+            background-color: #ffa502;
+            box-shadow: 0 0 8px rgba(255, 165, 2, 0.55);
+        }
+
+        .todoist-close {
+            min-width: 44px;
+            min-height: 44px;
+            margin: -8px -4px -8px 0;
+            color: #445566;
+            background: transparent;
+            border: none;
+            border-radius: 10px;
+            font-size: 28px;
+            line-height: 1;
+            cursor: pointer;
+        }
+
+        .todoist-close:active {
+            background-color: rgba(26, 35, 50, 0.08);
+        }
+
+        .todoist-body {
+            max-height: calc(42vh - 52px);
+            overflow-y: auto;
+            padding: 8px;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        .todoist-item {
+            position: relative;
+            padding: 10px 10px 10px 14px;
+            margin-bottom: 6px;
+            background-color: rgba(255, 255, 255, 0.85);
+            border: 1px solid #d5dee9;
+            border-radius: 10px;
+        }
+
+        .todoist-item:last-child {
+            margin-bottom: 0;
+        }
+
+        .todoist-item::before {
+            content: "";
+            position: absolute;
+            top: 10px;
+            bottom: 10px;
+            left: 0;
+            width: 3px;
+            border-radius: 2px;
+            background-color: #ffa502;
+        }
+
+        .todoist-item.tone-overdue::before {
+            background-color: #ff4757;
+        }
+
+        .todoist-item a,
+        .todoist-item span {
+            color: #1a2332;
+            font-size: 15px;
+            font-weight: bold;
+            line-height: 1.4;
+            text-decoration: none;
+            word-break: break-word;
+        }
+
+        .todoist-item a:active {
+            color: #c0392b;
+        }
     </style>
+    <script src="config.js"></script>
 </head>
 <body>
+
+    <!-- Todoist 待辦（22:00–23:59） -->
+    <section class="todoist-panel" id="todoistPanel" aria-label="今日待辦" hidden>
+        <div class="todoist-header">
+            <div class="todoist-heading">
+                <span class="todoist-pulse"></span>
+                <span>今日待辦</span>
+            </div>
+            <button type="button" class="todoist-close" id="todoistClose" aria-label="關閉待辦">×</button>
+        </div>
+        <div class="todoist-body" id="todoistList"></div>
+    </section>
 
     <!-- 表格內容在這裡 -->
     <div class="container"></div>
@@ -262,6 +393,230 @@
 
         fetchAndUpdate(); // 初次載入
         setInterval(fetchAndUpdate, 180000); // 每三分鐘更新一次
+
+        // ---- Todoist 待辦（僅 22:00–23:59；含全天；不含無日期、不含未來）----
+        const TODOIST_DISMISS_KEY = 'sensor5_todoist_dismissed';
+        const todoistPanel = document.getElementById('todoistPanel');
+        const todoistList = document.getElementById('todoistList');
+        const todoistClose = document.getElementById('todoistClose');
+
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        function getLocalDateKey(date) {
+            const year = date.getFullYear();
+            const month = String(date.getMonth() + 1).padStart(2, '0');
+            const day = String(date.getDate()).padStart(2, '0');
+            return year + '-' + month + '-' + day;
+        }
+
+        function isTodoistDisplayWindow(now) {
+            const minutes = now.getHours() * 60 + now.getMinutes();
+            // 每日 22:00–23:59
+            if (minutes >= 22 * 60 && minutes <= 23 * 60 + 59) {
+                return true;
+            }
+            // 週六、週日 11:00–11:59
+            const day = now.getDay(); // 0=日, 6=六
+            if ((day === 0 || day === 6) && minutes >= 11 * 60 && minutes <= 11 * 60 + 59) {
+                return true;
+            }
+            return false;
+        }
+
+        function isDismissedTonight(now) {
+            try {
+                return localStorage.getItem(TODOIST_DISMISS_KEY) === getLocalDateKey(now);
+            } catch (e) {
+                return false;
+            }
+        }
+
+        function dismissTonight(now) {
+            try {
+                localStorage.setItem(TODOIST_DISMISS_KEY, getLocalDateKey(now));
+            } catch (e) {
+                // ignore
+            }
+            hideTodoistPanel();
+        }
+
+        function hideTodoistPanel() {
+            todoistPanel.classList.remove('is-visible');
+            todoistPanel.hidden = true;
+        }
+
+        function showTodoistPanel() {
+            todoistPanel.hidden = false;
+            todoistPanel.classList.add('is-visible');
+        }
+
+        function extractTimeMinutes(text) {
+            if (!text) return null;
+            const match = String(text).match(/(\d{1,2}):(\d{2})\b/);
+            if (!match) return null;
+            const hour = parseInt(match[1], 10);
+            const minute = parseInt(match[2], 10);
+            if (hour > 23 || minute > 59) return null;
+            return hour * 60 + minute;
+        }
+
+        function formatMinutesAsTime(minutes) {
+            const hour = String(Math.floor(minutes / 60)).padStart(2, '0');
+            const minute = String(minutes % 60).padStart(2, '0');
+            return hour + ':' + minute;
+        }
+
+        function getTodoistTaskTimeMinutes(task) {
+            if (task.due_datetime) {
+                const due = new Date(task.due_datetime);
+                if (!isNaN(due.getTime())) {
+                    return due.getHours() * 60 + due.getMinutes();
+                }
+            }
+            const fromContent = extractTimeMinutes(task.content);
+            if (fromContent !== null) return fromContent;
+            return extractTimeMinutes(task.due_string);
+        }
+
+        function getTodoistDueDateKey(task) {
+            if (task.due_date) {
+                return String(task.due_date).slice(0, 10);
+            }
+            if (task.due_datetime) {
+                const due = new Date(task.due_datetime);
+                if (!isNaN(due.getTime())) {
+                    return getLocalDateKey(due);
+                }
+            }
+            return '';
+        }
+
+        // 有日期（全天也可）；無日期且無時間不顯示；今天以後不顯示
+        function isTodoistTaskEligible(task, now) {
+            const dueDate = getTodoistDueDateKey(task);
+            const hasTime = getTodoistTaskTimeMinutes(task) !== null;
+            if (!dueDate && !hasTime) {
+                return false;
+            }
+            if (!dueDate) {
+                // 僅有時間、沒明確日期 → 不當成今天/過期，略過
+                return false;
+            }
+            const todayKey = getLocalDateKey(now);
+            return dueDate <= todayKey; // 今天 + 過期；未來不要
+        }
+
+        function isTodoistTaskOverdue(task, now) {
+            if (task.is_overdue) return true;
+            const dueDate = getTodoistDueDateKey(task);
+            if (!dueDate) return false;
+            const todayKey = getLocalDateKey(now);
+            if (dueDate < todayKey) return true;
+            if (dueDate > todayKey) return false;
+            const timeMinutes = getTodoistTaskTimeMinutes(task);
+            if (timeMinutes === null) return false; // 全天到隔日才算過期
+            const nowMinutes = now.getHours() * 60 + now.getMinutes();
+            return nowMinutes >= timeMinutes;
+        }
+
+        function taskToTodoistEvent(task, now) {
+            const content = task.content || '';
+            const isOverdue = isTodoistTaskOverdue(task, now);
+            const timeMinutes = getTodoistTaskTimeMinutes(task);
+            let title = content;
+            if (timeMinutes !== null && !extractTimeMinutes(content)) {
+                title = formatMinutesAsTime(timeMinutes) + ' ' + content;
+            }
+            if (isOverdue) {
+                title = '[過期] ' + title;
+            }
+            const event = {
+                title: title,
+                tone: isOverdue ? 'overdue' : 'todoist',
+                isOverdue: isOverdue,
+                timeMinutes: timeMinutes
+            };
+            if (task.url) {
+                event.url = task.url;
+            } else if (task.id) {
+                event.url = 'https://app.todoist.com/app/task/' + encodeURIComponent(task.id);
+            }
+            return event;
+        }
+
+        function renderTodoistEvents(events) {
+            if (!events.length) {
+                hideTodoistPanel();
+                return;
+            }
+            let html = '';
+            events.forEach(function (event) {
+                const itemClass = event.tone === 'overdue' ? 'todoist-item tone-overdue' : 'todoist-item';
+                const titleHtml = event.url
+                    ? `<a href="${escapeHtml(event.url)}" target="_blank" rel="noopener">${escapeHtml(event.title)}</a>`
+                    : `<span>${escapeHtml(event.title)}</span>`;
+                html += `<article class="${itemClass}">${titleHtml}</article>`;
+            });
+            todoistList.innerHTML = html;
+            showTodoistPanel();
+        }
+
+        async function refreshTodoistEvents() {
+            const now = new Date();
+            if (!isTodoistDisplayWindow(now) || isDismissedTonight(now)) {
+                hideTodoistPanel();
+                return;
+            }
+
+            try {
+                const response = await fetch('https://' + CONFIG.MYSITE + '/linepic/todoist.json');
+                if (!response.ok) {
+                    throw new Error('Todoist request failed: ' + response.status);
+                }
+                const data = await response.json();
+                let tasks = [];
+                if (Array.isArray(data.overdue_tasks) || Array.isArray(data.today_tasks)) {
+                    tasks = (data.overdue_tasks || []).concat(data.today_tasks || []);
+                } else if (Array.isArray(data.tasks)) {
+                    tasks = data.tasks.slice();
+                }
+
+                const events = tasks
+                    .filter(function (task) { return isTodoistTaskEligible(task, now); })
+                    .map(function (task) { return taskToTodoistEvent(task, now); });
+
+                events.sort(function (a, b) {
+                    if (!!a.isOverdue !== !!b.isOverdue) {
+                        return a.isOverdue ? -1 : 1;
+                    }
+                    const aHasTime = a.timeMinutes !== null && a.timeMinutes !== undefined;
+                    const bHasTime = b.timeMinutes !== null && b.timeMinutes !== undefined;
+                    if (aHasTime !== bHasTime) {
+                        return aHasTime ? -1 : 1; // 有時間在上，全天在後
+                    }
+                    if (aHasTime && bHasTime && a.timeMinutes !== b.timeMinutes) {
+                        return a.timeMinutes - b.timeMinutes;
+                    }
+                    return 0;
+                });
+
+                renderTodoistEvents(events);
+            } catch (error) {
+                hideTodoistPanel();
+                console.error('Todoist event fetch error:', error);
+            }
+        }
+
+        todoistClose.addEventListener('click', function () {
+            dismissTonight(new Date());
+        });
+
+        refreshTodoistEvents();
+        setInterval(refreshTodoistEvents, 60 * 1000);
     });
     </script>
 </body>
