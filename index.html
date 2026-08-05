@@ -86,8 +86,11 @@
                 { div: "TSE", title: "", url: "" },
                 { div: "OTC", title: "", url: "" },
                 { div: "ratio00647", title: "", url: "" },
-                { div: "STOCK_2", title: "SensorBK1", url: "https://thingspeak.mathworks.com/channels/1729950" },
-                { div: "STOCK_3", title: "SensorBK2", url: "https://thingspeak.mathworks.com/channels/72839" },
+                { div: "o8089", title: "", url: "" },
+                { div: "STOCK_3", title: "SensorBK1 SensorBK2", url: "", links: [
+                    { title: "SensorBK1", url: "https://thingspeak.mathworks.com/channels/1729950" },
+                    { title: "SensorBK2", url: "https://thingspeak.mathworks.com/channels/72839" }
+                ] },
             ]
         },
         { // [7]
@@ -444,11 +447,19 @@
                 item_title = list_table[i].items[j].title;
                 item_url = list_table[i].items[j].url;
                 item_div = list_table[i].items[j].div;
+                item_links = list_table[i].items[j].links;
                 if (item_title == "")
                     item_title = "　";
                 if (item_title == "XXX")
                     document.write("<tr><td><div class=\"container\"></div></td></tr>");
-                else
+                else if (item_links && item_links.length) {
+                    var links_html = "";
+                    for (var k = 0; k < item_links.length; k++) {
+                        if (k > 0) links_html += " ";
+                        links_html += "<a href=\"" + item_links[k].url + "\">" + item_links[k].title + "</a>";
+                    }
+                    document.write("<tr><td><div class=\"" + item_div + "\">" + links_html + "</div></td></tr>");
+                } else
                     document.write("<tr><td><div class=\"" + item_div + "\"><a href=\"" + item_url + "\">" + item_title + "</a></div></td></tr>");
             }
 
@@ -1131,6 +1142,16 @@
                 $("div.OTC").css("font-weight", "bold");
             }
             $("div.OTC").html(parseInt(data.o5274_last).toString() + ", " + parseInt(data.o5274_change).toString() + ", " + data.o5274_change_percent.toString());
+            if (data.o8089_last !== undefined && data.o8089_last !== null && data.o8089_last !== "") {
+                if (parseFloat(data.o8089_change) > 0) {
+                    $("div.o8089").css("color", "#80FF00");
+                    $("div.o8089").css("font-weight", "normal");
+                } else {
+                    $("div.o8089").css("color", "red");
+                    $("div.o8089").css("font-weight", "bold");
+                }
+                $("div.o8089").html(data.o8089_last.toString() + ", " + data.o8089_change.toString() + ", " + data.o8089_change_percent.toString());
+            }
             if (data.ratio00647) {
                 $("div.ratio00647").html(data.ratio00647);
             }
