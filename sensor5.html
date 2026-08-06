@@ -208,7 +208,7 @@
 </head>
 <body>
 
-    <!-- Todoist 待辦（22:00–23:59） -->
+    <!-- Todoist 待辦（21:00–23:59） -->
     <section class="todoist-panel" id="todoistPanel" aria-label="今日待辦" hidden>
         <div class="todoist-header">
             <div class="todoist-heading">
@@ -394,7 +394,7 @@
         fetchAndUpdate(); // 初次載入
         setInterval(fetchAndUpdate, 180000); // 每三分鐘更新一次
 
-        // ---- Todoist 待辦（僅 22:00–23:59；含全天；不含無日期、不含未來）----
+        // ---- Todoist 待辦（僅 21:00–23:59；含全天；不含無日期、不含未來）----
         const TODOIST_DISMISS_KEY = 'sensor5_todoist_dismissed';
         const todoistPanel = document.getElementById('todoistPanel');
         const todoistList = document.getElementById('todoistList');
@@ -415,13 +415,13 @@
 
         function isTodoistDisplayWindow(now) {
             const minutes = now.getHours() * 60 + now.getMinutes();
-            // 每日 22:00–23:59
-            if (minutes >= 22 * 60 && minutes <= 23 * 60 + 59) {
+            // 每日 21:00–23:59
+            if (minutes >= 21 * 60 && minutes <= 23 * 60 + 59) {
                 return true;
             }
-            // 週六、週日 11:00–11:59
+            // 週六、週日 10:00–11:59
             const day = now.getDay(); // 0=日, 6=六
-            if ((day === 0 || day === 6) && minutes >= 11 * 60 && minutes <= 11 * 60 + 59) {
+            if ((day === 0 || day === 6) && minutes >= 10 * 60 && minutes <= 11 * 60 + 59) {
                 return true;
             }
             return false;
