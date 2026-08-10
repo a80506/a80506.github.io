@@ -270,7 +270,10 @@
             position: fixed;
             top: 18px;
             left: 18px;
-            width: 200px;
+            width: 200px; /* 實際寬度由 updateSideFloatWidths 依剩餘空間調整 */
+            min-width: 100px;
+            max-width: 220px;
+            box-sizing: border-box;
             color: #edf3ff;
             background: linear-gradient(155deg, #171d2b 0%, #10141f 100%);
             border: 1px solid #34435d;
@@ -412,6 +415,224 @@
             opacity: 0.94;
             box-shadow: 0 25px 54px rgba(0, 0, 0, 0.7);
         }
+
+        /* 新高(左中往下) / 新低(右中往下)：幣股混在一起 */
+        .market-float {
+            position: fixed;
+            top: 50%;
+            bottom: auto;
+            width: 200px; /* 實際寬度由 updateSideFloatWidths 依剩餘空間調整 */
+            min-width: 100px;
+            max-width: 220px;
+            box-sizing: border-box;
+            max-height: 46vh;
+            color: #edf3ff;
+            background: linear-gradient(155deg, #141c28 0%, #0d121b 100%);
+            border-radius: 12px;
+            box-shadow: 0 18px 45px rgba(0, 0, 0, 0.62);
+            overflow: hidden;
+            z-index: 1200;
+            font-family: Arial, "Microsoft JhengHei", sans-serif;
+            display: none;
+        }
+
+        .market-float.is-visible {
+            display: block;
+        }
+
+        .market-float.is-high {
+            left: 18px;
+            right: auto;
+            border: 1px solid #3a4d2a;
+            box-shadow: 0 18px 45px rgba(0, 0, 0, 0.62), 0 0 0 1px rgba(120, 180, 60, 0.12);
+        }
+
+        .market-float.is-low {
+            right: 18px;
+            left: auto;
+            border: 1px solid #5a2a35;
+            box-shadow: 0 18px 45px rgba(0, 0, 0, 0.62), 0 0 0 1px rgba(200, 80, 100, 0.14);
+        }
+
+        /* 成交量極端：右上，預設收合 */
+        .market-float.is-volume {
+            top: 18px;
+            bottom: auto;
+            right: 18px;
+            left: auto;
+            border: 1px solid #5a4a28;
+            box-shadow: 0 18px 45px rgba(0, 0, 0, 0.62), 0 0 0 1px rgba(220, 180, 60, 0.14);
+        }
+
+        .market-float.is-volume .event-header {
+            background: rgba(42, 36, 20, 0.95);
+            border-bottom: 1px solid #4a3f28;
+            cursor: default;
+            padding: 7px 6px 6px 9px;
+        }
+
+        .market-float.is-volume .market-pulse {
+            background-color: #ffc048;
+            box-shadow: 0 0 8px #ffc048;
+        }
+
+        .market-item.is-vol-high {
+            background-color: rgba(52, 44, 24, 0.78);
+            border: 1px solid #5a4a28;
+        }
+
+        .market-item.is-vol-low {
+            background-color: rgba(36, 40, 52, 0.78);
+            border: 1px solid #3a4258;
+        }
+
+        .market-item.is-vol-high::before {
+            background-color: #ffc048;
+        }
+
+        .market-item.is-vol-low::before {
+            background-color: #70a1ff;
+        }
+
+        .market-item.is-vol-high .market-name {
+            color: #fff6d8;
+        }
+
+        .market-item.is-vol-low .market-name {
+            color: #e8f0ff;
+        }
+
+        .market-item.is-vol-high .market-days {
+            color: #ffd76a;
+        }
+
+        .market-item.is-vol-low .market-days {
+            color: #9ec1ff;
+        }
+
+        .market-float.is-high .event-header {
+            background: rgba(28, 40, 24, 0.95);
+            border-bottom: 1px solid #2f3f28;
+            cursor: default;
+            padding: 7px 6px 6px 9px;
+        }
+
+        .market-float.is-low .event-header {
+            background: rgba(42, 24, 30, 0.95);
+            border-bottom: 1px solid #4a2d35;
+            cursor: default;
+            padding: 7px 6px 6px 9px;
+        }
+
+        .market-float .event-heading {
+            font-size: 13px;
+            gap: 7px;
+        }
+
+        .market-pulse {
+            position: relative;
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+        }
+
+        .market-float.is-high .market-pulse {
+            background-color: #7bed9f;
+            box-shadow: 0 0 8px #7bed9f;
+        }
+
+        .market-float.is-low .market-pulse {
+            background-color: #ff6b81;
+            box-shadow: 0 0 8px #ff6b81;
+        }
+
+        .market-pulse::after {
+            content: "";
+            position: absolute;
+            inset: -4px;
+            border: 1px solid rgba(255, 255, 255, 0.35);
+            border-radius: 50%;
+            animation: event-pulse 1.8s ease-out infinite;
+        }
+
+        .market-body {
+            padding: 5px;
+            max-height: calc(46vh - 38px);
+            overflow-y: auto;
+        }
+
+        .market-item {
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 2px;
+            padding: 6px 6px 6px 10px;
+            margin-bottom: 4px;
+            border-radius: 8px;
+        }
+
+        .market-item:last-child {
+            margin-bottom: 0;
+        }
+
+        .market-item.is-high {
+            background-color: rgba(37, 52, 40, 0.72);
+            border: 1px solid #2d3f2a;
+        }
+
+        .market-item.is-low {
+            background-color: rgba(52, 32, 40, 0.72);
+            border: 1px solid #4a2d35;
+        }
+
+        .market-item::before {
+            content: "";
+            position: absolute;
+            top: 7px;
+            bottom: 7px;
+            left: 0;
+            width: 3px;
+            border-radius: 2px;
+        }
+
+        .market-item.is-high::before {
+            background-color: #7bed9f;
+        }
+
+        .market-item.is-low::before {
+            background-color: #ff6b81;
+        }
+
+        .market-name {
+            color: #f0fff4;
+            font-size: 12px;
+            font-weight: bold;
+            line-height: 1.3;
+            word-break: break-all;
+        }
+
+        .market-item.is-low .market-name {
+            color: #ffeef1;
+        }
+
+        .market-days {
+            font-size: 11px;
+            font-weight: bold;
+            white-space: nowrap;
+        }
+
+        .market-item.is-high .market-days {
+            color: #a8e6bf;
+        }
+
+        .market-item.is-low .market-days {
+            color: #ff9aa8;
+        }
+
+        .market-float.compact .market-body {
+            display: none;
+        }
     </style>
     <style type="text/css"></style>
 </head>
@@ -434,6 +655,57 @@
         </div>
         <div class="event-body">
             <div id="eventList"></div>
+        </div>
+    </section>
+
+    <!-- 左中往下：新高（幣+股混），預設收合 -->
+    <section class="market-float is-high compact" id="highFloat" aria-label="新高" hidden>
+        <div class="event-header">
+            <div class="event-heading">
+                <span class="market-pulse"></span>
+                <span id="highTitle">新高: 0</span>
+            </div>
+            <div class="event-actions">
+                <button class="event-minimize" id="highMinimize" type="button" aria-label="展開新高視窗"
+                    aria-expanded="false">+</button>
+            </div>
+        </div>
+        <div class="market-body">
+            <div id="highList"></div>
+        </div>
+    </section>
+
+    <!-- 右中往下：新低（幣+股混），預設收合 -->
+    <section class="market-float is-low compact" id="lowFloat" aria-label="新低" hidden>
+        <div class="event-header">
+            <div class="event-heading">
+                <span class="market-pulse"></span>
+                <span id="lowTitle">新低: 0</span>
+            </div>
+            <div class="event-actions">
+                <button class="event-minimize" id="lowMinimize" type="button" aria-label="展開新低視窗"
+                    aria-expanded="false">+</button>
+            </div>
+        </div>
+        <div class="market-body">
+            <div id="lowList"></div>
+        </div>
+    </section>
+
+    <!-- 右上：成交量極端（stockdays），預設收合 -->
+    <section class="market-float is-volume compact" id="volumeFloat" aria-label="成交量" hidden>
+        <div class="event-header">
+            <div class="event-heading">
+                <span class="market-pulse"></span>
+                <span id="volumeTitle">量: 0</span>
+            </div>
+            <div class="event-actions">
+                <button class="event-minimize" id="volumeMinimize" type="button" aria-label="展開成交量視窗"
+                    aria-expanded="false">+</button>
+            </div>
+        </div>
+        <div class="market-body">
+            <div id="volumeList"></div>
         </div>
     </section>
 
@@ -1778,13 +2050,345 @@
         handle.addEventListener('pointercancel', finishEventDrag);
     }
 
+    function stripUsdtSuffix(text) {
+        return String(text || '').replace(/USDT$/i, '');
+    }
+
+    function marketBreakoutLabel(item) {
+        if (item.name) {
+            return stripUsdtSuffix(item.name);
+        }
+        return stripUsdtSuffix(item.symbol);
+    }
+
+    // 從單一 payload 收集指定 kind 的 breakout
+    function collectMarketBreakoutsByKind(payload, kind) {
+        const alerts = (payload && payload.alerts && payload.alerts.breakouts) || [];
+        const type = kind === 'high' ? 'up_over_high' : 'down_over_low';
+        const rows = [];
+        alerts.forEach(function (item) {
+            if (item.type !== type) {
+                return;
+            }
+            const days = parseInt(item.days, 10);
+            if (isNaN(days) || days <= 0) {
+                return;
+            }
+            rows.push({
+                name: marketBreakoutLabel(item),
+                days: days,
+                kind: kind
+            });
+        });
+        return rows;
+    }
+
+    function mergeAndSortBreakouts(coinPayload, stockPayload, kind) {
+        const rows = collectMarketBreakoutsByKind(coinPayload, kind)
+            .concat(collectMarketBreakoutsByKind(stockPayload, kind));
+        // 天數大→小；同天數幣名排前（字母）
+        rows.sort(function (a, b) {
+            if (a.days !== b.days) {
+                return b.days - a.days;
+            }
+            return String(a.name).localeCompare(String(b.name));
+        });
+        return rows;
+    }
+
+    function renderMarketPanel(panelId, listId, titleId, rows, kindLabel) {
+        const panel = document.getElementById(panelId);
+        const list = document.getElementById(listId);
+        const title = document.getElementById(titleId);
+        if (!panel || !list) {
+            return;
+        }
+
+        if (title) {
+            title.textContent = kindLabel + ': ' + rows.length;
+        }
+
+        if (!rows.length) {
+            panel.classList.remove('is-visible');
+            panel.hidden = true;
+            list.innerHTML = '';
+            return;
+        }
+
+        const itemClass = kindLabel === '新高' ? 'market-item is-high' : 'market-item is-low';
+        let html = '';
+        rows.forEach(function (row) {
+            html += `
+                <article class="${itemClass}">
+                    <span class="market-name">${escapeHtml(row.name)}</span>
+                    <span class="market-days">${row.days}日${kindLabel}</span>
+                </article>`;
+        });
+        list.innerHTML = html;
+        panel.hidden = false;
+        panel.classList.add('is-visible');
+    }
+
+    function collectVolumeExtremes(payload) {
+        const alerts = (payload && payload.alerts && payload.alerts.volume_extremes) || [];
+        const rows = [];
+        alerts.forEach(function (item) {
+            let kind = '';
+            let label = '';
+            if (item.type === 'volume_high_extreme') {
+                kind = 'vol-high';
+                label = '量高';
+            } else if (item.type === 'volume_low_extreme') {
+                kind = 'vol-low';
+                label = '量低';
+            } else {
+                return;
+            }
+            const days = parseInt(item.days, 10);
+            if (isNaN(days) || days <= 0) {
+                return;
+            }
+            rows.push({
+                name: marketBreakoutLabel(item),
+                days: days,
+                kind: kind,
+                label: label
+            });
+        });
+        // 量高在前、量低在後；同組天數大→小
+        rows.sort(function (a, b) {
+            if (a.kind !== b.kind) {
+                return a.kind === 'vol-high' ? -1 : 1;
+            }
+            if (a.days !== b.days) {
+                return b.days - a.days;
+            }
+            return String(a.name).localeCompare(String(b.name));
+        });
+        return rows;
+    }
+
+    function renderVolumePanel(rows) {
+        const panel = document.getElementById('volumeFloat');
+        const list = document.getElementById('volumeList');
+        const title = document.getElementById('volumeTitle');
+        if (!panel || !list) {
+            return;
+        }
+
+        if (title) {
+            title.textContent = '量: ' + rows.length;
+        }
+
+        if (!rows.length) {
+            panel.classList.remove('is-visible');
+            panel.hidden = true;
+            list.innerHTML = '';
+            return;
+        }
+
+        let html = '';
+        rows.forEach(function (row) {
+            const itemClass = row.kind === 'vol-high' ? 'market-item is-vol-high' : 'market-item is-vol-low';
+            html += `
+                <article class="${itemClass}">
+                    <span class="market-name">${escapeHtml(row.name)}</span>
+                    <span class="market-days">${row.days}日${row.label}</span>
+                </article>`;
+        });
+        list.innerHTML = html;
+        panel.hidden = false;
+        panel.classList.add('is-visible');
+    }
+
+    async function refreshMarketBreakouts() {
+        const base = 'https://' + CONFIG.MYSITE + '/linepic/';
+        try {
+            const responses = await Promise.all([
+                fetch(base + 'coindays.json'),
+                fetch(base + 'stockdays.json')
+            ]);
+            const payloads = await Promise.all(responses.map(function (response, index) {
+                if (!response.ok) {
+                    throw new Error((index === 0 ? 'coindays' : 'stockdays') + ' failed: ' + response.status);
+                }
+                return response.json();
+            }));
+
+            const highRows = mergeAndSortBreakouts(payloads[0], payloads[1], 'high');
+            const lowRows = mergeAndSortBreakouts(payloads[0], payloads[1], 'low');
+            renderMarketPanel('highFloat', 'highList', 'highTitle', highRows, '新高');
+            renderMarketPanel('lowFloat', 'lowList', 'lowTitle', lowRows, '新低');
+            renderVolumePanel(collectVolumeExtremes(payloads[1]));
+        } catch (error) {
+            renderMarketPanel('highFloat', 'highList', 'highTitle', [], '新高');
+            renderMarketPanel('lowFloat', 'lowList', 'lowTitle', [], '新低');
+            renderVolumePanel([]);
+            console.error('Market breakout fetch error:', error);
+        }
+    }
+
+    function initMarketFloat(panelId, minimizeId, storageKey) {
+        const panel = document.getElementById(panelId);
+        const minimize = document.getElementById(minimizeId);
+        if (!panel || !minimize) {
+            return;
+        }
+
+        const expandLabel = panelId === 'highFloat' ? '展開新高視窗'
+            : (panelId === 'lowFloat' ? '展開新低視窗' : '展開成交量視窗');
+        const collapseLabel = panelId === 'highFloat' ? '縮小新高視窗'
+            : (panelId === 'lowFloat' ? '縮小新低視窗' : '縮小成交量視窗');
+
+        // 每次載入皆預設收合
+        function setCompactState(compact) {
+            if (compact) {
+                panel.classList.add('compact');
+                minimize.textContent = '+';
+                minimize.setAttribute('aria-expanded', 'false');
+                minimize.setAttribute('aria-label', expandLabel);
+            } else {
+                panel.classList.remove('compact');
+                minimize.textContent = '−';
+                minimize.setAttribute('aria-expanded', 'true');
+                minimize.setAttribute('aria-label', collapseLabel);
+            }
+            try {
+                localStorage.setItem(storageKey, compact ? 'true' : 'false');
+            } catch (error) {
+                // ignore
+            }
+        }
+
+        setCompactState(true);
+
+        minimize.addEventListener('click', function () {
+            setCompactState(!panel.classList.contains('compact'));
+        });
+    }
+
+    // 依主內容左右剩餘寬度調整側邊 event：貼近內容區，勿貼螢幕最外緣
+    function getMainContentRect() {
+        const outer = document.querySelector('body > table');
+        if (!outer) {
+            return null;
+        }
+        // 外層 table 常是 100% 寬；取內層置中的內容表
+        const inner = outer.querySelector('table');
+        return (inner || outer).getBoundingClientRect();
+    }
+
+    function clampFloatWidth(spacePx) {
+        // spacePx = 側邊空隙；扣掉與內容、螢幕邊緣的間距
+        const edgePad = 10;
+        const contentGap = 12;
+        const available = Math.floor(spacePx - edgePad - contentGap);
+        const minW = 100;
+        const preferred = 200;
+        if (available <= 0) {
+            return minW;
+        }
+        // 空間夠就用 200，不要撐滿整條側邊（否則看起來貼邊又過寬）
+        if (available >= preferred) {
+            return preferred;
+        }
+        return Math.max(minW, available);
+    }
+
+    function updateSideFloatWidths() {
+        const content = getMainContentRect();
+        const leftPanels = [
+            document.getElementById('eventFloat'),
+            document.getElementById('highFloat')
+        ];
+        const rightPanels = [
+            document.getElementById('lowFloat'),
+            document.getElementById('volumeFloat')
+        ];
+        const edgePad = 10;
+        const contentGap = 12;
+
+        let leftW = 200;
+        let rightW = 200;
+        let leftX = 18;
+        let rightX = null; // 用 left 定位右欄時的 x
+
+        if (content && content.width > 0) {
+            leftW = clampFloatWidth(content.left);
+            rightW = clampFloatWidth(window.innerWidth - content.right);
+
+            // 左側：貼在主內容左外側（往右靠，不要貼螢幕左緣）
+            leftX = Math.round(content.left - contentGap - leftW);
+            if (leftX < edgePad) {
+                leftX = edgePad;
+                // 螢幕太窄時再縮寬，避免壓到內容
+                const maxLeftW = Math.max(minWSafe(), Math.floor(content.left - edgePad - contentGap));
+                leftW = Math.min(leftW, maxLeftW);
+                leftX = Math.max(edgePad, Math.round(content.left - contentGap - leftW));
+            }
+
+            // 右側：貼在主內容右外側（往左靠，不要貼螢幕右緣）
+            rightX = Math.round(content.right + contentGap);
+            const rightEdge = rightX + rightW;
+            if (rightEdge > window.innerWidth - edgePad) {
+                const maxRightW = Math.max(minWSafe(), Math.floor(window.innerWidth - edgePad - content.right - contentGap));
+                rightW = Math.min(rightW, maxRightW);
+                rightX = Math.round(content.right + contentGap);
+            }
+        }
+
+        function minWSafe() {
+            return 100;
+        }
+
+        leftPanels.forEach(function (el) {
+            if (!el) {
+                return;
+            }
+            el.style.width = leftW + 'px';
+            el.style.left = leftX + 'px';
+            el.style.right = 'auto';
+        });
+        rightPanels.forEach(function (el) {
+            if (!el) {
+                return;
+            }
+            el.style.width = rightW + 'px';
+            if (rightX !== null) {
+                el.style.left = rightX + 'px';
+                el.style.right = 'auto';
+            } else {
+                el.style.right = '18px';
+                el.style.left = 'auto';
+            }
+        });
+    }
+
+    let floatWidthResizeTimer = null;
+    function scheduleSideFloatWidthUpdate() {
+        if (floatWidthResizeTimer) {
+            clearTimeout(floatWidthResizeTimer);
+        }
+        floatWidthResizeTimer = setTimeout(updateSideFloatWidths, 80);
+    }
+
     initEventFloat();
+    initMarketFloat('highFloat', 'highMinimize', 'highFloatCompact');
+    initMarketFloat('lowFloat', 'lowMinimize', 'lowFloatCompact');
+    initMarketFloat('volumeFloat', 'volumeMinimize', 'volumeFloatCompact');
+    updateSideFloatWidths();
+    window.addEventListener('resize', scheduleSideFloatWidthUpdate);
+    // 表格寫入後再量一次，避免初始 layout 未穩
+    setTimeout(updateSideFloatWidths, 0);
+    setTimeout(updateSideFloatWidths, 300);
     refreshSensorEvents();
     setInterval(refreshSensorEvents, 60 * 1000);
     updateClockEvent();
     setInterval(updateClockEvent, 60 * 1000);
     refreshTodoistEvents();
     setInterval(refreshTodoistEvents, 60 * 1000);
+    refreshMarketBreakouts();
+    setInterval(refreshMarketBreakouts, 60 * 1000);
     fetchAndUpdate();
     fetchAndUpdateBTC();
     /* Auto Reload */
