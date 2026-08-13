@@ -1828,7 +1828,7 @@
             } else if (type === 'power') {
                 humidContainer.style.display = 'none';
                 tempTitle.textContent = `⚡ HS300 耗電量 (${timeLabel})`;
-                tempChart = createChart(tempCtx, labels, filtered.map(f => parseFloat(f.field6)), '#ffd700');
+                tempChart = createChart(tempCtx, labels, filtered.map(f => parseFloat(f.field6)), '#2ed573');
             }
             document.getElementById('dataCount').textContent = `📊 ${labels.length} 筆`;
         }
