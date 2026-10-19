@@ -68,6 +68,7 @@
     <div class="room1" align="center">書房：00°C, 00%</div>
     <div class="balcony" align="center">陽台：00°C, 00%</div>
     <div class="kids" align="center">房間：00°C, 00%</div>
+    <div class="master-bedroom" align="center">主臥：00°C, 00%</div>
     <div class="pm25" align="center">PM2.5：0 ug/m3</div>
     <div class="rain" align="center" style="display: none;"></div>
     <div class="weather" align="center">戶外：00°C, 0%</div>
@@ -103,6 +104,7 @@
         $("div.room2").css("color", gray);
         $("div.room3").css("color", gray);
         $("div.kids").css("color", gray);
+        $("div.master-bedroom").css("color", gray);
         $("div.balcony").css("color", gray);
         $("div.pm25").css("color", gray);
         $("div.miner0").css("color", gray);
@@ -184,6 +186,32 @@
         }
 
         function get_sensor() {
+            $.getJSON("https://api.thingspeak.com/channels/565880/feeds.json?results=" + String(max),
+                function (data) {
+                    var bedroom = $("div.master-bedroom");
+                    var latest = (data.feeds || []).slice().reverse().find(function (feed) {
+                        var age = Date.now() - Date.parse(feed.created_at);
+                        return age >= 0 && age <= 1800000 &&
+                            feed.field7 != null && feed.field7 !== "" &&
+                            feed.field8 != null && feed.field8 !== "" &&
+                            isFinite(parseFloat(feed.field7)) && isFinite(parseFloat(feed.field8));
+                    });
+
+                    if (!latest) {
+                        bedroom.text("主臥：無近期資料").css({ color: gray, "font-weight": "normal" });
+                        return;
+                    }
+
+                    var temp = parseInt(latest.field7);
+                    var humid = parseInt(latest.field8);
+                    bedroom.text("主臥：" + temp + "°C, " + humid + "%")
+                        .css({ color: humid === 0 ? gray : humid >= 80 ? "red" : humid >= 70 ? "orange" : green,
+                            "font-weight": humid >= 80 ? "bold" : "normal" });
+                }).fail(function () {
+                    $("div.master-bedroom").text("主臥：讀取失敗")
+                        .css({ color: gray, "font-weight": "normal" });
+                });
+
             $.getJSON("https://api.thingspeak.com/channels/72313/feeds.json?results=" + String(max),
                 function (data) {
                     $.each(data, function (key, val) {

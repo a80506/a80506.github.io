@@ -80,7 +80,14 @@
             justify-content: center;
         }
 
+        .kline-chart {
+            width: 50%;
+            min-width: 0;
+            text-align: center;
+        }
+
         canvas {
+            display: block;
             width: 100%;
             max-width: 100%;
             height: 200px;
@@ -226,16 +233,28 @@
 
     <!-- K 線圖的容器 -->
     <div class="kline-chart-container">
-        <canvas id="klineChart"></canvas>
+        <div class="kline-chart">
+            <div>BTCUSDT · 60分鐘</div>
+            <canvas id="btcKlineChart"></canvas>
+        </div>
+        <div class="kline-chart">
+            <div>ETHBTC · 1小時</div>
+            <canvas id="klineChart"></canvas>
+        </div>
     </div>
 
     <script>
     // Binance API Endpoint for K 線
-    const apiUrl = 'https://api.binance.com/api/v3/klines?symbol=ETHBTC&interval=1h&limit=48';
+    const klineCharts = [
+      { canvasId: 'klineChart', symbol: 'ETHBTC', interval: '1h', decimals: 5 },
+      { canvasId: 'btcKlineChart', symbol: 'BTCUSDT', interval: '1h', decimals: 2 }
+    ];
 
     // 抓取K線資料
-    async function fetchKlineData() {
+    async function fetchKlineData(chart) {
+      const apiUrl = `https://api.binance.com/api/v3/klines?symbol=${chart.symbol}&interval=${chart.interval}&limit=24`;
       const response = await fetch(apiUrl);
+      if (!response.ok) throw new Error('Kline request failed: ' + response.status);
       const data = await response.json();
       return data.map(k => ({
         time: k[0],
@@ -247,13 +266,14 @@
     }
 
     // 繪製K線圖
-    function drawKlineChart(data) {
-      const canvas = document.getElementById('klineChart');
+    function drawKlineChart(data, chart) {
+      if (!data.length) return;
+      const canvas = document.getElementById(chart.canvasId);
       const ctx = canvas.getContext('2d');
       const width = canvas.width = canvas.clientWidth;
       const height = canvas.height = canvas.clientHeight;
       const padding = 20;
-      const rightPadding = 50; // 右邊用來顯示價格
+      const rightPadding = 65; // 右邊用來顯示價格
 
       // 計算每個K線的寬度
       const candleWidth = (width - 2 * padding - rightPadding) / data.length;
@@ -279,7 +299,7 @@
 
         // 在右邊顯示價格
         ctx.fillStyle = '#fff';
-        ctx.fillText(price.toFixed(2), width - rightPadding + 5, y + 3); // 顯示價格文字
+        ctx.fillText(price.toFixed(chart.decimals), width - rightPadding + 5, y + 3); // 顯示價格文字
       });
 
       // 繪製K線
@@ -308,26 +328,38 @@
 
     // 將價格映射到Canvas座標
     function mapToCanvas(price, minPrice, maxPrice, canvasHeight, padding) {
+      if (maxPrice === minPrice) return canvasHeight / 2;
       return canvasHeight - padding - (price - minPrice) / (maxPrice - minPrice) * (canvasHeight - 2 * padding);
     }
 
     // 主程式
     async function main() {
-      const klineData = await fetchKlineData();
-      drawKlineChart(klineData);
+      await Promise.all(klineCharts.map(async chart => {
+        try {
+          const klineData = await fetchKlineData(chart);
+          chart.data = klineData;
+          drawKlineChart(klineData, chart);
+        } catch (error) {
+          console.error(chart.symbol + ' Kline error:', error);
+        }
+      }));
     }
 
-  //  main();
+    window.addEventListener('resize', function () {
+      klineCharts.forEach(chart => {
+        if (chart.data) drawKlineChart(chart.data, chart);
+      });
+    });
 
     // 其他 JavaScript 邏輯：載入表格數據並更新
     document.addEventListener("DOMContentLoaded", function () {
         // 幣種清單
         var coinOrder = [
             'BTC', 'ETH', 'SOL', 'BNB',
-            'STX', 'ORDI', '1000SATS', 'CKB',
+            'STX', 'ORDI', 'AVA', 'ADA',
             'APT', 'SUI', 'DOT', 'ATOM',
             'LINK', 'PYTH', 'ETHFI', 'NEAR',
-            'ALT', 'MANTA', 'MATIC', 'SSV',
+            'ALT', 'HYPE', 'ZEC', 'SSV',
         ];
 
         function fetchAndUpdate() {
