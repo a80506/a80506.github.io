@@ -77,11 +77,12 @@
             max-width: 100%;
             margin-top: 10px;
             display: flex;
+            flex-direction: column;
             justify-content: center;
         }
 
         .kline-chart {
-            width: 50%;
+            width: 100%;
             min-width: 0;
             text-align: center;
         }
@@ -234,11 +235,9 @@
     <!-- K 線圖的容器 -->
     <div class="kline-chart-container">
         <div class="kline-chart">
-            <div>BTCUSDT · 60分鐘</div>
             <canvas id="btcKlineChart"></canvas>
         </div>
         <div class="kline-chart">
-            <div>ETHBTC · 1小時</div>
             <canvas id="klineChart"></canvas>
         </div>
     </div>
@@ -252,7 +251,7 @@
 
     // 抓取K線資料
     async function fetchKlineData(chart) {
-      const apiUrl = `https://api.binance.com/api/v3/klines?symbol=${chart.symbol}&interval=${chart.interval}&limit=24`;
+      const apiUrl = `https://api.binance.com/api/v3/klines?symbol=${chart.symbol}&interval=${chart.interval}&limit=48`;
       const response = await fetch(apiUrl);
       if (!response.ok) throw new Error('Kline request failed: ' + response.status);
       const data = await response.json();
@@ -356,10 +355,9 @@
         // 幣種清單
         var coinOrder = [
             'BTC', 'ETH', 'SOL', 'BNB',
-            'STX', 'ORDI', 'AVA', 'ADA',
-            'APT', 'SUI', 'DOT', 'ATOM',
-            'LINK', 'PYTH', 'ETHFI', 'NEAR',
-            'ALT', 'HYPE', 'ZEC', 'SSV',
+            'STX', 'AVA', 'ADA', 'SUI',
+            'DOT', 'ATOM', 'LINK', 'PYTH',
+            'NEAR', 'HYPE', 'ZEC', 'SSV',
         ];
 
         function fetchAndUpdate() {
