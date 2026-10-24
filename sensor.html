@@ -78,834 +78,281 @@
     <div class="nasdaq" id="nasdaqDataContainer" align="center"></div>
     <div align="center">　</div>
 
+    <div id="update-status" role="status" align="center" style="font-size: 16pt; color: #aaaaaa;"></div>
     <script>
-        var weather_emoji = '';
-        var max = 20;
-        var living_room_t = 0, living_room_h = 0;
-        var room1_t = 0, room1_h = 0;
-        var room2_t = 0, room2_h = 0;
-        var room3_t = 0, room3_h = 0;
-        var kidsroom_t = 0, kidsroom_h = 0;
-        var balcony_t = 0, balcony_h = 0;
-        var plant_level = -1, plant_water_times = -1;
-        var pm25 = 0, pm10 = 0;
-        var green = "#80FF00";
-        var gray = "#444444";
-        var fil_reward = 0, fil_storage = 0;
-        var grass = 0;
-        var mcc = 0;
-        var wcc = 0;
+        // Each source owns one timer. Requests finish (or time out) before rescheduling.
+        (function () {
+            'use strict';
 
-        var date = new Date();
-        var now_hour = date.getHours();
+            const green = '#80FF00';
+            const gray = '#444444';
+            const minute = 60000;
+            const sensorMaxAge = 30 * minute;
+            const readings = {};
+            const tasks = [];
+            let weatherEmoji = '';
+            let ethereumTVL = null;
+            let nasdaq = null;
 
-        //$("div.living_room").css("color", gray);
-        $("div.room1").css("color", gray);
-        $("div.room2").css("color", gray);
-        $("div.room3").css("color", gray);
-        $("div.kids").css("color", gray);
-        $("div.master-bedroom").css("color", gray);
-        $("div.balcony").css("color", gray);
-        $("div.pm25").css("color", gray);
-        $("div.miner0").css("color", gray);
-        $("div.miner1").css("color", gray);
-        $("div.nasdaq").css("color", gray);
-
-        function btcDominance() {
-            // Initialize XMLHttpRequest
-            const xhr = new XMLHttpRequest();
-
-            // Make synchronous request
-            xhr.open('GET', 'https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&order=market_cap_desc&per_page=250&page=1&sparkline=false', false);
-
-            try {
-                // Send request
-                xhr.send();
-
-                if (xhr.status !== 200) {
-                    throw new Error(`HTTP error! status: ${xhr.status}`);
-                }
-
-                // Parse response
-                const response = JSON.parse(xhr.responseText);
-
-                // Initialize variables
-                let BTCCap = 0;
-                let altCap = 0;
-
-                // Get current date
-                const current_time = new Date().toLocaleDateString('en-GB', {
-                    day: '2-digit',
-                    month: '2-digit',
-                    year: 'numeric'
-                }).split('/').join('-');
-
-                // Calculate market caps
-                for (const x of response) {
-                    if (x.id === "bitcoin") {
-                        BTCCap = x.market_cap;
-                        altCap += x.market_cap;
-                    } else {
-                        altCap += x.market_cap;
-                    }
-                }
-
-                // Return formatted percentage
-                return `${(BTCCap/altCap * 100).toFixed(2)}%`;
-
-            } catch (error) {
-                console.error('Error:', error);
-                throw error;
+            function requestJSON(url) {
+                return new Promise(function (resolve, reject) {
+                    $.ajax({ url: url, dataType: 'json', timeout: 15000, cache: false })
+                        .done(resolve)
+                        .fail(function (_xhr, status) {
+                            // Do not log URLs containing API keys.
+                            reject(new Error(status === 'timeout' ? '連線逾時' : '讀取失敗'));
+                        });
+                });
             }
-        }
 
-        function get_binance(item) {
-            var percent = 0;
-            var percent_html = "";
+            function number(value) {
+                return value == null || String(value).trim() === '' ? NaN : Number(value);
+            }
 
-            $.getJSON("https://api.binance.com/api/v3/ticker/24hr?symbol=" + item,
-                function (data) {
-                    var color = "#80FF00";
-                    percent = parseInt(data.priceChangePercent);
-                    if (percent < 0) {
-                        color = "red";
-                        percent_html = " (" + percent.toString() + "%)";
-                    } else if (percent > 0) {
-                        color = green;
-                        percent_html = " (+" + percent.toString() + "%)";
-                    } else {
-                        color = "yellow";
-                    }
+            function fresh(timestamp, maxAge) {
+                const age = Date.now() - Date.parse(timestamp);
+                return Number.isFinite(age) && age >= 0 && age <= maxAge;
+            }
 
-                    $("div."+item).css("color", color);
-                    price = parseFloat(data.lastPrice).toFixed(5);
-                    $("div." + item.toUpperCase()).html(String(price));
+            function showStatus() {
+                const failed = tasks.filter(function (task) { return task.error; });
+                $('#update-status').text(failed.map(function (task) {
+                    return task.name + '：' + task.error + (task.lastSuccess ? '（保留上次資料）' : '');
+                }).join('；'));
+            }
+
+            function schedule(name, interval, update) {
+                const task = { name: name, interval: interval, update: update,
+                    running: false, timer: null, error: '', lastSuccess: 0 };
+                tasks.push(task);
+                return task;
+            }
+
+            async function run(task) {
+                if (task.running) return;
+                clearTimeout(task.timer);
+                task.running = true;
+                try {
+                    await task.update();
+                    task.lastSuccess = Date.now();
+                    task.error = '';
+                } catch (error) {
+                    task.error = error.message || '更新失敗';
+                } finally {
+                    task.running = false;
+                    showStatus();
+                    task.timer = setTimeout(function () { run(task); }, task.interval);
                 }
-            );
-            return;
-        }
+            }
 
-        function get_sensor() {
-            $.getJSON("https://api.thingspeak.com/channels/565880/feeds.json?results=" + String(max),
-                function (data) {
-                    var bedroom = $("div.master-bedroom");
-                    var latest = (data.feeds || []).slice().reverse().find(function (feed) {
-                        var age = Date.now() - Date.parse(feed.created_at);
-                        return age >= 0 && age <= 1800000 &&
-                            feed.field7 != null && feed.field7 !== "" &&
-                            feed.field8 != null && feed.field8 !== "" &&
-                            isFinite(parseFloat(feed.field7)) && isFinite(parseFloat(feed.field8));
-                    });
+            function refreshAll() {
+                tasks.forEach(function (task) { run(task); });
+            }
 
-                    if (!latest) {
-                        bedroom.text("主臥：無近期資料").css({ color: gray, "font-weight": "normal" });
+            const rooms = [
+                { selector: '.living_room', name: '客廳', temp: 'field1', humidity: 'field2' },
+                { selector: '.room1', name: '書房', temp: 'field7', humidity: 'field8' },
+                { selector: '.balcony', name: '陽台', temp: 'field5', humidity: 'field6' },
+                { selector: '.kids', name: '房間', temp: 'field3', humidity: 'field4' },
+                { selector: '.master-bedroom', name: '主臥', temp: 'field7', humidity: 'field8' }
+            ];
+
+            function renderSensors() {
+                rooms.forEach(function (room) {
+                    const reading = readings[room.selector];
+                    const element = $(room.selector);
+                    if (!reading || !fresh(reading.time, sensorMaxAge)) {
+                        element.text(room.name + '：無近期資料')
+                            .css({ color: gray, 'font-weight': 'normal' });
                         return;
                     }
-
-                    var temp = parseInt(latest.field7);
-                    var humid = parseInt(latest.field8);
-                    bedroom.text("主臥：" + temp + "°C, " + humid + "%")
-                        .css({ color: humid === 0 ? gray : humid >= 80 ? "red" : humid >= 70 ? "orange" : green,
-                            "font-weight": humid >= 80 ? "bold" : "normal" });
-                }).fail(function () {
-                    $("div.master-bedroom").text("主臥：讀取失敗")
-                        .css({ color: gray, "font-weight": "normal" });
-                });
-
-            $.getJSON("https://api.thingspeak.com/channels/72313/feeds.json?results=" + String(max),
-                function (data) {
-                    $.each(data, function (key, val) {
-                        if (key == "feeds") {
-                            for (var i = 0; i < max; i++) {
-                                if (Date.now() - Date.parse(val[i].created_at) > 1800000)
-                                    continue;
-
-                                if (val[i].field1 && val[i].field2) {
-                                    living_room_t = parseInt(val[i].field1);
-                                    living_room_h = parseInt(val[i].field2);
-                                } else if (val[i].field7 && val[i].field8) {
-                                    room1_t = parseInt(val[i].field7);
-                                    room1_h = parseInt(val[i].field8);
-                                } else if (val[i].field5 && val[i].field6) {
-                                        room2_t = parseInt(val[i].field5);
-                                        room2_h = parseInt(val[i].field6);
-                                } else if (val[i].field3 && val[i].field4) {
-                                        kidsroom_t = parseInt(val[i].field3);
-                                        kidsroom_h = parseInt(val[i].field4);
-                                }
-                            }
-
-                            if (living_room_h == 0) {
-                                $("div.kids").css("color", gray);
-                            } else if (kidsroom_t > 29) {
-                                $("div.kids").css("color", "red");
-                                $("div.kids").css("font-weight", "bold");
-                            } else if (kidsroom_t > 27) {
-                                $("div.kids").css("color", "pink");
-                            } else {
-                                $("div.kids").css("color", green);
-                            }
-
-                            if (living_room_h == 0) {
-                                $("div.living_room").css("color", gray);
-                            } else if (living_room_h >= 80) {
-                                $("div.living_room").css("color", "red");
-                                $("div.living_room").css("font-weight", "bold");
-                            } else if (living_room_h >= 70) {
-                                $("div.living_room").css("color", "orange");
-                            } else {
-                                $("div.living_room").css("color", green);
-                            }
-
-                            if (room1_h == 0) {
-                                $("div.room1").css("color", gray);
-                            } else if (room1_h >= 80) {
-                                $("div.room1").css("color", "red");
-                                $("div.room1").css("font-weight", "bold");
-                            } else if (room1_h >= 70) {
-                                $("div.room1").css("color", "orange");
-                            } else {
-                                $("div.room1").css("color", green);
-                            }
-
-                            if (room2_t == 0) {
-                                $("div.balcony").css("color", gray);
-                            } else if (room2_h >= 90) {
-                                $("div.balcony").css("color", "red");
-                                $("div.balcony").css("font-weight", "bold");
-                            } else if (room2_h >= 80) {
-                                $("div.balcony").css("color", "orangeSS");
-                            } else {
-                                $("div.balcony").css("color", green);
-                            }
-
-                            if (room3_h >= 80) {
-                                $("div.living_room_h").css("color", "red");
-                                $("div.living_room_h").css("font-weight", "bold");
-                            } else if (room3_h >= 70) {
-                                $("div.living_room_h").css("color", "orange");
-                            }
-
-                            if (room1_t > 50 || room1_t < 0)
-                                $("div.room1").html("書房：error");
-                            else
-                                $("div.room1").html("書房：" + room1_t + "°C, " + room1_h + "%");
-                            $("div.living_room").html("客廳：" + living_room_t + "°C, " + living_room_h + "%");
-                            $("div.balcony").html("陽台：" + room2_t + "°C, " + room2_h + "%");
-                            $("div.kids").html("房間：" + kidsroom_t + "°C, " + kidsroom_h + "%");
-                            //$("div.living_room_h").html("客廳 " + living_room_h + "% / 書房 " + room3_h + "%");
-                        }
-                    });
-                });
-
-        }
-
-        // FIL reward + ETHBTC --------------------------------------------------------
-        var ethbtc = -1;
-        function get_binance_price(item) {
-            return new Promise((resolve, reject) => {
-                $.getJSON("https://api.binance.com/api/v3/ticker/24hr?symbol=" + item, function (data) {
-                    resolve(parseFloat(data.lastPrice));
-                }).fail(function (jqXHR, textStatus, error) {
-                    reject(error);
-                });
-            })
-            .then((price) => {
-                console.log("Price:", price);
-                ethbtc = price;
-            })
-            .catch((error) => {
-                console.error("Error:", error);
-            });
-        }
-        //get_binance_price("ETHBTC");
-
-        function get_filecoin() {
-            $.getJSON("https://api.thingspeak.com/channels/565880/feeds.json?results=" + String(max),
-                function (data) {
-                    $.each(data, function (key, val) {
-                        if (key == "feeds") {
-                            for (var i = 0; i < max; i++) {
-                                if (parseFloat(val[i].field1) > 0) {
-                                    if (Date.now() - Date.parse(val[i].created_at) > 86400000)
-                                        continue;
-                                    fil_reward = parseFloat(val[i].field1);
-                                    if (parseFloat(val[i].field2) > 0) {
-                                        if (Date.now() - Date.parse(val[i].created_at) > 86400000)
-                                            continue;
-                                        fil_storage = parseFloat(val[i].field2);
-                                    }
-                                }
-
-                                $("div.fil").html(fil_storage.toFixed(2) + " / " + ethbtc );
-                            }
-                        }
-                    });
-                });
-        }
-
-        // ------------------------------------------------------------------------------
-
-        function get_sea() {
-            $.getJSON("https://starsharks.com/go/api/market/exchange-rate",
-            function (data) {
-                sea = parseFloat(data['data']['sea']).toFixed(2);
-                $("b.coin").text(sea);
-                $("b.coin").css("color", document.getElementById("coin").style.color);
-            });
-        }
-
-        function get_coin_bitstamp() {
-            var price = 0, open = 0;
-            var percentage;
-            var eth_price = 0;
-
-            $.getJSON("https://www.bitstamp.net/api/ticker",
-            function (data) {
-                price = parseInt(data.last);
-                open = parseInt(data.open);
-                percentage = (price - open)/open * 100;
-
-                if (percentage.toFixed(1) == 0)
-                    percentage = 0;
-
-                if (percentage == 0)
-                    $("div.coin").css("color", "orange");
-                else if (percentage >= 0)
-                    $("div.coin").css("color", "red");
-                else
-                    $("div.coin").css("color", green);
-
-                if (price >= 10000 && percentage >= 10)
-                    percent_str = "+" + parseInt(percentage).toString() + "%";
-                else if (percentage > 0)
-                    percent_str = "+" + percentage.toFixed(1).toString() + "%";
-                else if (percentage <= -10)
-                    percent_str = parseInt(percentage).toString() + "%";
-                else
-                    percent_str = percentage.toFixed(1).toString() + "%";
-
-                if (eth_price > 0)
-                    $('div.coin').html(price.toString() + ' / ' + eth_price.toString());
-                else if (percentage == 0)
-                    $('div.coin').html(price.toString());
-                else
-                    $('div.coin').html(price.toString() + " (" + percent_str + ")");
-            });
-
-            setTimeout(function () { get_coin_bitstamp(); }, 60000);
-        }
-
-        function get_geckoterminal(pool) {
-            var price = 0;
-            if (pool == "0xfb79d843d8d7e38bd5a7f115fa889b043db6fe76") {
-                $.getJSON("https://api.geckoterminal.com/api/v2/networks/bsc/pools/" + pool,
-                    function (data) {
-                            price = parseFloat(data.data.attributes.base_token_price_usd)*10000;
-                            mcc = parseInt(price);
-                    }
-                );
-            } else if (pool == "0x09ead9122ba8ac230746eb9730d1c099d9a6181d") {
-                $.getJSON("https://api.geckoterminal.com/api/v2/networks/bsc/pools/" + pool,
-                    function (data) {
-                            price = parseFloat(data.data.attributes.base_token_price_usd)*10000;
-                            wcc = parseInt(price);
-                    }
-                );
-            }
-        }
-
-        function get_binance_cmc(item, slug, retry = 1) {
-            var percent = 0;
-            var percent_html = "";
-            var maxRetries = 3; // 設定最大重試次數
-
-            $.getJSON("https://www.binance.com/bapi/composite/v1/public/promo/cmc/cryptocurrency/quotes/latest?symbol=" + item,
-                function (data) {
-                    var color = "#80FF00";
-                    var price = 0;
-                    var name = "";
-                    var i = 0;
-
-                    $.each(data.data.body.data, function (key, val) {
-                        if (key === item) {
-                            i = 0;
-                            while (val[i] && val[i].slug.length > 0) {
-                                if (slug === val[i].slug) {
-                                    break;
-                                }
-                                i++;
-                            }
-
-                            if (val[i] && val[i].quote && val[i].quote.USD) {
-                                price = parseFloat(val[i].quote.USD.price);
-
-                                if (price >= 100) {
-                                    price = parseInt(price);
-                                } else if (price >= 1) {
-                                    price = price.toFixed(2);
-                                } else if (price >= 0.01) {
-                                    price = price.toFixed(3);
-                                } else {
-                                    price = price.toFixed(4);
-                                }
-
-                                name = val[i].slug;
-
-                                if (item === "GRASS") {
-                                    grass = price;
-                                }
-                            }
-                        }
-                    });
-
-                    // 若 price 為 0 且重試次數未超過最大重試次數，則重新嘗試
-                    if (price === 0 && retry < maxRetries) {
-                        console.log("Price is 0, retrying fetch... Attempt:", retry + 1);
-                        get_binance_cmc(item, slug, retry + 1);
-                    } else if (price === 0) {
-                        console.warn("Unable to fetch a valid price after", maxRetries, "attempts.");
+                    const temp = reading.temp;
+                    const humidity = reading.humidity;
+                    let color = green;
+                    let bold = false;
+                    if (humidity === 0) color = gray;
+                    else if (room.selector === '.kids') {
+                        color = temp > 29 ? 'red' : temp > 27 ? 'pink' : green;
+                        bold = temp > 29;
                     } else {
-                        console.log("Price fetched successfully:", price);
+                        const limit = room.selector === '.balcony' ? 90 : 80;
+                        color = humidity >= limit ? 'red' : humidity >= limit - 10 ? 'orange' : green;
+                        bold = humidity >= limit;
                     }
-                }
-            ).fail(function() {
-                // 若請求失敗且尚未達到最大重試次數，則重試
-                if (retry < maxRetries) {
-                    console.log("Request failed, retrying... Attempt:", retry + 1);
-                    get_binance_cmc(item, slug, retry + 1);
-                } else {
-                    console.warn("Failed to fetch data after", maxRetries, "attempts.");
-                }
-            });
-        }
-
-        function get_coin_binance() {
-            $.getJSON("https://api.binance.com/api/v3/ticker/24hr",
-            function (data) {
-
-                var ethbtc = 0;
-                var btc = 0;
-                var btc_percent;
-                var eth = 0;
-                var fil = 0;
-                var flow = 0;
-                var usdt = 0;
-                var ava = 0;
-                var bnb = 0;
-                var sol = 0;
-                var op = 0;
-                var doge = 0;
-                var price = 0;
-                var btcd = btcDominance();
-
-                $.each( data, function( key, val ) {
-                    if (data[key].symbol == "BTCUSDT") {
-                        btc_percent = parseFloat(data[key].priceChangePercent).toFixed(1);
-                        if (btc_percent > 0)
-                            btc_percent = "(+" + btc_percent.toString() + "%)";
-                        else if (btc_percent == 0)
-                            btc_percent = "";
-                        else
-                            btc_percent = "(" + btc_percent.toString() + "%)";
-
-                        btc = parseInt(data[key].lastPrice);
-                        if (btc >= 100000)
-                            btc = parseFloat(btc/1000).toFixed(3).toString();
-
-                    } else if (data[key].symbol == "ETHUSDT") {
-                        eth = parseInt(data[key].lastPrice);
-                        if (parseFloat(data[key].priceChange) < 0)
-                            $("div.coin").css("color", "red");
-                        else
-                            $("div.coin").css("color", green);
-/*
-                    } else if (data[key].symbol == "ETHBTC") {
-                        ethbtc = parseFloat(data[key].lastPrice);
-                        $("div.ethbtc").html(ethbtc + " / " + btcd);
-*/
-                    } else {
-                        price = parseFloat(data[key].lastPrice);
-                        if (data[key].symbol == "BNBUSDT")
-                            price = parseFloat(price).toFixed(1);
-                        else if (price >= 100)
-                            price = parseInt(price);
-                        else if (price >= 10)
-                            price = parseFloat(price).toFixed(1);
-                        else if (price > 1)
-                            price = parseFloat(price).toFixed(1)
-                        else
-                            price = parseFloat(price).toFixed(2)
-
-                        if (data[key].symbol == "FILUSDT")
-                            fil = price;
-                        else if (data[key].symbol == "AVAUSDT")
-                            ava = price;
-                        else if (data[key].symbol == "BNBUSDT")
-                           bnb = parseInt(price);
-                        else if (data[key].symbol == "OPUSDT")
-                            op = price;
-                        else if (data[key].symbol == "SOLUSDT")
-                            sol = price;
-                        else if (data[key].symbol == "DOGEUSDT")
-                            doge = price;
-                    }
-
-                    $("div.coin").html(btc + " / " + eth);// + "<br />" + bnb + " / " + sol + " / " + doge);
+                    element.text(room.name + '：' + temp + '°C, ' + humidity + '%')
+                        .css({ color: color, 'font-weight': bold ? 'bold' : 'normal' });
                 });
-            })
-            .fail(function(){
-                get_coin_bitstamp();
-            });
-            //get_sea();
-            setTimeout(function () { get_coin(); }, 60000);
-        }
-
-        function get_coin() {
-            get_geckoterminal("0x09ead9122ba8ac230746eb9730d1c099d9a6181d"); //WCC
-            get_geckoterminal("0xfb79d843d8d7e38bd5a7f115fa889b043db6fe76"); //MCC
-            get_coin_binance();
-            //get_coin_bitstamp()
-        }
-
-        function blink() {
-            var times = 1000;
-            while(times--)
-                $('div.coin').fadeOut(1300).fadeIn(600);
-        }
-
-        function set_time() {
-            var d = new Date();
-            $("div.time").html(d.toLocaleTimeString("en-US", { hour12: false , hour: "2-digit", minute: "2-digit"}));
-            setTimeout(function () { set_time(); }, 1000);
-        }
-
-        function get_pm25() {
-            $.getJSON("https://data.moenv.gov.tw/api/v2/aqx_p_432?api_key=" + CONFIG.MOENV_KEY + "&format=JSON",
-            function (data) {
-                const citiesToCheck = ["新莊", "林口", "菜寮", "五股", "蘆洲", "板橋"];
-                let found = 0;
-                let site = "";
-                let pm25_str = "";
-
-                for (const city of citiesToCheck) {
-                    for (const record of data) {
-                        if (record.sitename === city && parseInt(record["pm2.5"]) > 0) {
-                            found = 1;
-                            site = record.sitename;
-                            pm25_str = record["pm2.5"];
-                            break;
-                        }
-                    }
-                    if (found)
-                        break;
-                }
-
-                if (found) {
-                    const pm25Value = parseInt(pm25_str);
-                    const pm25Div = $("div.pm25");
-
-                    if (pm25Value > 40) {
-                        pm25Div.css("color", "red");
-                        pm25Div.css("font-weight", "bold");
-                    } else if (pm25Value > 20) {
-                        pm25Div.css("color", "orange");
-                        pm25Div.css("font-weight", "bold");
-                    } else {
-                        pm25Div.css("color", "80FF00");
-                    }
-
-                    pm25Div.html(`${site} PM2.5：${pm25_str}`);
-                }
-            });
-        }
-
-        function change_weather_div(data, station) {
-            var cwb_t = "";
-            var cwb_h = "";
-            var cwb_w = "";
-            if (data.ObsTime.DateTime != "") {
-                timestamp = Date.parse(data.ObsTime.DateTime);
-                if (Date.now() - timestamp > 5400000)
-                    return 0;
+                const living = readings['.living_room'];
+                const alert = living && fresh(living.time, sensorMaxAge) && living.humidity >= 80;
+                $('.living_room').toggle(Boolean(alert));
+                $('.time').toggle(!alert);
             }
 
-            if (data.WeatherElement) {
-                cwb_t = data.WeatherElement.AirTemperature;
-                cwb_h = data.WeatherElement.RelativeHumidity;
-                cwb_w = data.WeatherElement.Weather;
-
-                var emoji = '';
-                /*
-                if (cwb_h >= 80)
-                    emoji += "💦";
-                if (cwb_t >= 32)
-                    emoji += "🥵";
-                else if (cwb_t <=15)
-                    emoji += "🥶"; */
-                emoji = weather_emoji;
-                if (cwb_t != "" && cwb_h != "" && parseFloat(cwb_t) > -10 && parseFloat(cwb_h) > 0) {
-                    if (station == "新莊" )
-                        station = weather_emoji + " ";
-                    else
-                        station += "：";
-
-                    if (parseInt(cwb_h) >= 80) {
-                        $("div.weather").css("color", "#46a3ff");
-                        $("div.weather").css("font-weight", "bold");
-                    }
-                    if (parseInt(cwb_t) >= 32 || parseInt(cwb_t) < 15) {
-                        $("div.weather").css("color", "red");
-                        $("div.weather").css("font-weight", "bold");
-                    } else if (parseInt(cwb_t) > 28 || parseInt(cwb_t) < 20) {
-                        $("div.weather").css("color", "orange");
-                        $("div.weather").css("font-weight", "bold");
-                    }
-                    $("div.weather").html(station + cwb_t + "°C, " + String(parseInt(cwb_h)) + "% " + emoji);
-                    return 1;
-                }
-            }
-            return 0;
-        }
-
-        function get_weather_place(data, station) {
-            for (var x in data.cwaopendata.dataset.Station) {
-                if (data.cwaopendata.dataset.Station[x].StationName == station) {
-                    found = change_weather_div(data.cwaopendata.dataset.Station[x], station)
-                    if (found)
-                        return 1;
-                }
-            }
-            return 0;
-        }
-
-        function get_weather(emoji) {
-            $.getJSON("https://opendata.cwa.gov.tw/fileapi/v1/opendataapi/O-A0001-001?Authorization=" + CONFIG.CWB_APIKEY + "&downloadType=WEB&format=JSON",
-            function (data) {
-                var found = 0;
-
-                const cities = ["新莊", "三重", "五股", "蘆洲", "板橋"];
-
-                for (const city of cities) {
-                    if (get_weather_place(data, city, emoji)) {
-                        return;
-                    }
-                }
-
-            });
-        }
-
-        function getWeatherTaipei() {
-          // API URL with Authorization and StationId for 中正區
-          const apiUrl = 'https://opendata.cwa.gov.tw/api/v1/rest/datastore/O-A0003-001?Authorization=' + CONFIG.CWB_APIKEY + '&StationId=466920';
-
-          // 定義函數來根據天氣條件顯示對應的 Emoji
-          function getWeatherEmoji(weather) {
-            if (weather.includes('晴')) {
-              const now = new Date();  // 取得目前時間
-              const hours = now.getHours();  // 取得小時數字
-              if (hours > 5 && hours < 18)
-                  weather_emoji = '☀️';
-              else
-                  weather_emoji = '🌙';
-            } else if (weather.includes('雨')) {
-              weather_emoji = '🌧️'; // 雨天
-            } else if (weather.includes('陰')) {
-              weather_emoji = '☁️'; // 陰天
-            } else if (weather.includes('多雲')) {
-              weather_emoji = '🌥️'; // 多雲
-            } else {
-              weather_emoji = ''; // 未知天氣
-            }
-            return weather_emoji;
-          }
-
-          // 發送 API 請求
-          fetch(apiUrl)
-            .then(response => response.json())
-            .then(data => {
-              // 找到中正區的天氣資訊
-              const station = data.records.Station[0];
-
-              if (station) {
-                const weatherCondition = station.WeatherElement.Weather;
-                const emoji = getWeatherEmoji(weatherCondition);
-                // 返回對應的天氣 Emoji
-                console.log(`中正區的天氣是: ${emoji}`);
-                return emoji; // 如果想在其他地方使用結果，可以return emoji
-              } else {
-                console.error('無法找到中正區的天氣資料');
-                return '❓';
-              }
-            })
-            .catch(error => {
-              console.error('Error fetching weather data:', error);
-              return '⚠️';
-            });
-        }
-
-        function fetchEthereumTVL() {
-            try {
-                var url = "https://api.llama.fi/v2/chains";
-                var xhr = new XMLHttpRequest();
-                xhr.open("GET", url, false); // false 表示同步請求
-                xhr.send();
-
-                if (xhr.status !== 200) {
-                    console.log("Error: 無法取得資料，狀態碼 " + xhr.status);
-                    return null;
-                }
-
-                var chainsData = JSON.parse(xhr.responseText);
-                for (var i = 0; i < chainsData.length; i++) {
-                    if (chainsData[i].name.toLowerCase() === "ethereum") {
-                        var tvl = chainsData[i].tvl / 1e9; // 轉成十億美元
-                        console.log("TVL: " + tvl.toFixed(2));
-                        return tvl.toFixed(2);
-                    }
-                }
-
-                console.log("Error: 在資料中找不到 Ethereum");
-                return null;
-
-            } catch (e) {
-                console.log("發生錯誤：" + e.toString());
-                return null;
-            }
-        }
-
-        // Nasdaq Futures
-        async function fetchNasdaqData(url, targetDivId) {
-            const nasdaqDataElement = document.getElementById(targetDivId);
-            var ethtvl = fetchEthereumTVL();
-            var first_data = 0;
-            
-            try {
-                // Fetch the JSON data
-                const response = await fetch(url);
-                
-                // Check if the response is OK
-                if (!response.ok) {
-                    throw new Error(`HTTP error! status: ${response.status}`);
-                }
-                
-                // Parse the JSON
-                const data = await response.json();
-                
-                // Calculate time difference
-                const dataTime = new Date(data.time);
-                const currentTime = new Date();
-                const timeDiffSeconds = Math.round((currentTime - dataTime) / 1000);
-                var todolist_status = "";
-                
-                // Show alert with time difference
-                //alert(`數據時間距離現在約 ${timeDiffSeconds} 秒`);
-                var status = '';
-                if (timeDiffSeconds > 1800)
-                    status = '*';
-                first_data = data.latest_price;
-                vix_percent = data.price_change_percent_vix;
-
-                if (ethtvl > 0)
-                    first_data = parseInt(ethtvl);
-
-                if (first_data == 111) {
-                    todolist_status = "**";
-                    vix_percent = "";
-                }
-
-                if (data.price_change > 0)
-                    nasdaqDataElement.innerHTML = `
-                        <div class="nasdaq">
-                            ${first_data.toString()} / +${data.price_change} ${status} / ${vix_percent}${todolist_status}
-                        </div>
-                    `;
-                else
-                    nasdaqDataElement.innerHTML = `
-                        <div class="nasdaq" style="color:red;">
-                            ${first_data.toString()} / ${data.price_change} ${status} / ${vix_percent}${todolist_status}
-                        </div>
-                    `;
-                //<div class="nasdaq" id="nasdaqDataContainer" align="center"></div>
-                //$("div.nasdaqDataContainer").html(data.latest_price.toString() + " / " );
-            } catch (error) {
-                // Handle any errors
-                nasdaqDataElement.innerHTML = `
-                    <div class="nasdaq">
-                        No data
-                    </div>
-                `;
-                console.error('Fetch error:', error);
-            }
-        }
-
-        function get_rain() {
-            $.getJSON('https://' + CONFIG.MYSITE + '/linepic/rain.json')
-                .done(function(data) {
-                    var hasRain = false;
-                    if (data.rain_periods && data.rain_periods.length > 0) {
-                        for (var i = 0; i < data.rain_periods.length; i++) {
-                            var period = data.rain_periods[i];
-                            if (period.weather_description && period.weather_description.includes('雨')) {
-                                hasRain = true;
-                                $('div.rain').html(period.time + ' ' + period.weather_description + ' ' + period.probability + '%');
-                                $('div.rain').show();
-                                $('div.kids').hide();
-                                break;
-                            }
-                        }
-                    }
-                    if (!hasRain) {
-                        $('div.rain').hide();
-                        $('div.kids').show();
-                    }
-                })
-                .fail(function() {
-                    console.log('Failed to fetch rain data');
-                    $('div.rain').hide();
-                    $('div.kids').show();
+            async function updateSensors(channel, selectedRooms) {
+                const data = await requestJSON('https://api.thingspeak.com/channels/' + channel + '/feeds.json?results=20');
+                if (!Array.isArray(data.feeds)) throw new Error('資料格式錯誤');
+                selectedRooms.forEach(function (room) {
+                    const latest = data.feeds.filter(function (feed) {
+                        const temp = number(feed[room.temp]);
+                        const humidity = number(feed[room.humidity]);
+                        return fresh(feed.created_at, sensorMaxAge) && Number.isFinite(temp) &&
+                            Number.isFinite(humidity) && temp >= -50 && temp <= 60 && humidity >= 0 && humidity <= 100;
+                    }).sort(function (a, b) { return Date.parse(b.created_at) - Date.parse(a.created_at); })[0];
+                    readings[room.selector] = latest ? {
+                        time: latest.created_at, temp: Math.trunc(number(latest[room.temp])),
+                        humidity: Math.trunc(number(latest[room.humidity]))
+                    } : null;
                 });
-        }
-
-        function get_all() {
-            fetchNasdaqData('https://' + CONFIG.MYSITE + '/linepic/nasdaq.json', 'nasdaqDataContainer');
-            //fetchNasdaqData('http://192.168.55.147/linepic/nasdaq.json', 'nasdaqDataContainer');
-            get_binance_cmc("GRASS", "grass");
-            setTimeout(function () { window.location = window.location; }, 300000);
-            getWeatherTaipei();
-            get_coin();
-            get_pm25();
-            get_weather();
-            get_sensor();
-            get_rain();
-            //get_filecoin();
-  //          get_binance("ETHBTC");
-            //miner_data(0);
-            //miner_data(1);
-            //miner_balance();
-            //setTimeout(function () { get_all(); }, 300000);
-        }
-
-        function hide_item() {
-            let now = new Date();
-            let hours = now.getHours();
-            let timeDiv = document.querySelector(".time");
-            let livingroomDiv = document.querySelector(".living_room");
-
-            //if (hours >= 6 && hours < 9) {
-            if (living_room_h < 80) {
-                timeDiv.style.display = "block";
-                livingroomDiv.style.display = "none";
-            } else {
-                timeDiv.style.display = "none";
-                livingroomDiv.style.display = "block";
+                renderSensors();
             }
-        }
 
-        hide_item();
-        set_time();
-        get_all();
-        //setTimeout(function () { miner_balance(); }, 150000);
+            async function updateCoin() {
+                try {
+                    const data = await requestJSON('https://api.binance.com/api/v3/ticker/24hr');
+                    const btc = data.find(function (item) { return item.symbol === 'BTCUSDT'; });
+                    const eth = data.find(function (item) { return item.symbol === 'ETHUSDT'; });
+                    if (!btc || !eth || !(number(btc.lastPrice) > 0) || !(number(eth.lastPrice) > 0) ||
+                        !Number.isFinite(number(eth.priceChange))) throw new Error('幣價資料無效');
+                    const price = Math.trunc(number(btc.lastPrice));
+                    $('.coin').text((price >= 100000 ? (price / 1000).toFixed(3) : price) + ' / ' + Math.trunc(number(eth.lastPrice)))
+                        .css('color', number(eth.priceChange) < 0 ? 'red' : green);
+                } catch (_error) {
+                    // Fallback is part of this update, never a second polling loop.
+                    const data = await requestJSON('https://www.bitstamp.net/api/ticker');
+                    const price = Math.trunc(number(data.last));
+                    const open = number(data.open);
+                    if (!(price > 0) || !(open > 0)) throw new Error('備援幣價無效');
+                    const percent = Number(((price - open) / open * 100).toFixed(1));
+                    $('.coin').text(price + (percent ? ' (' + (percent > 0 ? '+' : '') + percent + '%)' : '') + ' [備援 BTC]')
+                        .css('color', percent === 0 ? 'orange' : percent > 0 ? 'red' : green);
+                }
+            }
+
+            async function updatePM25() {
+                const data = await requestJSON('https://data.moenv.gov.tw/api/v2/aqx_p_432?api_key=' + CONFIG.MOENV_KEY + '&format=JSON');
+                const records = Array.isArray(data) ? data : data.records;
+                if (!Array.isArray(records)) throw new Error('空品資料格式錯誤');
+                for (const city of ['新莊', '林口', '菜寮', '五股', '蘆洲', '板橋']) {
+                    const record = records.find(function (item) {
+                        return item.sitename === city && Number.isFinite(number(item['pm2.5'])) && number(item['pm2.5']) >= 0;
+                    });
+                    if (!record) continue;
+                    const value = number(record['pm2.5']);
+                    $('.pm25').text(city + ' PM2.5：' + value)
+                        .css({ color: value > 40 ? 'red' : value > 20 ? 'orange' : green,
+                            'font-weight': value > 20 ? 'bold' : 'normal' });
+                    return;
+                }
+                throw new Error('無有效空品資料');
+            }
+
+            async function updateWeatherEmoji() {
+                const data = await requestJSON('https://opendata.cwa.gov.tw/api/v1/rest/datastore/O-A0003-001?Authorization=' + CONFIG.CWB_APIKEY + '&StationId=466920');
+                const weather = data.records.Station[0].WeatherElement.Weather;
+                const hours = new Date().getHours();
+                weatherEmoji = weather.includes('雨') ? '🌧️' : weather.includes('晴') ?
+                    (hours > 5 && hours < 18 ? '☀️' : '🌙') : weather.includes('陰') ? '☁️' : weather.includes('多雲') ? '🌥️' : '';
+                renderWeather();
+            }
+
+            let weatherReading = null;
+            function renderWeather() {
+                if (!weatherReading || !fresh(weatherReading.time, 90 * minute)) {
+                    $('.weather').text('天氣：無近期資料').css({ color: gray, 'font-weight': 'normal' });
+                    return;
+                }
+                const reading = weatherReading;
+                const extreme = reading.temp >= 32 || reading.temp < 15;
+                const warm = reading.temp > 28 || reading.temp < 20;
+                $('.weather').text((reading.station === '新莊' ? '' : reading.station + '：') +
+                    reading.temp + '°C, ' + Math.trunc(reading.humidity) + '% ' + weatherEmoji)
+                    .css({ color: extreme ? 'red' : warm ? 'orange' : reading.humidity >= 80 ? '#46a3ff' : '#FFFFFF',
+                        'font-weight': 'bold' });
+            }
+
+            async function updateWeather() {
+                const data = await requestJSON('https://opendata.cwa.gov.tw/fileapi/v1/opendataapi/O-A0001-001?Authorization=' + CONFIG.CWB_APIKEY + '&downloadType=WEB&format=JSON');
+                const stations = data.cwaopendata.dataset.Station;
+                for (const city of ['新莊', '三重', '五股', '蘆洲', '板橋']) {
+                    const station = stations.find(function (item) {
+                        return item.StationName === city && fresh(item.ObsTime.DateTime, 90 * minute) &&
+                            Number.isFinite(number(item.WeatherElement.AirTemperature)) && number(item.WeatherElement.AirTemperature) > -10 &&
+                            number(item.WeatherElement.RelativeHumidity) > 0 && number(item.WeatherElement.RelativeHumidity) <= 100;
+                    });
+                    if (!station) continue;
+                    weatherReading = { station: city, time: station.ObsTime.DateTime,
+                        temp: number(station.WeatherElement.AirTemperature), humidity: number(station.WeatherElement.RelativeHumidity) };
+                    renderWeather();
+                    return;
+                }
+                weatherReading = null;
+                renderWeather();
+                throw new Error('無近期天氣資料');
+            }
+
+            function renderNasdaq() {
+                if (!nasdaq) return;
+                const first = ethereumTVL && Date.now() - ethereumTVL.time <= 30 * minute ? Math.trunc(ethereumTVL.value) : nasdaq.latest_price;
+                const stale = fresh(nasdaq.time, 30 * minute) ? '' : '*';
+                const vix = first === 111 ? '**' : nasdaq.price_change_percent_vix;
+                $('#nasdaqDataContainer').text(first + ' / ' + (nasdaq.price_change > 0 ? '+' : '') +
+                    nasdaq.price_change + ' ' + stale + ' / ' + vix).css('color', nasdaq.price_change > 0 ? green : 'red');
+            }
+
+            async function updateNasdaq() {
+                const data = await requestJSON('https://' + CONFIG.MYSITE + '/linepic/nasdaq.json');
+                if (!Number.isFinite(number(data.latest_price)) || !Number.isFinite(number(data.price_change)) ||
+                    !Number.isFinite(Date.parse(data.time)) || data.price_change_percent_vix == null) throw new Error('行情資料無效');
+                nasdaq = data;
+                renderNasdaq();
+            }
+
+            async function updateTVL() {
+                const data = await requestJSON('https://api.llama.fi/v2/chains');
+                const chain = data.find(function (item) { return item.name.toLowerCase() === 'ethereum'; });
+                if (!chain || !(number(chain.tvl) > 0)) throw new Error('TVL 資料無效');
+                ethereumTVL = { value: number(chain.tvl) / 1e9, time: Date.now() };
+                renderNasdaq();
+            }
+
+            async function updateRain() {
+                const data = await requestJSON('https://' + CONFIG.MYSITE + '/linepic/rain.json');
+                if (!Array.isArray(data.rain_periods)) throw new Error('降雨資料格式錯誤');
+                const rain = data.rain_periods.find(function (period) {
+                    return typeof period.weather_description === 'string' && period.weather_description.includes('雨');
+                });
+                if (rain) $('.rain').text(rain.time + ' ' + rain.weather_description + ' ' + rain.probability + '%');
+                $('.rain').toggle(Boolean(rain));
+                $('.kids').toggle(!rain);
+            }
+
+            schedule('感測器', minute, function () { return updateSensors('72313', rooms.slice(0, 4)); });
+            schedule('主臥', minute, function () { return updateSensors('565880', rooms.slice(4)); });
+            schedule('幣價', minute, updateCoin);
+            schedule('PM2.5', 5 * minute, updatePM25);
+            schedule('天氣圖示', 5 * minute, updateWeatherEmoji);
+            schedule('天氣', 5 * minute, updateWeather);
+            schedule('Nasdaq', 5 * minute, updateNasdaq);
+            schedule('TVL', 5 * minute, updateTVL);
+            schedule('降雨', 5 * minute, updateRain);
+
+            function tick() {
+                $('.time').text(new Date().toLocaleTimeString('en-US', { hour12: false, hour: '2-digit', minute: '2-digit' }));
+                renderSensors();
+                renderWeather();
+                renderNasdaq();
+            }
+            tick();
+            setInterval(tick, 1000);
+            refreshAll();
+            window.addEventListener('online', refreshAll);
+            document.addEventListener('visibilitychange', function () {
+                if (!document.hidden) {
+                    tick();
+                    refreshAll();
+                }
+            });
+        }());
     </script>
 </body>
 </html>
