@@ -78,7 +78,6 @@
     <div class="nasdaq" id="nasdaqDataContainer" align="center"></div>
     <div align="center">　</div>
 
-    <div id="update-status" role="status" align="center" style="font-size: 16pt; color: #aaaaaa;"></div>
     <script>
         // Each source owns one timer. Requests finish (or time out) before rescheduling.
         (function () {
@@ -114,16 +113,9 @@
                 return Number.isFinite(age) && age >= 0 && age <= maxAge;
             }
 
-            function showStatus() {
-                const failed = tasks.filter(function (task) { return task.error; });
-                $('#update-status').text(failed.map(function (task) {
-                    return task.name + '：' + task.error + (task.lastSuccess ? '（保留上次資料）' : '');
-                }).join('；'));
-            }
-
             function schedule(name, interval, update) {
                 const task = { name: name, interval: interval, update: update,
-                    running: false, timer: null, error: '', lastSuccess: 0 };
+                    running: false, timer: null };
                 tasks.push(task);
                 return task;
             }
@@ -134,13 +126,10 @@
                 task.running = true;
                 try {
                     await task.update();
-                    task.lastSuccess = Date.now();
-                    task.error = '';
-                } catch (error) {
-                    task.error = error.message || '更新失敗';
+                } catch (_error) {
+                    // Preserve the display and retry without adding on-screen messages.
                 } finally {
                     task.running = false;
-                    showStatus();
                     task.timer = setTimeout(function () { run(task); }, task.interval);
                 }
             }
@@ -162,8 +151,7 @@
                     const reading = readings[room.selector];
                     const element = $(room.selector);
                     if (!reading || !fresh(reading.time, sensorMaxAge)) {
-                        element.text(room.name + '：無近期資料')
-                            .css({ color: gray, 'font-weight': 'normal' });
+                        element.css({ color: gray, 'font-weight': 'normal' });
                         return;
                     }
                     const temp = reading.temp;
@@ -179,7 +167,8 @@
                         color = humidity >= limit ? 'red' : humidity >= limit - 10 ? 'orange' : green;
                         bold = humidity >= limit;
                     }
-                    element.text(room.name + '：' + temp + '°C, ' + humidity + '%')
+                    element.text(room.selector === '.room1' && (temp > 50 || temp < 0) ?
+                        '書房：error' : room.name + '：' + temp + '°C, ' + humidity + '%')
                         .css({ color: color, 'font-weight': bold ? 'bold' : 'normal' });
                 });
                 const living = readings['.living_room'];
@@ -196,7 +185,7 @@
                         const temp = number(feed[room.temp]);
                         const humidity = number(feed[room.humidity]);
                         return fresh(feed.created_at, sensorMaxAge) && Number.isFinite(temp) &&
-                            Number.isFinite(humidity) && temp >= -50 && temp <= 60 && humidity >= 0 && humidity <= 100;
+                            Number.isFinite(humidity);
                     }).sort(function (a, b) { return Date.parse(b.created_at) - Date.parse(a.created_at); })[0];
                     readings[room.selector] = latest ? {
                         time: latest.created_at, temp: Math.trunc(number(latest[room.temp])),
@@ -220,10 +209,13 @@
                     // Fallback is part of this update, never a second polling loop.
                     const data = await requestJSON('https://www.bitstamp.net/api/ticker');
                     const price = Math.trunc(number(data.last));
-                    const open = number(data.open);
+                    const open = Math.trunc(number(data.open));
                     if (!(price > 0) || !(open > 0)) throw new Error('備援幣價無效');
-                    const percent = Number(((price - open) / open * 100).toFixed(1));
-                    $('.coin').text(price + (percent ? ' (' + (percent > 0 ? '+' : '') + percent + '%)' : '') + ' [備援 BTC]')
+                    let percent = (price - open) / open * 100;
+                    if (Number(percent.toFixed(1)) === 0) percent = 0;
+                    const percentText = (percent > 0 ? '+' : '') +
+                        ((price >= 10000 && percent >= 10) || percent <= -10 ? Math.trunc(percent) : percent.toFixed(1)) + '%';
+                    $('.coin').text(String(price) + (percent ? ' (' + percentText + ')' : ''))
                         .css('color', percent === 0 ? 'orange' : percent > 0 ? 'red' : green);
                 }
             }
@@ -250,21 +242,21 @@
                 const data = await requestJSON('https://opendata.cwa.gov.tw/api/v1/rest/datastore/O-A0003-001?Authorization=' + CONFIG.CWB_APIKEY + '&StationId=466920');
                 const weather = data.records.Station[0].WeatherElement.Weather;
                 const hours = new Date().getHours();
-                weatherEmoji = weather.includes('雨') ? '🌧️' : weather.includes('晴') ?
-                    (hours > 5 && hours < 18 ? '☀️' : '🌙') : weather.includes('陰') ? '☁️' : weather.includes('多雲') ? '🌥️' : '';
+                weatherEmoji = weather.includes('晴') ? (hours > 5 && hours < 18 ? '☀️' : '🌙') :
+                    weather.includes('雨') ? '🌧️' : weather.includes('陰') ? '☁️' : weather.includes('多雲') ? '🌥️' : '';
                 renderWeather();
             }
 
             let weatherReading = null;
             function renderWeather() {
                 if (!weatherReading || !fresh(weatherReading.time, 90 * minute)) {
-                    $('.weather').text('天氣：無近期資料').css({ color: gray, 'font-weight': 'normal' });
+                    $('.weather').css({ color: gray, 'font-weight': 'normal' });
                     return;
                 }
                 const reading = weatherReading;
                 const extreme = reading.temp >= 32 || reading.temp < 15;
                 const warm = reading.temp > 28 || reading.temp < 20;
-                $('.weather').text((reading.station === '新莊' ? '' : reading.station + '：') +
+                $('.weather').text((reading.station === '新莊' ? weatherEmoji + ' ' : reading.station + '：') +
                     reading.temp + '°C, ' + Math.trunc(reading.humidity) + '% ' + weatherEmoji)
                     .css({ color: extreme ? 'red' : warm ? 'orange' : reading.humidity >= 80 ? '#46a3ff' : '#FFFFFF',
                         'font-weight': 'bold' });
@@ -292,7 +284,7 @@
 
             function renderNasdaq() {
                 if (!nasdaq) return;
-                const first = ethereumTVL && Date.now() - ethereumTVL.time <= 30 * minute ? Math.trunc(ethereumTVL.value) : nasdaq.latest_price;
+                const first = ethereumTVL ? Math.trunc(ethereumTVL.value) : nasdaq.latest_price;
                 const stale = fresh(nasdaq.time, 30 * minute) ? '' : '*';
                 const vix = first === 111 ? '**' : nasdaq.price_change_percent_vix;
                 $('#nasdaqDataContainer').text(first + ' / ' + (nasdaq.price_change > 0 ? '+' : '') +
