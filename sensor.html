@@ -286,7 +286,8 @@
 
             function renderNasdaq() {
                 if (!nasdaq) return;
-                const first = ethereumTVL ? Math.trunc(ethereumTVL.value) : nasdaq.latest_price;
+                //const first = ethereumTVL ? Math.trunc(ethereumTVL.value) : nasdaq.latest_price;
+                const first = parseInt(nasdaq.b_oil_latest_price);
                 const stale = fresh(nasdaq.time, 30 * minute) ? '' : '*';
                 const vix = first === 111 ? '**' : nasdaq.price_change_percent_vix;
                 $('#nasdaqDataContainer').text(first + ' / ' + (nasdaq.price_change > 0 ? '+' : '') +
