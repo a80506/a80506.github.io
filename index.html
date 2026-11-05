@@ -86,7 +86,7 @@
                 { div: "TSE", title: "", url: "" },
                 { div: "OTC", title: "", url: "" },
                 { div: "ratio00647", title: "", url: "" },
-                { div: "o8089", title: "", url: "" },
+                { div: "t2412", title: "", url: "" },
                 { div: "STOCK_3", title: "SensorBK1 SensorBK2", url: "", links: [
                     { title: "SensorBK1", url: "https://thingspeak.mathworks.com/channels/1729950" },
                     { title: "SensorBK2", url: "https://thingspeak.mathworks.com/channels/72839" }
@@ -1422,15 +1422,15 @@
                 $("div.OTC").css("font-weight", "bold");
             }
             $("div.OTC").html(parseInt(data.o5274_last).toString() + ", " + parseInt(data.o5274_change).toString() + ", " + data.o5274_change_percent.toString());
-            if (data.o8089_last !== undefined && data.o8089_last !== null && data.o8089_last !== "") {
-                if (parseFloat(data.o8089_change) > 0) {
-                    $("div.o8089").css("color", "#80FF00");
-                    $("div.o8089").css("font-weight", "normal");
+            if (data.t2412_last !== undefined && data.t2412_last !== null && data.t2412_last !== "") {
+                if (parseFloat(data.t2412_change) > 0) {
+                    $("div.t2412").css("color", "#80FF00");
+                    $("div.t2412").css("font-weight", "normal");
                 } else {
-                    $("div.o8089").css("color", "red");
-                    $("div.o8089").css("font-weight", "bold");
+                    $("div.t2412").css("color", "red");
+                    $("div.t2412").css("font-weight", "bold");
                 }
-                $("div.o8089").html(data.o8089_last.toString() + ", " + data.o8089_change.toString() + ", " + data.o8089_change_percent.toString());
+                $("div.t2412").html(data.t2412_last.toString() + ", " + data.t2412_change.toString() + ", " + data.t2412_change_percent.toString());
             }
             if (data.ratio00647) {
                 $("div.ratio00647").html(data.ratio00647);
