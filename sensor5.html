@@ -584,8 +584,41 @@
                 return;
             }
             let html = '';
+            // 1. 建立一個 skip list (用 Set 效能最好)
+            const skipList = new Set(['定位', '記帳', '礦池', '下班', '網卡檢查', 'Manpower', 'Weekly report', 'on wiki']);
+            
+            // 假設 18 小時的毫秒數
+            const EIGHTEEN_HOURS_MS = 18 * 60 * 60 * 1000;
+            const now = Date.now();
+
+
             events.forEach(function (event) {
-                const itemClass = event.tone === 'overdue' ? 'todoist-item tone-overdue' : 'todoist-item';
+                // 2. 檢查是否符合 skip list 裡的字串
+                // 假設你要比對的是 event.title 或其他屬性，這裡以 event.title 為例
+                const isSkippedWord = skipList.has(event.title);
+            
+                // 3. 檢查是否超過 18 小時
+                // 假設 event.timestamp 是事件的時間戳記（毫秒）
+                var isOver18Hours = 0;
+                
+                // 確保 event.due 存在且有 datetime 或 date
+                const dueString = event.due ? (event.due.datetime || event.due.date) : null;
+                
+                if (dueString) {
+                    const dueTime = new Date(dueString).getTime();
+                    const now = Date.now();
+                    const EIGHTEEN_HOURS_MS = 18 * 60 * 60 * 1000;
+                    isOver18Hours = (now - dueTime) > EIGHTEEN_HOURS_MS;
+                }
+                
+                // 4. 如果「符合 skip」且「超過 18 小時」，就跳過
+                // 注意：因為 JavaScript 的 forEach 無法使用 continue，我們可以用 return 達到跳過當前迴圈的效果
+                if (isSkippedWord && isOver18Hours) {
+                    return; // 等同於 for迴圈裡的 continue
+                }
+            
+                // --- 以下為原本的渲染邏輯 ---
+                const itemClass = event.tone === 'overdue' && !isSkippedWord && !isOver18Hours ? 'todoist-item tone-overdue' : 'todoist-item';
                 const titleHtml = event.url
                     ? `<a href="${escapeHtml(event.url)}" target="_blank" rel="noopener">${escapeHtml(event.title)}</a>`
                     : `<span>${escapeHtml(event.title)}</span>`;
