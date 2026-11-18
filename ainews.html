@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8">
+  <title>正在跳轉至今日 AI 新聞...</title>
+  <script>
+    (function () {
+      const today = new Date();
+      const yyyy = today.getFullYear();
+      const mm = String(today.getMonth() + 1).padStart(2, '0');
+      const dd = String(today.getDate()).padStart(2, '0');
+
+      const targetUrl = `https://news.fuly.ai/ai-news-${yyyy}-${mm}-${dd}`;
+      
+      // 使用 replace 避免使用者按「上一頁」時陷入無限跳轉迴圈
+      window.location.replace(targetUrl);
+    })();
+  </script>
+</head>
+<body>
+  <p>正在為您跳轉至今日的 AI 新聞，若未自動跳轉，請<a id="fallback-link" href="https://news.fuly.ai/">點擊這裡</a>。</p>
+  <script>
+    // 備用連結同步更新為今日網址
+    const today = new Date();
+    const yyyy = today.getFullYear();
+    const mm = String(today.getMonth() + 1).padStart(2, '0');
+    const dd = String(today.getDate()).padStart(2, '0');
+    document.getElementById('fallback-link').href = `https://news.fuly.ai/ai-news-${yyyy}-${mm}-${dd}`;
+  </script>
+</body>
+</html>
