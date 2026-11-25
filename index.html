@@ -1399,9 +1399,9 @@
         var chgStr = !isNaN(chg) ? (sign + change.toString()) : "";
         var pctStr = !isNaN(pct) ? (sign + changePercent.toString() + "%") : "";
 
-        /* if (latestPrice !== undefined && latestPrice !== null && latestPrice !== "") {
+        if (latestPrice !== undefined && latestPrice !== null && latestPrice !== "") {
             var textParts = [label + ": " + latestPrice.toString()];
-            if (chgStr) textParts.push(chgStr);
+            //if (chgStr) textParts.push(chgStr);
             if (pctStr) textParts.push(pctStr);
             el.html(textParts.join(", "));
         } else { */
@@ -1411,7 +1411,7 @@
             } else {
                 el.html(label + ": " + (chgStr || pctStr));
             }
-        //}
+        }
         el.css("color", color);
     }
 
