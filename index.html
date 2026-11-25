@@ -101,7 +101,7 @@
                 { div: "DXY", title: "", url: "" },
                 { div: "TNX", title: "", url: "" },
                 { div: "GOLD", title: "", url: "" },
-                { div: "", title: "", url: "" }
+                { div: "WTX", title: "", url: "" }
             ]
         },
         { // [8] 第三列開始
@@ -1518,6 +1518,7 @@
             formatMarketMetric("div.DXY", "DXY", data.latest_price_dxy, data.price_change_dxy, data.price_change_percent_dxy, false);
             formatMarketMetric("div.TNX", "TNX", data.latest_price_tnx, data.price_change_tnx, data.price_change_percent_tnx, false);
             formatMarketMetric("div.GOLD", "GOLD", data.latest_price_gold, data.price_change_gold, data.price_change_percent_gold, false);
+            formatMarketMetric("div.WTX", "WTX", data.taiex_futures_latest_price, data.taiex_futures_price_change, data.taiex_futures_price_change_percent, false);
 
             updateMarketEvents(data);
             //<div class="nasdaq" id="nasdaqDataContainer" align="center"></div>
