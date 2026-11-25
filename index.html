@@ -1399,26 +1399,20 @@
         var chgStr = !isNaN(chg) ? (sign + change.toString()) : "";
         var pctStr = !isNaN(pct) ? (sign + changePercent.toString() + "%") : "";
 
-        if (latestPrice !== undefined && latestPrice !== null && latestPrice !== "") {
+        /* if (latestPrice !== undefined && latestPrice !== null && latestPrice !== "") {
             var textParts = [label + ": " + latestPrice.toString()];
             if (chgStr) textParts.push(chgStr);
             if (pctStr) textParts.push(pctStr);
             el.html(textParts.join(", "));
-        } else {
+        } else { */
             // 僅顯示漲跌與漲跌幅 (例如 VIX)
             if (chgStr && pctStr) {
                 el.html(label + ": " + chgStr + " (" + pctStr + ")");
             } else {
                 el.html(label + ": " + (chgStr || pctStr));
             }
-        }
-
+        //}
         el.css("color", color);
-        if ((invertColor && isPositive) || (!invertColor && !isPositive && refVal !== 0)) {
-            el.css("font-weight", "bold");
-        } else {
-            el.css("font-weight", "normal");
-        }
     }
 
     // Nasdaq Futures
@@ -1505,7 +1499,7 @@
                     } else if (fgVal >= 55) {
                         fgColor = "#80FF00";
                     }
-                    $("div.FEAR").html("<a style=\"color:" + fgColor + "; font-weight:bold;\" href=\"https://alternative.me/crypto/fear-and-greed-index/\">Fear: " + fgVal + (fgClass ? " (" + fgClass + ")" : "") + "</a>");
+                    $("div.FEAR").html("<a style=\"color:" + fgColor + ";\" href=\"https://alternative.me/crypto/fear-and-greed-index/\">Fear: " + fgVal + (fgClass ? " (" + fgClass + ")" : "") + "</a>");
                 }
 
                 if (data.crypto_fear_greed.age !== undefined && data.crypto_fear_greed.age !== null) {
